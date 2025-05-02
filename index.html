@@ -1396,13 +1396,14 @@
                     </div>
                 </div>
                 
-                <div class="question-nav">
-                    ${Array(questions.length).fill(0).map((_, i) => `
-                        <div class="question-number ${i === currentQuestion ? 'active' : ''} ${selectedAnswers[i] ? 'answered' : ''}" 
-                             data-index="${i}">
-                            ${i + 1}
-                        </div>
-                    `).join('')}
+                <div class="question-nav" style="margin: 20px 0;">
+                    <select id="question-dropdown" style="padding: 8px; border-radius: 5px; border: 1px solid #ddd; width: 100%; max-width: 300px; margin: 0 auto; display: block;">
+                        ${Array(questions.length).fill(0).map((_, i) => `
+                            <option value="${i}" ${i === currentQuestion ? 'selected' : ''}>
+                                Question ${i + 1} ${selectedAnswers[i] ? '(Answered)' : ''}
+                            </option>
+                        `).join('')}
+                    </select>
                 </div>
             `;
             
@@ -1423,10 +1424,9 @@
                 document.getElementById('finish-btn').addEventListener('click', finishQuiz);
             }
             
-            document.querySelectorAll('.question-number').forEach(num => {
-                num.addEventListener('click', () => {
-                    goToQuestion(parseInt(num.dataset.index));
-                });
+            // Add event listener for the dropdown menu
+            document.getElementById('question-dropdown').addEventListener('change', (e) => {
+                goToQuestion(parseInt(e.target.value));
             });
         }
 
