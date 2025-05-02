@@ -1323,48 +1323,23 @@
         // DOM Elements
         const quizContainer = document.getElementById('quiz-container');
 
-        // Account and user management
-        let currentUser = null;
-        
-        function getAllUsers() {
-            const userList = localStorage.getItem('decaFinanceUsers');
-            if (userList) {
-                return JSON.parse(userList);
-            }
-            return [];
-        }
-        
-        function addUser(username) {
-            const users = getAllUsers();
-            if (!users.includes(username)) {
-                users.push(username);
-                localStorage.setItem('decaFinanceUsers', JSON.stringify(users));
-            }
-        }
-        
-        function getUserTestState(username) {
-            const stateKey = `decaFinanceTestState_${username}`;
-            const savedState = localStorage.getItem(stateKey);
-            return savedState ? JSON.parse(savedState) : null;
-        }
-        
-        function saveUserTestState(username) {
-            const stateKey = `decaFinanceTestState_${username}`;
+        // Save and resume functionality
+        function saveTestState() {
             const testState = {
                 currentQuestion,
                 selectedAnswers,
                 timeSpentPerQuestion,
                 timer,
                 quizStarted,
-                showResults,
-                lastSaved: new Date().toLocaleString()
+                showResults
             };
-            localStorage.setItem(stateKey, JSON.stringify(testState));
+            localStorage.setItem('decaFinanceTestState', JSON.stringify(testState));
         }
-        
-        function loadUserTestState(username) {
-            const testState = getUserTestState(username);
-            if (testState) {
+
+        function loadTestState() {
+            const savedState = localStorage.getItem('decaFinanceTestState');
+            if (savedState) {
+                const testState = JSON.parse(savedState);
                 currentQuestion = testState.currentQuestion;
                 selectedAnswers = testState.selectedAnswers;
                 timeSpentPerQuestion = testState.timeSpentPerQuestion;
@@ -1375,10 +1350,9 @@
             }
             return false;
         }
-        
-        function clearUserTestState(username) {
-            const stateKey = `decaFinanceTestState_${username}`;
-            localStorage.removeItem(stateKey);
+
+        function clearTestState() {
+            localStorage.removeItem('decaFinanceTestState');
         }
 
         function startTimer() {
@@ -1387,8 +1361,8 @@
                 document.getElementById('timer-display').textContent = formatTime(timer);
                 
                 // Save state every minute
-                if (timer % 60 === 0 && currentUser) {
-                    saveUserTestState(currentUser);
+                if (timer % 60 === 0) {
+                    saveTestState();
                 }
                 
                 if (timer <= 0) {
@@ -1398,94 +1372,41 @@
             }, 1000);
         }
 
-        function renderWelcome() {
+        function renderIntro() {
             quizContainer.innerHTML = `
                 <h1>DECA Finance Cluster Practice Test 2025</h1>
                 
                 <div class="instructions">
-                    <h2>Welcome to the Practice Test</h2>
-                    <p>Please sign in with your name or create a new account to start or resume the test.</p>
+                    <h2>Test Instructions:</h2>
+                    <ul>
+                        <li>This test consists of ${questions.length} multiple-choice questions.</li>
+                        <li>Choose the best answer for each question.</li>
+                        <li>You have 60 minutes to complete the test.</li>
+                        <li>All questions are based on the Finance Cluster Performance Indicators.</li>
+                        <li>Your progress is automatically saved. You can close the browser and resume later.</li>
+                    </ul>
                 </div>
                 
-                <div style="max-width: 500px; margin: 0 auto; padding: 20px; background: #f8f9fa; border-radius: 5px;">
-                    <h3>Sign In</h3>
-                    <div style="margin-bottom: 15px;">
-                        <label for="username" style="display: block; margin-bottom: 5px;">Your Name:</label>
-                        <input type="text" id="username" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <button id="signin-btn" class="btn btn-success" style="width: 100%;">Sign In</button>
-                    
-                    <div style="margin-top: 30px;">
-                        <h3>Existing Users</h3>
-                        <div id="user-list" style="margin-top: 10px;">
-                            Loading user list...
-                        </div>
-                    </div>
+                <div style="text-align: center;">
+                    <button id="start-btn" class="btn btn-success">Start New Test</button>
+                    ${loadTestState() ? '<button id="resume-btn" class="btn" style="background-color: #3498db; margin-left: 10px;">Resume Saved Test</button>' : ''}
                 </div>
             `;
             
-            // Populate user list
-            const userListDiv = document.getElementById('user-list');
-            const users = getAllUsers();
-            
-            if (users.length === 0) {
-                userListDiv.innerHTML = '<p>No saved users found.</p>';
-            } else {
-                let userListHTML = '<ul style="list-style: none; padding: 0;">';
-                users.forEach(user => {
-                    const testState = getUserTestState(user);
-                    let statusText = 'Not started';
-                    
-                    if (testState) {
-                        if (testState.showResults) {
-                            statusText = 'Completed';
-                        } else if (testState.quizStarted) {
-                            statusText = `In progress (${formatTime(testState.timer)} remaining)`;
-                        }
-                    }
-                    
-                    userListHTML += `
-                        <li style="padding: 10px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                            <span><strong>${user}</strong> - ${statusText}</span>
-                            <button class="btn login-as-btn" data-username="${user}" style="padding: 5px 10px; font-size: 14px;">Login</button>
-                        </li>
-                    `;
-                });
-                userListHTML += '</ul>';
-                userListDiv.innerHTML = userListHTML;
-                
-                // Add event listeners to login buttons
-                document.querySelectorAll('.login-as-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const username = btn.getAttribute('data-username');
-                        loginUser(username);
-                    });
-                });
-            }
-            
-            // Add sign in button event listener
-            document.getElementById('signin-btn').addEventListener('click', () => {
-                const username = document.getElementById('username').value.trim();
-                if (username) {
-                    loginUser(username);
-                } else {
-                    alert('Please enter your name.');
-                }
+            document.getElementById('start-btn').addEventListener('click', () => {
+                clearTestState(); // Clear any previous state when starting new
+                startQuiz();
             });
-        }
-        
-        function loginUser(username) {
-            currentUser = username;
-            addUser(username);
             
-            if (loadUserTestState(username)) {
-                if (showResults) {
-                    renderResults();
-                } else {
-                    renderIntro();
-                }
-            } else {
-                renderIntro();
+            if (loadTestState()) {
+                document.getElementById('resume-btn').addEventListener('click', () => {
+                    if (showResults) {
+                        renderResults();
+                    } else if (quizStarted) {
+                        startTimer();
+                        renderQuestion();
+                    }
+                });
             }
         }
 
@@ -1502,10 +1423,7 @@
             const q = questions[currentQuestion];
             
             quizContainer.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div>Signed in as: <strong>${currentUser}</strong></div>
-                    <div class="timer" id="timer-display">${formatTime(timer)}</div>
-                </div>
+                <div class="timer" id="timer-display">${formatTime(timer)}</div>
                 
                 <h2>Question ${currentQuestion + 1} of ${questions.length}</h2>
                 <div class="question">${q.question}</div>
@@ -1565,9 +1483,7 @@
 
             // Add event listener for Save & Exit button
             document.getElementById('save-exit-btn').addEventListener('click', () => {
-                if (currentUser) {
-                    saveUserTestState(currentUser);
-                }
+                saveTestState();
                 clearInterval(timerInterval);
                 alert('Your progress has been saved. You can resume the test later.');
                 renderIntro();
@@ -1580,14 +1496,6 @@
             
             quizContainer.innerHTML = `
                 <h1>Quiz Results</h1>
-                
-                <div style="text-align: right; margin-bottom: 10px;">
-                    <button id="logout-btn" class="btn" style="background-color: #e74c3c;">Logout</button>
-                </div>
-                
-                <div style="text-align: center; margin-bottom: 10px;">
-                    <p>Student: <strong>${currentUser}</strong></p>
-                </div>
                 
                 <div class="results">
                     <div class="score">${score} / ${questions.length}</div>
@@ -1643,71 +1551,6 @@
             `;
             
             document.getElementById('restart-btn').addEventListener('click', restartQuiz);
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                currentUser = null;
-                renderWelcome();
-            });
-        }            </div>
-                            
-                            <div class="explanation">
-                                <strong>Explanation:</strong> ${q.explanation}
-                            </div>
-                            
-                            <div style="margin-top: 10px; font-weight: bold; color: ${isCorrect ? 'green' : 'red'}">
-                                ${isCorrect ? 'Correct' : 'Incorrect'} 
-                                ${!isCorrect ? `| Your answer: ${selectedAnswers[index] || 'Not answered'} | Correct answer: ${q.correctAnswer}` : ''}
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <button id="restart-btn" class="btn">Start Over</button>
-                </div>
-            `;
-            
-            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                currentUser = null;
-                renderWelcome();
-            });
-        }            <div class="options">
-                                ${q.options.map((option, optIndex) => {
-                                    const optionLetter = String.fromCharCode(65 + optIndex);
-                                    let classes = 'option';
-                                    
-                                    if (optionLetter === q.correctAnswer) {
-                                        classes += ' correct';
-                                    } else if (selectedAnswers[index] === optionLetter) {
-                                        classes += ' incorrect';
-                                    }
-                                    
-                                    return `
-                                        <div class="${classes}">
-                                            ${optionLetter}. ${option}
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                            
-                            <div class="explanation">
-                                <strong>Explanation:</strong> ${q.explanation}
-                            </div>
-                            
-                            <div style="margin-top: 10px; font-weight: bold; color: ${isCorrect ? 'green' : 'red'}">
-                                ${isCorrect ? 'Correct' : 'Incorrect'} 
-                                ${!isCorrect ? `| Your answer: ${selectedAnswers[index] || 'Not answered'} | Correct answer: ${q.correctAnswer}` : ''}
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <button id="restart-btn" class="btn">Start Over</button>
-                </div>
-            `;
-            
-            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
         }
 
         function startQuiz() {
@@ -1718,18 +1561,14 @@
 
         function selectAnswer(option) {
             selectedAnswers[currentQuestion] = option;
-            if (currentUser) {
-                saveUserTestState(currentUser); // Save after answering
-            }
+            saveTestState(); // Save after answering
             renderQuestion(); // Re-render to show selected option
         }
 
         function goToNext() {
             if (currentQuestion < questions.length - 1) {
                 currentQuestion++;
-                if (currentUser) {
-                    saveUserTestState(currentUser); // Save after navigation
-                }
+                saveTestState(); // Save after navigation
                 renderQuestion();
             }
         }
@@ -1737,18 +1576,14 @@
         function goToPrevious() {
             if (currentQuestion > 0) {
                 currentQuestion--;
-                if (currentUser) {
-                    saveUserTestState(currentUser); // Save after navigation
-                }
+                saveTestState(); // Save after navigation
                 renderQuestion();
             }
         }
 
         function goToQuestion(index) {
             currentQuestion = index;
-            if (currentUser) {
-                saveUserTestState(currentUser); // Save after navigation
-            }
+            saveTestState(); // Save after navigation
             renderQuestion();
         }
 
@@ -1762,9 +1597,7 @@
             }
             
             showResults = true;
-            if (currentUser) {
-                saveUserTestState(currentUser);
-            }
+            saveTestState();
             renderResults();
         }
 
@@ -1785,10 +1618,8 @@
             timer = 3600;
             quizStarted = false;
             showResults = false;
-            if (currentUser) {
-                clearUserTestState(currentUser); // Clear saved state when restarting
-            }
-            renderWelcome();
+            clearTestState(); // Clear saved state when restarting
+            renderIntro();
         }
 
         // Initialize the quiz
