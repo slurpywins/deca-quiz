@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+        // Helper Functions
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        }<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1318,17 +1323,47 @@
         // DOM Elements
         const quizContainer = document.getElementById('quiz-container');
 
-        // Helper Functions
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        // Save and resume functionality
+        function saveTestState() {
+            const testState = {
+                currentQuestion,
+                selectedAnswers,
+                timeSpentPerQuestion,
+                timer,
+                quizStarted,
+                showResults
+            };
+            localStorage.setItem('decaFinanceTestState', JSON.stringify(testState));
+        }
+
+        function loadTestState() {
+            const savedState = localStorage.getItem('decaFinanceTestState');
+            if (savedState) {
+                const testState = JSON.parse(savedState);
+                currentQuestion = testState.currentQuestion;
+                selectedAnswers = testState.selectedAnswers;
+                timeSpentPerQuestion = testState.timeSpentPerQuestion;
+                timer = testState.timer;
+                quizStarted = testState.quizStarted;
+                showResults = testState.showResults;
+                return true;
+            }
+            return false;
+        }
+
+        function clearTestState() {
+            localStorage.removeItem('decaFinanceTestState');
         }
 
         function startTimer() {
             timerInterval = setInterval(() => {
                 timer--;
                 document.getElementById('timer-display').textContent = formatTime(timer);
+                
+                // Save state every minute
+                if (timer % 60 === 0) {
+                    saveTestState();
+                }
                 
                 if (timer <= 0) {
                     clearInterval(timerInterval);
@@ -1348,15 +1383,31 @@
                         <li>Choose the best answer for each question.</li>
                         <li>You have 60 minutes to complete the test.</li>
                         <li>All questions are based on the Finance Cluster Performance Indicators.</li>
+                        <li>Your progress is automatically saved. You can close the browser and resume later.</li>
                     </ul>
                 </div>
                 
                 <div style="text-align: center;">
-                    <button id="start-btn" class="btn btn-success">Start Test</button>
+                    <button id="start-btn" class="btn btn-success">Start New Test</button>
+                    ${loadTestState() ? '<button id="resume-btn" class="btn" style="background-color: #3498db; margin-left: 10px;">Resume Saved Test</button>' : ''}
                 </div>
             `;
             
-            document.getElementById('start-btn').addEventListener('click', startQuiz);
+            document.getElementById('start-btn').addEventListener('click', () => {
+                clearTestState(); // Clear any previous state when starting new
+                startQuiz();
+            });
+            
+            if (loadTestState()) {
+                document.getElementById('resume-btn').addEventListener('click', () => {
+                    if (showResults) {
+                        renderResults();
+                    } else if (quizStarted) {
+                        startTimer();
+                        renderQuestion();
+                    }
+                });
+            }
         }
 
         function renderQuestion() {
@@ -1390,6 +1441,7 @@
                     <button id="prev-btn" class="btn" ${currentQuestion === 0 ? 'disabled' : ''}>Previous</button>
                     
                     <div>
+                        <button id="save-exit-btn" class="btn" style="background-color: #f39c12;">Save & Exit</button>
                         ${currentQuestion < questions.length - 1 
                             ? `<button id="next-btn" class="btn">Next</button>` 
                             : `<button id="finish-btn" class="btn btn-success">Finish</button>`}
@@ -1427,6 +1479,14 @@
             // Add event listener for the dropdown menu
             document.getElementById('question-dropdown').addEventListener('change', (e) => {
                 goToQuestion(parseInt(e.target.value));
+            });
+
+            // Add event listener for Save & Exit button
+            document.getElementById('save-exit-btn').addEventListener('click', () => {
+                saveTestState();
+                clearInterval(timerInterval);
+                alert('Your progress has been saved. You can resume the test later.');
+                renderIntro();
             });
         }
 
@@ -1501,12 +1561,14 @@
 
         function selectAnswer(option) {
             selectedAnswers[currentQuestion] = option;
+            saveTestState(); // Save after answering
             renderQuestion(); // Re-render to show selected option
         }
 
         function goToNext() {
             if (currentQuestion < questions.length - 1) {
                 currentQuestion++;
+                saveTestState(); // Save after navigation
                 renderQuestion();
             }
         }
@@ -1514,12 +1576,14 @@
         function goToPrevious() {
             if (currentQuestion > 0) {
                 currentQuestion--;
+                saveTestState(); // Save after navigation
                 renderQuestion();
             }
         }
 
         function goToQuestion(index) {
             currentQuestion = index;
+            saveTestState(); // Save after navigation
             renderQuestion();
         }
 
@@ -1533,6 +1597,7 @@
             }
             
             showResults = true;
+            saveTestState();
             renderResults();
         }
 
@@ -1553,11 +1618,24 @@
             timer = 3600;
             quizStarted = false;
             showResults = false;
+            clearTestState(); // Clear saved state when restarting
             renderIntro();
         }
 
         // Initialize the quiz
-        renderIntro();
+        function init() {
+            if (loadTestState() && (quizStarted || showResults)) {
+                if (showResults) {
+                    renderResults();
+                } else {
+                    renderIntro();
+                }
+            } else {
+                renderIntro();
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>
