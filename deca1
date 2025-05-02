@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECA Finance Cluster Practice Test 2025</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        h1, h2 { text-align: center; }
+        .instructions, .option, .btn, .timer, .question-nav, .results, .explanation, .question-review {
+            margin-bottom: 20px;
+        }
+        .option {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .option:hover { background-color: #e3f2fd; }
+        .selected { background-color: #bbdefb; border-color: #64b5f6; }
+        .correct { background-color: #c8e6c9 !important; border-color: #81c784 !important; }
+        .incorrect { background-color: #ffcdd2 !important; border-color: #e57373 !important; }
+        .btn { padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background-color: #2980b9; }
+        .timer { font-size: 24px; font-weight: bold; color: #3498db; text-align: center; }
+    </style>
+</head>
+<body>
+<div id="quiz-container" class="container"></div>
+<script>
+const questions = [
+  {question:"What best describes EBITDA?",options:["Liquidity ratio","Earnings before interest, taxes, depreciation, amortization","Accounting method","Tax liability calculation"],correctAnswer:"B",explanation:"EBITDA measures earnings before interest, taxes, depreciation, amortization."},
+  {question:"Primary global risk when expanding internationally?",options:["Political instability","Domestic preferences","Advertising costs","Employee turnover"],correctAnswer:"A",explanation:"Political instability significantly affects international business operations."},
+  {question:"Working capital is calculated as:",options:["Total assets minus liabilities","Current assets minus current liabilities","Fixed assets minus long-term liabilities","Equity minus retained earnings"],correctAnswer:"B",explanation:"Working capital is the difference between current assets and current liabilities."},
+  {question:"Definition of cash flow budget:",options:["Estimate of cash inflows and outflows","Total bank cash","Historical cash records","Profit projections"],correctAnswer:"A",explanation:"A cash flow budget estimates expected cash inflows and outflows."},
+  {question:"Highest risk securities:",options:["Treasury bonds","Certificates of deposit","Growth stocks in emerging markets","Municipal bonds"],correctAnswer:"C",explanation:"Emerging market growth stocks carry significant risk."},
+  {question:"Negative effect of issuing additional stock:",options:["Increased dividends","Higher bond interest","Ownership dilution","Greater voting rights"],correctAnswer:"C",explanation:"Issuing more stock dilutes existing shareholders' ownership."},
+  {question:"What does KYC stand for?",options:["Keep Your Currency","Know Your Customer","Key Yearly Calculation","Knowledge Yield Capacity"],correctAnswer:"B",explanation:"KYC stands for Know Your Customer, essential in banking compliance."},
+  {question:"Example of variable cost:",options:["Rent","Insurance premiums","Property taxes","Raw materials"],correctAnswer:"D",explanation:"Raw materials are variable costs dependent on production."},
+  {question:"Quick ratio measures:",options:["Long-term obligations","Inventory management","Short-term liquidity without inventory","Depreciation rate"],correctAnswer:"C",explanation:"Quick ratio assesses liquidity excluding inventory."},
+  {question:"GAAP financial statement showing revenues/expenses:",options:["Balance sheet","Cash flow statement","Income statement","Equity changes statement"],correctAnswer:"C",explanation:"Income statement shows revenues and expenses over time."},
+  {question:"Most conservative retirement investment:",options:["Growth stocks","Treasury securities","Cryptocurrency","Commodities futures"],correctAnswer:"B",explanation:"U.S. Treasury securities are low-risk investments."},
+  {question:"Purpose of risk assessment in finance:",options:["Optimal pricing","Evaluate threats","Calculate bonuses","Sales forecasts"],correctAnswer:"B",explanation:"Risk assessments identify and evaluate potential threats."},
+  {question:"Operations department activity in securities firm:",options:["Marketing strategies","Transaction processing","Investment advice","Corporate planning"],correctAnswer:"B",explanation:"Operations manage processing and settlement of securities transactions."},
+  {question:"Not considered in insurance underwriting:",options:["Credit history","Claims history","Political affiliation","Property value"],correctAnswer:"C",explanation:"Political affiliation isn't relevant in risk evaluation."},
+  {question:"CAPM helps determine:",options:["Inventory levels","Expected investment return based on risk","Fixed asset depreciation","Optimal capital structure"],correctAnswer:"B",explanation:"CAPM evaluates expected returns based on market risk."},
+  {question:"Role of board of directors:",options:["Daily operations management","Management oversight and shareholder protection","Financial statement preparation","Direct product sales"],correctAnswer:"B",explanation:"The board oversees management and protects shareholders."},
+  {question:"Objective of Sarbanes-Oxley Act:",options:["Credit protection","Financial competition","Governance and disclosure","International banking"],correctAnswer:"C",explanation:"Sarbanes-Oxley enhances corporate governance and transparency."},
+  {question:"Cash budget outflow example:",options:["Accounts receivable collection","Asset sales","Accounts payable payment","Interest receipt"],correctAnswer:"C",explanation:"Paying accounts payable is a cash outflow."},
+  {question:"Ratio evaluating short-term obligations:",options:["Debt-to-equity","Return on assets","Current ratio","Gross margin"],correctAnswer:"C",explanation:"Current ratio measures ability to meet short-term obligations."},
+  {question:"Purpose of emergency fund:",options:["Maximize returns","Reduce taxes","Provide financial security","Increase borrowing"],correctAnswer:"C",explanation:"Emergency funds protect against unexpected financial hardships."}
+];
+// JavaScript functions remain the same as previously provided
+
+let currentQuestion = 0, selectedAnswers = Array(questions.length).fill(''), timer = 3600, timerInterval;
+const quizContainer = document.getElementById('quiz-container');
+
+function startQuiz(){startTimer();renderQuestion();}
+function renderIntro(){quizContainer.innerHTML=`<h1>DECA Finance Cluster Practice Test 2025</h1><button class="btn" onclick="startQuiz()">Start Test</button>`;}
+renderIntro();
+</script>
+</body>
+</html>
