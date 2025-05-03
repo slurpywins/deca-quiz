@@ -9,11 +9,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <style>
     :root {
-      --primary-color: #0056a4; /* DEON blue */
+      --primary-color: #0056a4; /* DECA blue */
       --primary-light: #3a7dc0;
       --primary-dark: #004080;
       --secondary-color: #ffffff;
-      --accent-color: #4bb4e6; /* DEON light blue */
+      --accent-color: #4bb4e6; /* DECA light blue */
       --success-color: #10b981;
       --success-light: #d1fae5;
       --danger-color: #ef4444;
@@ -797,6 +797,43 @@
   </div>
   
   <div class="container">
+    <!-- Admin Verification Page -->
+    <div id="adminVerificationPage" class="page auth-page">
+      <div class="logo-container">
+        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+        </svg>
+      </div>
+      
+      <h1>Admin Verification</h1>
+      <div id="verificationMessageContainer" class="message-container"></div>
+      
+      <div class="card">
+        <p class="welcome-message">A verification code has been sent to your email address. Please enter it below to access the admin dashboard.</p>
+        
+        <div class="form-group">
+          <label for="verificationCode">Verification Code</label>
+          <input type="text" id="verificationCode" placeholder="Enter 6-digit code">
+        </div>
+        
+        <button id="verifyButton" class="btn btn-primary">
+          <i class="fas fa-check-circle"></i> Verify
+        </button>
+        
+        <button id="resendCodeButton" class="btn btn-secondary">
+          <i class="fas fa-redo"></i> Resend Code
+        </button>
+        
+        <button id="cancelVerificationButton" class="btn btn-danger">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+    
     <!-- Admin Page -->
     <div id="adminPage" class="page">
       <div class="logo-container">
@@ -1262,14 +1299,14 @@
   <script>
     // Initialize Firebase
     const firebaseConfig = {
-  apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
-  authDomain: "deca-55fc4.firebaseapp.com",
-  databaseURL: "https://deca-55fc4-default-rtdb.firebaseio.com",
-  projectId: "deca-55fc4",
-  storageBucket: "deca-55fc4.firebasestorage.app",
-  messagingSenderId: "368623997898",
-  appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
-  measurementId: "G-7ZT1H2WTWH"
+      apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
+      authDomain: "DECA-55fc4.firebaseapp.com",
+      databaseURL: "https://DECA-55fc4-default-rtdb.firebaseio.com",
+      projectId: "DECA-55fc4",
+      storageBucket: "DECA-55fc4.appspot.com",
+      messagingSenderId: "368623997898",
+      appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
+      measurementId: "G-7ZT1H2WTWH"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -1286,7 +1323,17 @@
       review: document.getElementById('reviewPage'),
       testDetail: document.getElementById('testDetailPage'),
       admin: document.getElementById('adminPage'),
-      userDetail: document.getElementById('userDetailPage')
+      userDetail: document.getElementById('userDetailPage'),
+      adminVerification: document.getElementById('adminVerificationPage')
+    };
+    
+    // Admin Verification elements
+    const verificationElements = {
+      messageContainer: document.getElementById('verificationMessageContainer'),
+      codeInput: document.getElementById('verificationCode'),
+      verifyButton: document.getElementById('verifyButton'),
+      resendButton: document.getElementById('resendCodeButton'),
+      cancelButton: document.getElementById('cancelVerificationButton')
     };
     
     // Admin elements
@@ -1426,7 +1473,9 @@
       isAdmin: false,
       allUsers: [],
       currentUserDetail: null,
-      adminEmail: "gautham0913@gmail.com" // Replace with your email
+      adminEmail: "admin@DECA.com", // Replace with your email
+      adminVerificationCode: null,
+      adminVerified: false
     };
 
     function toggleLoading(show) {
@@ -1569,6 +1618,10 @@
           const snap = await database.ref('users/' + usr.uid).once('value');
           const data = snap.val();
           appState.currentUser = { uid: usr.uid, name: data.name, email: data.email };
+          
+          // Check if this user is the admin
+          appState.isAdmin = (data.email === appState.adminEmail);
+          appState.adminVerified = false; // Reset verification state
           
           // Load user's completed tests
           await loadCompletedTests();
@@ -2500,7 +2553,7 @@
           adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Admin Dashboard';
           adminBtn.style.marginTop = '1rem';
           adminBtn.addEventListener('click', () => {
-            showAdminPage();
+            showAdminVerificationPage();
           });
           
           // Add to DOM after logout button
@@ -2537,8 +2590,79 @@
       authElements.nameGroup.style.display = 'none';
     }
 
+    function showVerificationMessage(msg, type) {
+      verificationElements.messageContainer.innerHTML =
+        `<div class="message ${type}">${msg}</div>`;
+    }
+    
+    function clearVerificationMessage() {
+      verificationElements.messageContainer.innerHTML = '';
+    }
+    
+    // Generate verification code
+    function generateVerificationCode() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+    
+    // Send verification code (simulated)
+    function sendVerificationCode() {
+      // Generate a new 6-digit code
+      appState.adminVerificationCode = generateVerificationCode();
+      
+      // In a real app, this would send an email with the code
+      // For now, we'll just show it in a message for demo purposes
+      showVerificationMessage(`Verification code sent! (For demo purposes, your code is: ${appState.adminVerificationCode})`, 'success');
+      
+      console.log('Verification code:', appState.adminVerificationCode);
+    }
+    
+    // Show admin verification page
+    function showAdminVerificationPage() {
+      // Reset state
+      appState.adminVerified = false;
+      verificationElements.codeInput.value = '';
+      clearVerificationMessage();
+      
+      // Send initial verification code
+      sendVerificationCode();
+      
+      // Show verification page
+      showPage(pages.adminVerification);
+    }
+    
+    // Verify admin code
+    function verifyAdminCode() {
+      const enteredCode = verificationElements.codeInput.value.trim();
+      
+      if (!enteredCode) {
+        showVerificationMessage('Please enter the verification code.', 'error');
+        return;
+      }
+      
+      if (enteredCode !== appState.adminVerificationCode) {
+        showVerificationMessage('Invalid verification code. Please try again.', 'error');
+        return;
+      }
+      
+      // Code is valid, mark as verified and proceed to admin dashboard
+      appState.adminVerified = true;
+      showAdminPage();
+    }
+    
     // Admin page functions
     async function showAdminPage() {
+      // Check if admin is verified
+      if (!appState.isAdmin) {
+        alert('You do not have permission to access the admin dashboard.');
+        showHomePage(appState.currentUser.name);
+        return;
+      }
+      
+      if (!appState.adminVerified) {
+        showAdminVerificationPage();
+        return;
+      }
+      
       toggleLoading(true);
       
       try {
@@ -3012,6 +3136,26 @@
       });
     }
     
+    // Event listeners for verification page elements
+    verificationElements.verifyButton.addEventListener('click', () => {
+      verifyAdminCode();
+    });
+    
+    verificationElements.resendButton.addEventListener('click', () => {
+      sendVerificationCode();
+    });
+    
+    verificationElements.cancelButton.addEventListener('click', () => {
+      showHomePage(appState.currentUser.name);
+    });
+    
+    // Allow pressing Enter to submit verification code
+    verificationElements.codeInput.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') {
+        verifyAdminCode();
+      }
+    });
+    
     // Event listeners for admin elements
     adminElements.backButton.addEventListener('click', () => {
       showHomePage(appState.currentUser.name);
@@ -3029,6 +3173,7 @@
       auth.signOut().then(() => {
         appState.currentUser = null;
         appState.isAdmin = false;
+        appState.adminVerified = false;
         showAuthPage();
       }).catch(error => {
         console.error('Error signing out:', error);
