@@ -507,49 +507,51 @@
     
     // Display current question
     function displayQuestion() {
-      const q = appState.testQuestions[appState.currentQuestionIndex];
-      if (!q) return;
+  const q = appState.testQuestions[appState.currentQuestionIndex];
+  if (!q) return;
+  
+  // Update this line to use q.question instead of q.text
+  testElements.questionText.textContent = q.question || ""; 
+  
+  testElements.optionsContainer.innerHTML = '';
+  testElements.questionCounter.textContent = `Question ${appState.currentQuestionIndex + 1} of ${appState.testQuestions.length}`;
+  
+  // Update progress bar
+  const progress = ((appState.currentQuestionIndex + 1) / appState.testQuestions.length) * 100;
+  testElements.questionProgress.style.width = `${progress}%`;
+  
+  // Create option elements
+  if (q.options) {
+    q.options.forEach((option, index) => {
+      const optionDiv = document.createElement('div');
+      optionDiv.className = 'option';
       
-      testElements.questionText.textContent = q.text;
-      testElements.optionsContainer.innerHTML = '';
-      testElements.questionCounter.textContent = `Question ${appState.currentQuestionIndex + 1} of ${appState.testQuestions.length}`;
+      const radioInput = document.createElement('input');
+      radioInput.type = 'radio';
+      radioInput.name = 'answer';
+      radioInput.id = `option-${index}`;
+      radioInput.value = index;
       
-      // Update progress bar
-      const progress = ((appState.currentQuestionIndex + 1) / appState.testQuestions.length) * 100;
-      testElements.questionProgress.style.width = `${progress}%`;
-      
-      // Create option elements
-      if (q.options) {
-        q.options.forEach((option, index) => {
-          const optionDiv = document.createElement('div');
-          optionDiv.className = 'option';
-          
-          const radioInput = document.createElement('input');
-          radioInput.type = 'radio';
-          radioInput.name = 'answer';
-          radioInput.id = `option-${index}`;
-          radioInput.value = index;
-          
-          // Check if user already answered this question
-          if (appState.userAnswers[appState.currentQuestionIndex] === index) {
-            radioInput.checked = true;
-          }
-          
-          const label = document.createElement('label');
-          label.htmlFor = `option-${index}`;
-          label.textContent = option;
-          
-          optionDiv.appendChild(radioInput);
-          optionDiv.appendChild(label);
-          testElements.optionsContainer.appendChild(optionDiv);
-          
-          // Add event listener to save answer when selected
-          radioInput.addEventListener('change', () => {
-            appState.userAnswers[appState.currentQuestionIndex] = index;
-            saveTestProgress();
-          });
-        });
+      // Check if user already answered this question
+      if (appState.userAnswers[appState.currentQuestionIndex] === index) {
+        radioInput.checked = true;
       }
+      
+      const label = document.createElement('label');
+      label.htmlFor = `option-${index}`;
+      label.textContent = option;
+      
+      optionDiv.appendChild(radioInput);
+      optionDiv.appendChild(label);
+      testElements.optionsContainer.appendChild(optionDiv);
+      
+      // Add event listener to save answer when selected
+      radioInput.addEventListener('change', () => {
+        appState.userAnswers[appState.currentQuestionIndex] = index;
+        saveTestProgress();
+      });
+    });
+  }
       
       // Update navigation buttons
       testElements.prevButton.disabled = appState.currentQuestionIndex === 0;
@@ -678,49 +680,49 @@
     });
 
     function renderReview() {
-      reviewElements.container.innerHTML = '';
+  reviewElements.container.innerHTML = '';
+  
+  appState.testQuestions.forEach((q, index) => {
+    const userAnswer = appState.userAnswers[index];
+    const isCorrect = userAnswer === q.correctAnswer;
+    
+    const questionDiv = document.createElement('div');
+    questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+    
+    const header = document.createElement('h3');
+    header.textContent = `Question ${index + 1}: ${isCorrect ? '✓' : '✗'}`;
+    header.style.color = isCorrect ? 'var(--success-dark)' : 'var(--danger-dark)';
+    
+    const questionText = document.createElement('p');
+    // Update this line to use q.question instead of q.text
+    questionText.textContent = q.question || "";
+    
+    questionDiv.appendChild(header);
+    questionDiv.appendChild(questionText);
+    
+    // Add options with indicators
+    const optionsList = document.createElement('div');
+    optionsList.className = 'options-list';
+    
+    q.options.forEach((option, optIndex) => {
+      const optionItem = document.createElement('div');
+      optionItem.className = 'review-option';
       
-      appState.testQuestions.forEach((q, index) => {
-        const userAnswer = appState.userAnswers[index];
-        const isCorrect = userAnswer === q.correctAnswer;
-        
-        const questionDiv = document.createElement('div');
-        questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
-        
-        const header = document.createElement('h3');
-        header.textContent = `Question ${index + 1}: ${isCorrect ? '✓' : '✗'}`;
-        header.style.color = isCorrect ? 'var(--success-dark)' : 'var(--danger-dark)';
-        
-        const questionText = document.createElement('p');
-        questionText.textContent = q.text;
-        
-        questionDiv.appendChild(header);
-        questionDiv.appendChild(questionText);
-        questionDiv.appendChild(questionText);
-        
-        // Add options with indicators
-        const optionsList = document.createElement('div');
-        optionsList.className = 'options-list';
-        
-        q.options.forEach((option, optIndex) => {
-          const optionItem = document.createElement('div');
-          optionItem.className = 'review-option';
-          
-          if (optIndex === q.correctAnswer) {
-            optionItem.classList.add('correct-answer');
-          }
-          if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
-            optionItem.classList.add('wrong-answer');
-          }
-          
-          optionItem.textContent = `${optIndex === q.correctAnswer ? '✓ ' : ''}${optIndex === userAnswer ? '• ' : ''}${option}`;
-          optionsList.appendChild(optionItem);
-        });
-        
-        questionDiv.appendChild(optionsList);
-        reviewElements.container.appendChild(questionDiv);
-      });
-    }
+      if (optIndex === q.correctAnswer) {
+        optionItem.classList.add('correct-answer');
+      }
+      if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
+        optionItem.classList.add('wrong-answer');
+      }
+      
+      optionItem.textContent = `${optIndex === q.correctAnswer ? '✓ ' : ''}${optIndex === userAnswer ? '• ' : ''}${option}`;
+      optionsList.appendChild(optionItem);
+    });
+    
+    questionDiv.appendChild(optionsList);
+    reviewElements.container.appendChild(questionDiv);
+  });
+}
 
     // Logout button
     homeElements.logoutButton.addEventListener('click', () => {
