@@ -1,3184 +1,2247 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DECA Finance Test Platform</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Chart.js for data visualization -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <style>
-    :root {
-      --primary-color: #0056a4; /* DECA blue */
-      --primary-light: #3a7dc0;
-      --primary-dark: #004080;
-      --secondary-color: #ffffff;
-      --accent-color: #4bb4e6; /* DECA light blue */
-      --success-color: #10b981;
-      --success-light: #d1fae5;
-      --danger-color: #ef4444;
-      --danger-light: #fee2e2;
-      --warning-color: #f59e0b;
-      --warning-light: #fef3c7;
-      --text-primary: #333333;
-      --text-secondary: #6b7280;
-      --text-light: #9ca3af;
-      --background-primary: #f9fafb;
-      --background-secondary: #ffffff;
-      --border-color: #e5e7eb;
-      --box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      --transition: all 0.2s ease;
-      --border-radius: 0.5rem;
-    }
-    
-    * { 
-      box-sizing: border-box; 
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: var(--text-primary);
-      background-color: var(--background-primary);
-      line-height: 1.5;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
-    }
-    
-    .container {
-      width: 100%;
-      max-width: 1000px;
-      margin: 0 auto;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      box-shadow: var(--box-shadow-lg);
-      background: var(--background-secondary);
-      transition: var(--transition);
-    }
-    
-    .page { 
-      display: none;
-      padding: 2rem; 
-    }
-    
-    .logo-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
-    }
-    
-    .logo {
-      height: 60px;
-      display: block;
-    }
-    
-    h1, h2, h3 {
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-    
-    h1 {
-      font-size: 1.875rem;
-      color: var(--primary-color);
-    }
-    
-    h2 {
-      font-size: 1.5rem;
-    }
-    
-    h3 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-    }
-    
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: var(--text-primary);
-      font-size: 0.875rem;
-    }
-    
-    input, select {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      transition: var(--transition);
-      background-color: var(--background-primary);
-    }
-    
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 86, 164, 0.2);
-    }
-    
-    .btn {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: var(--border-radius);
-      font-weight: 500;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: var(--transition);
-      text-align: center;
-      width: 100%;
-    }
-    
-    .btn-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
-    
-    .btn-primary:hover:not(:disabled) {
-      background-color: var(--primary-dark);
-      transform: translateY(-1px);
-    }
-    
-    .btn-secondary {
-      background-color: white;
-      color: var(--primary-color);
-      border: 1px solid var(--primary-color);
-    }
-    
-    .btn-secondary:hover:not(:disabled) {
-      background-color: rgba(0, 86, 164, 0.05);
-    }
-    
-    .btn-danger {
-      background-color: var(--danger-color);
-      color: white;
-    }
-    
-    .btn-danger:hover:not(:disabled) {
-      background-color: #dc2626;
-    }
-    
-    .btn-warning {
-      background-color: var(--warning-color);
-      color: white;
-    }
-    
-    .btn-warning:hover:not(:disabled) {
-      background-color: #d97706;
-    }
-    
-    .btn-success {
-      background-color: var(--success-color);
-      color: white;
-    }
-    
-    .btn-success:hover:not(:disabled) {
-      background-color: #059669;
-    }
-    
-    .btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    
-    .btn + .btn {
-      margin-top: 0.75rem;
-    }
-    
-    .toggle-form {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-    
-    .toggle-form a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-    }
-    
-    .toggle-form a:hover {
-      text-decoration: underline;
-    }
-    
-    .message-container {
-      min-height: 3.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .message {
-      padding: 0.75rem 1rem;
-      border-radius: var(--border-radius);
-      font-size: 0.875rem;
-      text-align: center;
-      animation: fadeIn 0.3s ease;
-    }
-    
-    .error {
-      background-color: var(--danger-light);
-      color: var(--danger-color);
-    }
-    
-    .success {
-      background-color: var(--success-light);
-      color: var(--success-color);
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .welcome-message {
-      text-align: center;
-      font-size: 1.125rem;
-      margin-bottom: 2rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-    
-    .card {
-      background: var(--background-secondary);
-      border-radius: var(--border-radius);
-      padding: 2rem;
-      margin-bottom: 1.5rem;
-      box-shadow: var(--box-shadow-sm);
-      border: 1px solid var(--border-color);
-    }
-    
-    .test-settings {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .progress-container {
-      width: 100%;
-      height: 0.5rem;
-      background: var(--border-color);
-      border-radius: 1rem;
-      margin-bottom: 1.5rem;
-      overflow: hidden;
-    }
-    
-    .progress-bar {
-      height: 100%;
-      background: var(--primary-color);
-      border-radius: 1rem;
-      transition: width 0.3s ease;
-    }
-    
-    .test-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .test-info {
-      display: flex;
-      flex-direction: column;
-      text-align: right;
-    }
-    
-    #questionCounter {
-      font-weight: 600;
-      color: var(--primary-color);
-    }
-    
-    #timerDisplay {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-    
-    .question-container {
-      background: var(--background-primary);
-      padding: 2rem;
-      border-radius: var(--border-radius);
-      margin: 1.5rem 0;
-      min-height: 200px;
-      border: 1px solid var(--border-color);
-    }
-    
-    .option {
-      margin: 1rem 0;
-      padding: 1rem;
-      background: var(--background-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      transition: var(--transition);
-    }
-    
-    .option:hover {
-      background: rgba(0, 86, 164, 0.05);
-      border-color: var(--primary-light);
-    }
-    
-    .option input {
-      width: auto;
-      margin-right: 1rem;
-      cursor: pointer;
-    }
-    
-    .option label {
-      margin: 0;
-      cursor: pointer;
-      width: 100%;
-    }
-    
-    .test-navigation {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .test-navigation .btn {
-      width: auto;
-    }
-    
-    .results-summary {
-      background: var(--background-secondary);
-      padding: 2rem;
-      border-radius: var(--border-radius);
-      margin-bottom: 2rem;
-      box-shadow: var(--box-shadow);
-      border-left: 4px solid var(--primary-color);
-    }
-    
-    .results-summary p {
-      font-size: 1.125rem;
-      margin: 0.75rem 0;
-      display: flex;
-      justify-content: space-between;
-    }
-    
-    .results-summary span {
-      font-weight: 600;
-    }
-    
-    .results-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    
-    .review-question {
-      background: var(--background-primary);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      border-radius: var(--border-radius);
-      border-left: 5px solid var(--border-color);
-    }
-    
-    .review-question.correct {
-      border-left-color: var(--success-color);
-    }
-    
-    .review-question.incorrect {
-      border-left-color: var(--danger-color);
-    }
-    
-    .review-question h3 {
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .review-question h3 .icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 1.5rem;
-      height: 1.5rem;
-      border-radius: 50%;
-      font-size: 0.75rem;
-      color: white;
-    }
-    
-    .review-question h3 .icon.correct {
-      background: var(--success-color);
-    }
-    
-    .review-question h3 .icon.incorrect {
-      background: var(--danger-color);
-    }
-    
-    .review-option {
-      margin: 0.75rem 0;
-      padding: 0.75rem 1rem;
-      background: var(--background-secondary);
-      border-radius: var(--border-radius);
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    
-    .review-option .icon {
-      margin-right: 0.75rem;
-      font-size: 0.875rem;
-    }
-    
-    .correct-answer {
-      background: var(--success-light);
-      border: 1px solid var(--success-color);
-    }
-    
-    .wrong-answer {
-      background: var(--danger-light);
-      border: 1px solid var(--danger-color);
-    }
-    
-    #loadingOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.9);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      backdrop-filter: blur(3px);
-    }
-    
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      position: relative;
-    }
-    
-    .spinner::before,
-    .spinner::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-    }
-    
-    .spinner::before {
-      width: 100%;
-      height: 100%;
-      background-image: linear-gradient(var(--primary-color) 0%, var(--accent-color) 100%);
-      animation: spin 0.9s infinite linear;
-    }
-    
-    .spinner::after {
-      width: 85%;
-      height: 85%;
-      background-color: white;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    
-    .auth-page {
-      max-width: 420px;
-      margin: 0 auto;
-    }
-    
-    /* New styles for summary and resume pages */
-    .home-nav {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .home-nav .btn {
-      margin-top: 0;
-    }
-    
-    .test-card {
-      padding: 1.5rem;
-      background: var(--background-primary);
-      border-radius: var(--border-radius);
-      border: 1px solid var(--border-color);
-      margin-bottom: 1rem;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    
-    .test-card:hover {
-      border-color: var(--primary-color);
-      box-shadow: var(--box-shadow);
-      transform: translateY(-2px);
-    }
-    
-    .test-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    
-    .test-card-title {
-      font-weight: 600;
-      color: var(--primary-color);
-      font-size: 1.125rem;
-      margin: 0;
-    }
-    
-    .test-card-date {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-    
-    .test-card-info {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-      font-size: 0.875rem;
-    }
-    
-    .test-card-stat {
-      background: var(--background-secondary);
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .test-card-stat i {
-      color: var(--primary-color);
-    }
-    
-    .test-card .progress-container {
-      margin: 0.75rem 0;
-    }
-    
-    .summary-stats {
-      background: var(--background-primary);
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      margin-bottom: 1.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
-    }
-    
-    .stat-card {
-      background: var(--background-secondary);
-      padding: 1.25rem;
-      border-radius: var(--border-radius);
-      text-align: center;
-      box-shadow: var(--box-shadow-sm);
-    }
-    
-    .stat-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--primary-color);
-      margin: 0.5rem 0;
-    }
-    
-    .stat-label {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 2rem;
-      background: var(--background-primary);
-      border-radius: var(--border-radius);
-      margin: 1.5rem 0;
-    }
-    
-    .empty-state i {
-      font-size: 3rem;
-      color: var(--text-light);
-      margin-bottom: 1rem;
-    }
-    
-    .empty-state p {
-      color: var(--text-secondary);
-      font-size: 1.125rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .back-button {
-      margin-top: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .nav-tabs {
-      display: flex;
-      margin-bottom: 2rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .nav-tab {
-      padding: 0.75rem 1.5rem;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      font-weight: 500;
-      color: var(--text-secondary);
-      transition: var(--transition);
-    }
-    
-    .nav-tab:hover {
-      color: var(--primary-color);
-    }
-    
-    .nav-tab.active {
-      color: var(--primary-color);
-      border-bottom-color: var(--primary-color);
-    }
-    
-    .filter-sort {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .filter-sort .form-group {
-      flex: 1;
-      margin-bottom: 0;
-    }
-    
-    /* New styles for charts and test detail view */
-    .charts-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .chart-card {
-      background: var(--background-secondary);
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow-sm);
-    }
-    
-    .chart-card h3 {
-      font-size: 1.125rem;
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-    
-    .chart-container {
-      position: relative;
-      height: 200px;
-      width: 100%;
-    }
-    
-    .test-detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .test-detail-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-color);
-      margin: 0;
-    }
-    
-    .test-detail-date {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-    
-    .test-detail-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    
-    .test-detail-stat {
-      padding: 1rem;
-      border-radius: var(--border-radius);
-      background: var(--background-primary);
-      text-align: center;
-    }
-    
-    .test-detail-stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-color);
-      margin-bottom: 0.25rem;
-    }
-    
-    .test-detail-stat-label {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-    
-    @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-      }
-      
-      .container {
-        box-shadow: none;
-      }
-      
-      .page {
-        padding: 1.5rem;
-      }
-      
-      .test-settings {
-        grid-template-columns: 1fr;
-      }
-      
-      .results-actions {
-        grid-template-columns: 1fr;
-      }
-      
-      .test-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .test-info {
-        width: 100%;
-        align-items: flex-start;
-        margin-top: 1rem;
-      }
-      
-      .summary-stats {
-        grid-template-columns: 1fr;
-      }
-      
-      .home-nav {
-        grid-template-columns: 1fr;
-      }
-      
-      .filter-sort {
-        flex-direction: column;
-      }
-      
-      .charts-container {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div id="loadingOverlay">
-    <div class="spinner"></div>
-  </div>
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
+  authDomain: "DECA-55fc4.firebaseapp.com",
+  databaseURL: "https://DECA-55fc4-default-rtdb.firebaseio.com",
+  projectId: "DECA-55fc4",
+  storageBucket: "DECA-55fc4.appspot.com",
+  messagingSenderId: "368623997898",
+  appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
+  measurementId: "G-7ZT1H2WTWH"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+// Page references
+const pages = {
+  auth: document.getElementById('authPage'),
+  home: document.getElementById('homePage'),
+  summary: document.getElementById('summaryPage'),
+  resumeTests: document.getElementById('resumeTestsPage'),
+  test: document.getElementById('testPage'),
+  results: document.getElementById('resultsPage'),
+  review: document.getElementById('reviewPage'),
+  testDetail: document.getElementById('testDetailPage'),
+  admin: document.getElementById('adminPage'),
+  userDetail: document.getElementById('userDetailPage'),
+  adminVerification: document.getElementById('adminVerificationPage'),
+  emailVerification: null // Will be set during initialization
+};
+
+// Admin Verification elements
+const verificationElements = {
+  messageContainer: document.getElementById('verificationMessageContainer'),
+  codeInput: document.getElementById('verificationCode'),
+  verifyButton: document.getElementById('verifyButton'),
+  resendButton: document.getElementById('resendCodeButton'),
+  cancelButton: document.getElementById('cancelVerificationButton')
+};
+
+// Admin elements
+const adminElements = {
+  welcomeMessage: document.getElementById('adminWelcomeMessage'),
+  filterTest: document.getElementById('adminFilterTest'),
+  sortBy: document.getElementById('adminSortBy'),
+  usersContainer: document.getElementById('usersContainer'),
+  backButton: document.getElementById('backToHomeFromAdminButton'),
+  userParticipationChart: document.getElementById('userParticipationChart'),
+  testTypeScoresChart: document.getElementById('testTypeScoresChart')
+};
+
+// User Detail elements
+const userDetailElements = {
+  name: document.getElementById('userDetailName'),
+  email: document.getElementById('userDetailEmail'),
+  totalTests: document.getElementById('userDetailTotalTests'),
+  avgScore: document.getElementById('userDetailAvgScore'),
+  bestScore: document.getElementById('userDetailBestScore'),
+  testTypeChart: document.getElementById('userTestTypeChart'),
+  progressionChart: document.getElementById('userProgressionChart'),
+  completedTestsContainer: document.getElementById('userCompletedTestsContainer'),
+  backButton: document.getElementById('backToAdminButton')
+};
+
+// Auth elements
+const authElements = {
+  title: document.getElementById('authTitle'),
+  button: document.getElementById('authButton'),
+  toggleText: document.getElementById('toggleText'),
+  toggleLink: document.getElementById('toggleLink'),
+  nameGroup: document.getElementById('nameGroup'),
+  messageContainer: document.getElementById('messageContainer')
+};
+
+// Home elements
+const homeElements = {
+  welcomeMessage: document.getElementById('welcomeMessage'),
+  logoutButton: document.getElementById('logoutButton'),
+  startTestButton: document.getElementById('startTestButton'),
+  summaryButton: document.getElementById('summaryButton'),
+  resumeTestsButton: document.getElementById('resumeTestsButton'),
+  timeLimit: document.getElementById('timeLimit'),
+  adminButton: document.createElement('button') // Will add this dynamically if admin
+};
+
+// Summary elements
+const summaryElements = {
+  totalTestsValue: document.getElementById('totalTestsValue'),
+  avgScoreValue: document.getElementById('avgScoreValue'),
+  bestScoreValue: document.getElementById('bestScoreValue'),
+  filterTest: document.getElementById('filterTest'),
+  sortBy: document.getElementById('sortBy'),
+  completedTestsContainer: document.getElementById('completedTestsContainer'),
+  backButton: document.getElementById('backToHomeButton'),
+  overallPieChart: document.getElementById('overallPieChart'),
+  progressionChart: document.getElementById('progressionChart')
+};
+
+// Test Detail elements
+const testDetailElements = {
+  title: document.getElementById('testDetailTitle'),
+  date: document.getElementById('testDetailDate'),
+  score: document.getElementById('testDetailScore'),
+  percentage: document.getElementById('testDetailPercentage'),
+  time: document.getElementById('testDetailTime'),
+  chart: document.getElementById('testDetailChart'),
+  reviewContainer: document.getElementById('testDetailReviewContainer'),
+  backButton: document.getElementById('backToSummaryButton')
+};
+
+// Resume tests elements
+const resumeElements = {
+  inProgressTestsContainer: document.getElementById('inProgressTestsContainer'),
+  backButton: document.getElementById('backFromResumeButton')
+};
+
+// Test elements
+const testElements = {
+  questionCounter: document.getElementById('questionCounter'),
+  timerDisplay: document.getElementById('timerDisplay'),
+  questionText: document.getElementById('questionText'),
+  optionsContainer: document.getElementById('optionsContainer'),
+  prevButton: document.getElementById('prevButton'),
+  nextButton: document.getElementById('nextButton'),
+  saveAndExitButton: document.getElementById('saveAndExitButton'),
+  submitTestButton: document.getElementById('submitTestButton'),
+  questionProgress: document.getElementById('questionProgress')
+};
+
+// Results elements
+const resultsElements = {
+  scoreDisplay: document.getElementById('scoreDisplay'),
+  percentageDisplay: document.getElementById('percentageDisplay'),
+  timeTakenDisplay: document.getElementById('timeTakenDisplay'),
+  reviewTestButton: document.getElementById('reviewTestButton'),
+  returnHomeButton: document.getElementById('returnHomeButton'),
+  pieChart: document.getElementById('resultsPieChart')
+};
+
+// Review elements
+const reviewElements = {
+  container: document.getElementById('reviewContainer'),
+  backButton: document.getElementById('backToResultsButton')
+};
+
+// Form inputs
+const formInputs = {
+  email: document.getElementById('email'),
+  password: document.getElementById('password'),
+  name: document.getElementById('name')
+};
+
+const testSelect = document.getElementById('testSelect');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+// Chart instances
+let overallPieChart = null;
+let progressionChart = null;
+let resultsPieChart = null;
+let testDetailChart = null;
+
+let appState = {
+  isLoginMode: true,
+  currentUser: null,
+  testQuestions: [],
+  currentQuestionIndex: 0,
+  userAnswers: [],
+  testData: null,
+  timerInterval: null,
+  timeRemaining: 0,
+  completedTests: [],
+  inProgressTests: {},
+  testTypes: [],
+  currentTestDetail: null,
+  isAdmin: false,
+  allUsers: [],
+  currentUserDetail: null,
+  adminEmail: "gautham0913@gmail.com", // Replace with your email
+  adminVerificationCode: null,
+  adminVerified: false,
+  pendingVerification: null, // For email verification
+  emailVerificationElements: null // For email verification UI
+};
+
+// Email verification page setup
+function setupEmailVerification() {
+  // Create email verification page
+  const verificationPage = document.createElement('div');
+  verificationPage.id = 'emailVerificationPage';
+  verificationPage.className = 'page auth-page';
+  verificationPage.style.display = 'none';
   
-  <div class="container">
-    <!-- Admin Verification Page -->
-    <div id="adminVerificationPage" class="page auth-page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <h1>Admin Verification</h1>
-      <div id="verificationMessageContainer" class="message-container"></div>
-      
-      <div class="card">
-        <p class="welcome-message">A verification code has been sent to your email address. Please enter it below to access the admin dashboard.</p>
-        
-        <div class="form-group">
-          <label for="verificationCode">Verification Code</label>
-          <input type="text" id="verificationCode" placeholder="Enter 6-digit code">
-        </div>
-        
-        <button id="verifyButton" class="btn btn-primary">
-          <i class="fas fa-check-circle"></i> Verify
-        </button>
-        
-        <button id="resendCodeButton" class="btn btn-secondary">
-          <i class="fas fa-redo"></i> Resend Code
-        </button>
-        
-        <button id="cancelVerificationButton" class="btn btn-danger">
-          <i class="fas fa-times"></i> Cancel
-        </button>
-      </div>
+  verificationPage.innerHTML = `
+    <div class="logo-container">
+      <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+        <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+        <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+        <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+        <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+      </svg>
     </div>
     
-    <!-- Admin Page -->
-    <div id="adminPage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
+    <h1>Email Verification</h1>
+    <div id="emailVerificationMessageContainer" class="message-container"></div>
+    
+    <div class="card">
+      <p class="welcome-message">A verification code has been sent to your email. Please verify your email to continue.</p>
+      
+      <div id="emailVerificationInfo" class="form-group">
+        <p>We've sent a verification link to: <strong id="userEmailDisplay"></strong></p>
       </div>
       
-      <h1>DECA Finance Admin Dashboard</h1>
-      <div id="adminWelcomeMessage" class="welcome-message"></div>
+      <button id="verifyEmailButton" class="btn btn-primary">
+        <i class="fas fa-check-circle"></i> I've Verified My Email
+      </button>
       
-      <div class="card">
-        <h2>Platform Statistics</h2>
-        <div class="charts-container">
-          <div class="chart-card">
-            <h3>User Participation</h3>
-            <div class="chart-container">
-              <canvas id="userParticipationChart"></canvas>
-            </div>
-          </div>
-          <div class="chart-card">
-            <h3>Average Scores by Test Type</h3>
-            <div class="chart-container">
-              <canvas id="testTypeScoresChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
+      <button id="resendVerificationButton" class="btn btn-secondary">
+        <i class="fas fa-redo"></i> Resend Verification Email
+      </button>
       
-      <div class="filter-sort">
-        <div class="form-group">
-          <label for="adminFilterTest">Filter by Test</label>
-          <select id="adminFilterTest">
-            <option value="all">All Tests</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="adminSortBy">Sort by</label>
-          <select id="adminSortBy">
-            <option value="name-asc">Name (A-Z)</option>
-            <option value="name-desc">Name (Z-A)</option>
-            <option value="tests-desc">Most Tests</option>
-            <option value="score-desc">Highest Avg. Score</option>
-            <option value="score-asc">Lowest Avg. Score</option>
-          </select>
-        </div>
-      </div>
-      
-      <div id="usersContainer" class="users-container">
-        <!-- User cards will be inserted here -->
-      </div>
-      
-      <button id="backToHomeFromAdminButton" class="btn btn-secondary back-button">
-        <i class="fas fa-arrow-left"></i> Back to Home
+      <button id="backToLoginButton" class="btn btn-danger">
+        <i class="fas fa-times"></i> Back to Login
       </button>
     </div>
-    
-    <!-- User Detail Page -->
-    <div id="userDetailPage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <div class="test-detail-header">
-        <h1 id="userDetailName" class="test-detail-title">User Details</h1>
-        <div id="userDetailEmail" class="test-detail-date"></div>
-      </div>
-      
-      <div class="test-detail-stats">
-        <div class="test-detail-stat">
-          <div id="userDetailTotalTests" class="test-detail-stat-value">0</div>
-          <div class="test-detail-stat-label">TOTAL TESTS</div>
-        </div>
-        <div class="test-detail-stat">
-          <div id="userDetailAvgScore" class="test-detail-stat-value">0%</div>
-          <div class="test-detail-stat-label">AVG SCORE</div>
-        </div>
-        <div class="test-detail-stat">
-          <div id="userDetailBestScore" class="test-detail-stat-value">0%</div>
-          <div class="test-detail-stat-label">BEST SCORE</div>
-        </div>
-      </div>
-      
-      <div class="charts-container">
-        <div class="chart-card">
-          <h3>Performance by Test Type</h3>
-          <div class="chart-container">
-            <canvas id="userTestTypeChart"></canvas>
-          </div>
-        </div>
-        <div class="chart-card">
-          <h3>Score Progression</h3>
-          <div class="chart-container">
-            <canvas id="userProgressionChart"></canvas>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <h2>Completed Tests</h2>
-        <div id="userCompletedTestsContainer">
-          <!-- User completed tests will go here -->
-        </div>
-      </div>
-      
-      <button id="backToAdminButton" class="btn btn-secondary back-button">
-        <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
-      </button>
-    </div>
-    
-    <!-- Auth Page -->
-    <div id="authPage" class="page auth-page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <h1 id="authTitle">Sign In</h1>
-      <div id="messageContainer" class="message-container"></div>
-      
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Enter your email">
-      </div>
-      
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter your password">
-      </div>
-      
-      <div id="nameGroup" class="form-group" style="display:none;">
-        <label for="name">Full Name</label>
-        <input type="text" id="name" placeholder="Enter your full name">
-      </div>
-      
-      <button id="authButton" class="btn btn-primary">Sign In</button>
-      
-      <div class="toggle-form">
-        <p><span id="toggleText">Don't have an account?</span> <a id="toggleLink" href="#">Sign Up</a></p>
-      </div>
-    </div>
+  `;
+  
+  // Add to container
+  document.querySelector('.container').appendChild(verificationPage);
+  
+  // Add to pages object
+  pages.emailVerification = verificationPage;
+  
+  // Store elements
+  const emailVerificationElements = {
+    page: verificationPage,
+    messageContainer: document.getElementById('emailVerificationMessageContainer'),
+    emailDisplay: document.getElementById('userEmailDisplay'),
+    verifyButton: document.getElementById('verifyEmailButton'),
+    resendButton: document.getElementById('resendVerificationButton'),
+    backButton: document.getElementById('backToLoginButton')
+  };
+  
+  // Add event listeners
+  emailVerificationElements.verifyButton.addEventListener('click', checkEmailVerification);
+  emailVerificationElements.resendButton.addEventListener('click', resendVerificationEmail);
+  emailVerificationElements.backButton.addEventListener('click', () => showAuthPage());
+  
+  return emailVerificationElements;
+}
 
-    <!-- Home Page -->
-    <div id="homePage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <h1>DECA Finance Test Platform</h1>
-      <div id="welcomeMessage" class="welcome-message"></div>
-      
-      <div class="home-nav">
-        <button id="summaryButton" class="btn btn-secondary">
-          <i class="fas fa-chart-bar"></i> View Test History
-        </button>
-        <button id="resumeTestsButton" class="btn btn-secondary">
-          <i class="fas fa-history"></i> Resume Tests
-        </button>
-      </div>
-      
-      <div class="card">
-        <h2>Start New Test</h2>
-        <div class="test-settings">
-          <div class="form-group">
-            <label for="testSelect">Choose a Test</label>
-            <select id="testSelect">
-              <option value="" disabled selected>Loading tests…</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="timeLimit">Time Limit</label>
-            <select id="timeLimit">
-              <option value="0">No Time Limit</option>
-              <option value="10">10 Minutes</option>
-              <option value="20">20 Minutes</option>
-              <option value="30">30 Minutes</option>
-              <option value="45">45 Minutes</option>
-              <option value="60" selected>60 Minutes</option>
-              <option value="90">90 Minutes</option>
-              <option value="120">2 Hours</option>
-            </select>
-          </div>
-        </div>
-        
-        <button id="startTestButton" class="btn btn-primary">
-          <i class="fas fa-play-circle"></i> Start New Test
-        </button>
-      </div>
-      
-      <button id="logoutButton" class="btn btn-danger">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </button>
-    </div>
+// Generate a secure verification token
+function generateVerificationToken() {
+  const array = new Uint8Array(32);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
 
-    <!-- Summary Page -->
-    <div id="summaryPage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <h1>Test History</h1>
-      
-      <div class="charts-container">
-        <div class="chart-card">
-          <h3>Overall Performance</h3>
-          <div class="chart-container">
-            <canvas id="overallPieChart"></canvas>
-          </div>
-        </div>
-        <div class="chart-card">
-          <h3>Score Progression</h3>
-          <div class="chart-container">
-            <canvas id="progressionChart"></canvas>
-          </div>
-        </div>
-      </div>
-      
-      <div class="summary-stats">
-        <div class="stat-card">
-          <div class="stat-label">Total Tests</div>
-          <div id="totalTestsValue" class="stat-value">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Average Score</div>
-          <div id="avgScoreValue" class="stat-value">0%</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Best Score</div>
-          <div id="bestScoreValue" class="stat-value">0%</div>
-        </div>
-      </div>
-      
-      <div class="filter-sort">
-        <div class="form-group">
-          <label for="filterTest">Filter by Test</label>
-          <select id="filterTest">
-            <option value="all">All Tests</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="sortBy">Sort by</label>
-          <select id="sortBy">
-            <option value="date-desc">Date (Newest First)</option>
-            <option value="date-asc">Date (Oldest First)</option>
-            <option value="score-desc">Score (Highest First)</option>
-            <option value="score-asc">Score (Lowest First)</option>
-          </select>
-        </div>
-      </div>
-      
-      <div id="completedTestsContainer">
-        <!-- Test history cards will be inserted here -->
-      </div>
-      
-      <button id="backToHomeButton" class="btn btn-secondary back-button">
-        <i class="fas fa-arrow-left"></i> Back to Home
-      </button>
-    </div>
+// Show verification message
+function showVerificationMessage(msg, type) {
+  const container = document.getElementById('emailVerificationMessageContainer');
+  container.innerHTML = `<div class="message ${type}">${msg}</div>`;
+}
 
-    <!-- Test Detail Page -->
-    <div id="testDetailPage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <div class="test-detail-header">
-        <h1 id="testDetailTitle" class="test-detail-title">Test Details</h1>
-        <div id="testDetailDate" class="test-detail-date"></div>
-      </div>
-      
-      <div class="test-detail-stats">
-        <div class="test-detail-stat">
-          <div id="testDetailScore" class="test-detail-stat-value">0/0</div>
-          <div class="test-detail-stat-label">SCORE</div>
-        </div>
-        <div class="test-detail-stat">
-          <div id="testDetailPercentage" class="test-detail-stat-value">0%</div>
-          <div class="test-detail-stat-label">PERCENTAGE</div>
-        </div>
-        <div class="test-detail-stat">
-          <div id="testDetailTime" class="test-detail-stat-value">00:00</div>
-          <div class="test-detail-stat-label">TIME TAKEN</div>
-        </div>
-      </div>
-      
-      <div class="chart-card">
-        <h3>Test Performance</h3>
-        <div class="chart-container">
-          <canvas id="testDetailChart"></canvas>
-        </div>
-      </div>
-      
-      <div id="testDetailReviewContainer">
-        <!-- Test questions and answers will be inserted here -->
-      </div>
-      
-      <button id="backToSummaryButton" class="btn btn-secondary back-button">
-        <i class="fas fa-arrow-left"></i> Back to Test History
-      </button>
-    </div>
+// Clear verification message
+function clearVerificationMessage() {
+  const container = document.getElementById('emailVerificationMessageContainer');
+  if (container) {
+    container.innerHTML = '';
+  }
+}
 
-    <!-- Resume Tests Page -->
-    <div id="resumeTestsPage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <h1>Resume Tests</h1>
-      
-      <div id="inProgressTestsContainer">
-        <!-- In-progress test cards will be inserted here -->
-      </div>
-      
-      <button id="backFromResumeButton" class="btn btn-secondary back-button">
-        <i class="fas fa-arrow-left"></i> Back to Home
-      </button>
-    </div>
-
-    <!-- Test Page -->
-    <div id="testPage" class="page">
-      <div class="test-header">
-        <h1>DECA Finance Test</h1>
-        
-        <div class="test-info">
-          <div id="questionCounter">Question 1 of 50</div>
-          <div id="timerDisplay">Time Remaining: 60:00</div>
-        </div>
-      </div>
-      
-      <div class="progress-container">
-        <div id="questionProgress" class="progress-bar" style="width:0%"></div>
-      </div>
-      
-      <div id="questionContainer" class="question-container">
-        <h3 id="questionText"></h3>
-        <div id="optionsContainer" class="options-container"></div>
-      </div>
-      
-      <div class="test-navigation">
-        <button id="prevButton" class="btn btn-secondary">
-          <i class="fas fa-arrow-left"></i> Previous
-        </button>
-        
-        <button id="nextButton" class="btn btn-primary">
-          Next <i class="fas fa-arrow-right"></i>
-        </button>
-        
-        <button id="saveAndExitButton" class="btn btn-warning">
-          <i class="fas fa-save"></i> Save & Exit
-        </button>
-        
-        <button id="submitTestButton" class="btn btn-success" style="display:none;">
-          <i class="fas fa-check-circle"></i> Submit Test
-        </button>
-      </div>
-    </div>
-
-    <!-- Results Page -->
-    <div id="resultsPage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <h1>Test Results</h1>
-      
-      <div class="results-summary">
-        <h2>Summary</h2>
-        <p>Score: <span id="scoreDisplay">0/0</span></p>
-        <p>Percentage: <span id="percentageDisplay">0%</span></p>
-        <p>Time Taken: <span id="timeTakenDisplay">00:00</span></p>
-      </div>
-      
-      <div class="chart-card">
-        <h3>Test Performance</h3>
-        <div class="chart-container">
-          <canvas id="resultsPieChart"></canvas>
-        </div>
-      </div>
-      
-      <div class="results-actions">
-        <button id="reviewTestButton" class="btn btn-primary">
-          <i class="fas fa-search"></i> Review Answers
-        </button>
-        
-        <button id="returnHomeButton" class="btn btn-secondary">
-          <i class="fas fa-home"></i> Return to Home
-        </button>
-      </div>
-    </div>
-
-    <!-- Review Page -->
-    <div id="reviewPage" class="page">
-      <div class="logo-container">
-        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-        </svg>
-      </div>
-      
-      <h1>Review Your Answers</h1>
-      <div id="reviewContainer"></div>
-      
-      <button id="backToResultsButton" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Results
-      </button>
-    </div>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-auth-compat.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-database-compat.min.js"></script>
-
-  <script>
-    // Initialize Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
-      authDomain: "DECA-55fc4.firebaseapp.com",
-      databaseURL: "https://DECA-55fc4-default-rtdb.firebaseio.com",
-      projectId: "DECA-55fc4",
-      storageBucket: "DECA-55fc4.appspot.com",
-      messagingSenderId: "368623997898",
-      appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
-      measurementId: "G-7ZT1H2WTWH"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const database = firebase.database();
-
-    // Page references
-    const pages = {
-      auth: document.getElementById('authPage'),
-      home: document.getElementById('homePage'),
-      summary: document.getElementById('summaryPage'),
-      resumeTests: document.getElementById('resumeTestsPage'),
-      test: document.getElementById('testPage'),
-      results: document.getElementById('resultsPage'),
-      review: document.getElementById('reviewPage'),
-      testDetail: document.getElementById('testDetailPage'),
-      admin: document.getElementById('adminPage'),
-      userDetail: document.getElementById('userDetailPage'),
-      adminVerification: document.getElementById('adminVerificationPage')
-    };
+// Send verification email
+async function sendVerificationEmail(user, email, token) {
+  try {
+    toggleLoading(true);
     
-    // Admin Verification elements
-    const verificationElements = {
-      messageContainer: document.getElementById('verificationMessageContainer'),
-      codeInput: document.getElementById('verificationCode'),
-      verifyButton: document.getElementById('verifyButton'),
-      resendButton: document.getElementById('resendCodeButton'),
-      cancelButton: document.getElementById('cancelVerificationButton')
-    };
-    
-    // Admin elements
-    const adminElements = {
-      welcomeMessage: document.getElementById('adminWelcomeMessage'),
-      filterTest: document.getElementById('adminFilterTest'),
-      sortBy: document.getElementById('adminSortBy'),
-      usersContainer: document.getElementById('usersContainer'),
-      backButton: document.getElementById('backToHomeFromAdminButton'),
-      userParticipationChart: document.getElementById('userParticipationChart'),
-      testTypeScoresChart: document.getElementById('testTypeScoresChart')
-    };
-    
-    // User Detail elements
-    const userDetailElements = {
-      name: document.getElementById('userDetailName'),
-      email: document.getElementById('userDetailEmail'),
-      totalTests: document.getElementById('userDetailTotalTests'),
-      avgScore: document.getElementById('userDetailAvgScore'),
-      bestScore: document.getElementById('userDetailBestScore'),
-      testTypeChart: document.getElementById('userTestTypeChart'),
-      progressionChart: document.getElementById('userProgressionChart'),
-      completedTestsContainer: document.getElementById('userCompletedTestsContainer'),
-      backButton: document.getElementById('backToAdminButton')
-    };
-    
-    // Auth elements
-    const authElements = {
-      title: document.getElementById('authTitle'),
-      button: document.getElementById('authButton'),
-      toggleText: document.getElementById('toggleText'),
-      toggleLink: document.getElementById('toggleLink'),
-      nameGroup: document.getElementById('nameGroup'),
-      messageContainer: document.getElementById('messageContainer')
-    };
-    
-    // Home elements
-    const homeElements = {
-      welcomeMessage: document.getElementById('welcomeMessage'),
-      logoutButton: document.getElementById('logoutButton'),
-      startTestButton: document.getElementById('startTestButton'),
-      summaryButton: document.getElementById('summaryButton'),
-      resumeTestsButton: document.getElementById('resumeTestsButton'),
-      timeLimit: document.getElementById('timeLimit'),
-      adminButton: document.createElement('button') // Will add this dynamically if admin
-    };
-    
-    // Summary elements
-    const summaryElements = {
-      totalTestsValue: document.getElementById('totalTestsValue'),
-      avgScoreValue: document.getElementById('avgScoreValue'),
-      bestScoreValue: document.getElementById('bestScoreValue'),
-      filterTest: document.getElementById('filterTest'),
-      sortBy: document.getElementById('sortBy'),
-      completedTestsContainer: document.getElementById('completedTestsContainer'),
-      backButton: document.getElementById('backToHomeButton'),
-      overallPieChart: document.getElementById('overallPieChart'),
-      progressionChart: document.getElementById('progressionChart')
-    };
-    
-    // Test Detail elements
-    const testDetailElements = {
-      title: document.getElementById('testDetailTitle'),
-      date: document.getElementById('testDetailDate'),
-      score: document.getElementById('testDetailScore'),
-      percentage: document.getElementById('testDetailPercentage'),
-      time: document.getElementById('testDetailTime'),
-      chart: document.getElementById('testDetailChart'),
-      reviewContainer: document.getElementById('testDetailReviewContainer'),
-      backButton: document.getElementById('backToSummaryButton')
-    };
-    
-    // Resume tests elements
-    const resumeElements = {
-      inProgressTestsContainer: document.getElementById('inProgressTestsContainer'),
-      backButton: document.getElementById('backFromResumeButton')
-    };
-    
-    // Test elements
-    const testElements = {
-      questionCounter: document.getElementById('questionCounter'),
-      timerDisplay: document.getElementById('timerDisplay'),
-      questionText: document.getElementById('questionText'),
-      optionsContainer: document.getElementById('optionsContainer'),
-      prevButton: document.getElementById('prevButton'),
-      nextButton: document.getElementById('nextButton'),
-      saveAndExitButton: document.getElementById('saveAndExitButton'),
-      submitTestButton: document.getElementById('submitTestButton'),
-      questionProgress: document.getElementById('questionProgress')
-    };
-    
-    // Results elements
-    const resultsElements = {
-      scoreDisplay: document.getElementById('scoreDisplay'),
-      percentageDisplay: document.getElementById('percentageDisplay'),
-      timeTakenDisplay: document.getElementById('timeTakenDisplay'),
-      reviewTestButton: document.getElementById('reviewTestButton'),
-      returnHomeButton: document.getElementById('returnHomeButton'),
-      pieChart: document.getElementById('resultsPieChart')
-    };
-    
-    // Review elements
-    const reviewElements = {
-      container: document.getElementById('reviewContainer'),
-      backButton: document.getElementById('backToResultsButton')
-    };
-    
-    // Form inputs
-    const formInputs = {
-      email: document.getElementById('email'),
-      password: document.getElementById('password'),
-      name: document.getElementById('name')
-    };
-    
-    const testSelect = document.getElementById('testSelect');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-
-    // Chart instances
-    let overallPieChart = null;
-    let progressionChart = null;
-    let resultsPieChart = null;
-    let testDetailChart = null;
-
-    let appState = {
-      isLoginMode: true,
-      currentUser: null,
-      testQuestions: [],
-      currentQuestionIndex: 0,
-      userAnswers: [],
-      testData: null,
-      timerInterval: null,
-      timeRemaining: 0,
-      completedTests: [],
-      inProgressTests: {},
-      testTypes: [],
-      currentTestDetail: null,
-      isAdmin: false,
-      allUsers: [],
-      currentUserDetail: null,
-      adminEmail: "admin@DECA.com", // Replace with your email
-      adminVerificationCode: null,
-      adminVerified: false
-    };
-
-    function toggleLoading(show) {
-      loadingOverlay.style.display = show ? 'flex' : 'none';
-    }
-    
-    function showMessage(msg, type) {
-      authElements.messageContainer.innerHTML =
-        `<div class="message ${type}">${msg}</div>`;
-    }
-    
-    function clearMessage() {
-      authElements.messageContainer.innerHTML = '';
-    }
-
-    // Toggle auth form
-    authElements.toggleLink.addEventListener('click', () => {
-      appState.isLoginMode = !appState.isLoginMode;
-      if (appState.isLoginMode) {
-        authElements.title.textContent = 'Sign In';
-        authElements.button.textContent = 'Sign In';
-        authElements.toggleText.textContent = "Don't have an account?";
-        authElements.toggleLink.textContent = 'Sign Up';
-        authElements.nameGroup.style.display = 'none';
-      } else {
-        authElements.title.textContent = 'Sign Up';
-        authElements.button.textContent = 'Sign Up';
-        authElements.toggleText.textContent = 'Already have an account?';
-        authElements.toggleLink.textContent = 'Sign In';
-        authElements.nameGroup.style.display = 'block';
-      }
-      clearMessage();
+    // Create user verification data in database
+    await database.ref(`userVerifications/${user.uid}`).set({
+      email: email,
+      token: token,
+      createdAt: new Date().toString(),
+      verified: false
     });
+    
+    // In a real implementation, you would send an actual email here
+    // using a service like Firebase Cloud Functions, SendGrid, etc.
+    // For demo purposes, we'll simulate this
+    
+    console.log('Verification token:', token);
+    
+    // Example verification URL (this would be included in the email)
+    const verificationUrl = `${window.location.origin}${window.location.pathname}?mode=verifyEmail&oobCode=${token}&uid=${user.uid}`;
+    console.log('Verification URL:', verificationUrl);
+    
+    // Show alert with the verification URL (for demo purposes only)
+    alert(`For demo purposes: Your verification URL is: ${verificationUrl}\n\nIn a real implementation, this would be sent to your email.`);
+    
+    showVerificationMessage('Verification email sent! Please check your inbox and spam folder.', 'success');
+    toggleLoading(false);
+    
+    return true;
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    showVerificationMessage('Failed to send verification email. Please try again.', 'error');
+    toggleLoading(false);
+    return false;
+  }
+}
 
-    // Sign In / Sign Up
-    authElements.button.addEventListener('click', async () => {
-      const email = formInputs.email.value.trim();
-      const password = formInputs.password.value.trim();
-      if (!email || !password) {
-        showMessage('Please enter both email and password.', 'error');
-        return;
-      }
+// Resend verification email
+async function resendVerificationEmail() {
+  if (!appState.pendingVerification || !appState.pendingVerification.user) {
+    showVerificationMessage('No pending verification found. Please try signing up again.', 'error');
+    return;
+  }
+  
+  try {
+    toggleLoading(true);
+    
+    const user = appState.pendingVerification.user;
+    const email = appState.pendingVerification.email;
+    const newToken = generateVerificationToken();
+    
+    // Update token in database
+    await database.ref(`userVerifications/${user.uid}`).update({
+      token: newToken,
+      createdAt: new Date().toString()
+    });
+    
+    // In a real implementation, you would send an actual email here
+    
+    console.log('New verification token:', newToken);
+    
+    // Example verification URL (this would be included in the email)
+    const verificationUrl = `${window.location.origin}${window.location.pathname}?mode=verifyEmail&oobCode=${newToken}&uid=${user.uid}`;
+    console.log('Verification URL:', verificationUrl);
+    
+    // Show alert with the verification URL (for demo purposes only)
+    alert(`For demo purposes: Your new verification URL is: ${verificationUrl}\n\nIn a real implementation, this would be sent to your email.`);
+    
+    showVerificationMessage('Verification email resent! Please check your inbox and spam folder.', 'success');
+    toggleLoading(false);
+  } catch (error) {
+    console.error('Error resending verification email:', error);
+    showVerificationMessage('Failed to resend verification email. Please try again.', 'error');
+    toggleLoading(false);
+  }
+}
+
+// Check if email is verified
+async function checkEmailVerification() {
+  if (!appState.pendingVerification || !appState.pendingVerification.user) {
+    showVerificationMessage('No pending verification found. Please try signing up again.', 'error');
+    return;
+  }
+  
+  try {
+    toggleLoading(true);
+    
+    const user = appState.pendingVerification.user;
+    
+    // Reload user to get latest verification status
+    await user.reload();
+    
+    // Check database verification status
+    const verificationSnapshot = await database.ref(`userVerifications/${user.uid}`).once('value');
+    const verificationData = verificationSnapshot.val();
+    
+    if (verificationData && verificationData.verified === true) {
+      // Email is verified, complete the sign-up process
+      showVerificationMessage('Email verified successfully!', 'success');
       
-      toggleLoading(true);
+      // Update user status
+      await database.ref(`users/${user.uid}`).update({
+        emailVerified: true
+      });
       
-      try {
-        if (!appState.isLoginMode) {
-          // Sign up
-          const name = formInputs.name.value.trim();
-          if (!name) {
-            showMessage('Please enter your name.', 'error');
-            toggleLoading(false);
-            return;
-          }
-          
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          const user = userCredential.user;
-          
-          await database.ref('users/' + user.uid).set({
-            email, name, lastLogin: new Date().toString(), tests: {}
-          });
-          
-          showMessage('Account created successfully!', 'success');
-          appState.currentUser = { uid: user.uid, name, email };
-          
-          setTimeout(() => {
-            showHomePage(name);
-            toggleLoading(false);
-          }, 1000);
-          
-        } else {
-          // Sign in
-          const userCredential = await auth.signInWithEmailAndPassword(email, password);
-          showMessage('Login successful!', 'success');
-          
-          const user = userCredential.user;
-          const snap = await database.ref('users/' + user.uid).once('value');
-          const userData = snap.val();
-          
-          await database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
-          
-          appState.currentUser = { uid: user.uid, name: userData.name, email: userData.email };
-          
-          // Check if this user is the admin
-          appState.isAdmin = (userData.email === appState.adminEmail);
-          
-          setTimeout(() => {
-            showHomePage(userData.name);
-            toggleLoading(false);
-          }, 1000);
-        }
-      } catch (err) {
-        showMessage(err.message, 'error');
+      // Complete registration and proceed to home page
+      appState.currentUser = {
+        uid: user.uid,
+        name: appState.pendingVerification.name,
+        email: appState.pendingVerification.email
+      };
+      
+      setTimeout(() => {
+        showHomePage(appState.pendingVerification.name);
         toggleLoading(false);
-      }
-    });
-
-    // Load tests and check auth on page load
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const snap = await database.ref('questions').once('value');
-        const tests = snap.exists() ? Object.keys(snap.val()) : [];
-        appState.testTypes = tests;
-        
-        // Populate testSelect
-        testSelect.innerHTML = '';
-        tests.forEach(key => {
-          const opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = key.replace(/-/g,' ').toUpperCase();
-          testSelect.appendChild(opt);
-        });
-        
-        // Populate filterTest
-        summaryElements.filterTest.innerHTML = '<option value="all">All Tests</option>';
-        tests.forEach(key => {
-          const opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = key.replace(/-/g,' ').toUpperCase();
-          summaryElements.filterTest.appendChild(opt);
-        });
-        
-        // Populate admin filterTest
-        adminElements.filterTest.innerHTML = '<option value="all">All Tests</option>';
-        tests.forEach(key => {
-          const opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = key.replace(/-/g,' ').toUpperCase();
-          adminElements.filterTest.appendChild(opt);
-        });
-      } catch (err) {
-        console.error('Error loading tests:', err);
-        testSelect.innerHTML = '<option disabled>Error loading tests</option>';
-      }
-      
-      // Check user auth state immediately
-      auth.onAuthStateChanged(async (usr) => {
-        if (usr) {
-          toggleLoading(true);
-          const snap = await database.ref('users/' + usr.uid).once('value');
-          const data = snap.val();
-          appState.currentUser = { uid: usr.uid, name: data.name, email: data.email };
-          
-          // Check if this user is the admin
-          appState.isAdmin = (data.email === appState.adminEmail);
-          appState.adminVerified = false; // Reset verification state
-          
-          // Load user's completed tests
-          await loadCompletedTests();
-          
-          // Load user's in-progress tests
-          await loadInProgressTests();
-          
-          showHomePage(data.name);
-          toggleLoading(false);
-        } else {
-          showAuthPage();
-        }
-      });
-    });
-
-    // Load completed tests
-    async function loadCompletedTests() {
-      try {
-        const snap = await database.ref(`users/${appState.currentUser.uid}/tests/completed`).once('value');
-        const data = snap.val() || {};
-        
-        // Convert to array
-        appState.completedTests = Object.entries(data).map(([id, test]) => ({
-          id,
-          ...test
-        }));
-        
-        // Update summary stats
-        updateSummaryStats();
-        
-        // Create summary charts
-        createSummaryCharts();
-      } catch (err) {
-        console.error('Error loading completed tests:', err);
-      }
-    }
-
-    // Load in-progress tests
-    async function loadInProgressTests() {
-      try {
-        const snap = await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).once('value');
-        if (snap.exists()) {
-          // Convert to object with keys
-          const tests = {};
-          
-          // Check if it's an object with keys or a single in-progress test
-          if (snap.hasChildren()) {
-            snap.forEach(childSnap => {
-              const key = childSnap.key;
-              const val = childSnap.val();
-              tests[key] = val;
-            });
-          } else {
-            // For backward compatibility - old structure had a single in-progress test
-            const val = snap.val();
-            if (val) {
-              tests['default'] = val;
-            }
-          }
-          
-          appState.inProgressTests = tests;
-        } else {
-          appState.inProgressTests = {};
-        }
-      } catch (err) {
-        console.error('Error loading in-progress tests:', err);
-      }
-    }
-
-    // Update summary stats
-    function updateSummaryStats() {
-      const tests = appState.completedTests;
-      
-      // Total tests
-      summaryElements.totalTestsValue.textContent = tests.length;
-      
-      // Average score
-      if (tests.length > 0) {
-        const avgScore = tests.reduce((acc, test) => acc + test.percentage, 0) / tests.length;
-        summaryElements.avgScoreValue.textContent = `${Math.round(avgScore)}%`;
-        
-        // Best score
-        const bestScore = Math.max(...tests.map(test => test.percentage));
-        summaryElements.bestScoreValue.textContent = `${bestScore}%`;
-      } else {
-        summaryElements.avgScoreValue.textContent = '0%';
-        summaryElements.bestScoreValue.textContent = '0%';
-      }
-    }
-
-    // Create summary charts
-    function createSummaryCharts() {
-      const tests = appState.completedTests;
-      
-      // Clear existing charts
-      if (overallPieChart) {
-        overallPieChart.destroy();
-      }
-      
-      if (progressionChart) {
-        progressionChart.destroy();
-      }
-      
-      if (tests.length === 0) {
-        return;
-      }
-      
-      // Calculate total correct and incorrect answers
-      let totalCorrect = 0;
-      let totalIncorrect = 0;
-      
-      tests.forEach(test => {
-        totalCorrect += test.score;
-        totalIncorrect += test.questionCount - test.score;
-      });
-      
-      // Create overall pie chart
-      const pieCtx = summaryElements.overallPieChart.getContext('2d');
-      overallPieChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-          labels: ['Correct', 'Incorrect'],
-          datasets: [{
-            data: [totalCorrect, totalIncorrect],
-            backgroundColor: ['#10B981', '#EF4444'],
-            borderColor: ['#D1FAE5', '#FEE2E2'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }
-      });
-      
-      // Create progression chart
-      // Sort tests by date and get the last 10
-      const sortedTests = [...tests].sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
-      const recentTests = sortedTests.slice(-10);
-      
-      const progressionCtx = summaryElements.progressionChart.getContext('2d');
-      progressionChart = new Chart(progressionCtx, {
-        type: 'line',
-        data: {
-          labels: recentTests.map((test, index) => `Test ${index + 1}`),
-          datasets: [{
-            label: 'Score %',
-            data: recentTests.map(test => test.percentage),
-            borderColor: '#0056A4',
-            backgroundColor: 'rgba(0, 86, 164, 0.1)',
-            fill: true,
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              title: {
-                display: true,
-                text: 'Score (%)'
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              display: false
-            }
-          }
-        }
-      });
-    }
-
-    // Create results pie chart
-    function createResultsPieChart(correct, total) {
-      const incorrect = total - correct;
-      
-      // Clear existing chart
-      if (resultsPieChart) {
-        resultsPieChart.destroy();
-      }
-      
-      const pieCtx = resultsElements.pieChart.getContext('2d');
-      resultsPieChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-          labels: ['Correct', 'Incorrect'],
-          datasets: [{
-            data: [correct, incorrect],
-            backgroundColor: ['#10B981', '#EF4444'],
-            borderColor: ['#D1FAE5', '#FEE2E2'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }
-      });
-    }
-
-    // Create test detail chart
-    function createTestDetailChart(correct, total) {
-      const incorrect = total - correct;
-      
-      // Clear existing chart
-      if (testDetailChart) {
-        testDetailChart.destroy();
-      }
-      
-      const pieCtx = testDetailElements.chart.getContext('2d');
-      testDetailChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-          labels: ['Correct', 'Incorrect'],
-          datasets: [{
-            data: [correct, incorrect],
-            backgroundColor: ['#10B981', '#EF4444'],
-            borderColor: ['#D1FAE5', '#FEE2E2'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }
-      });
-    }
-
-    // Filter and render completed tests
-    function renderCompletedTests() {
-      const container = summaryElements.completedTestsContainer;
-      const filterValue = summaryElements.filterTest.value;
-      const sortValue = summaryElements.sortBy.value;
-      
-      // Filter tests
-      let filteredTests = [...appState.completedTests];
-      if (filterValue !== 'all') {
-        filteredTests = filteredTests.filter(test => test.testKey === filterValue);
-      }
-      
-      // Sort tests
-      switch (sortValue) {
-        case 'date-desc':
-          filteredTests.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-          break;
-        case 'date-asc':
-          filteredTests.sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
-          break;
-        case 'score-desc':
-          filteredTests.sort((a, b) => b.percentage - a.percentage);
-          break;
-        case 'score-asc':
-          filteredTests.sort((a, b) => a.percentage - b.percentage);
-          break;
-      }
-      
-      // Render tests
-      container.innerHTML = '';
-      
-      if (filteredTests.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-clipboard-list"></i>
-            <p>No completed tests found</p>
-            <button class="btn btn-primary" onclick="showPage(pages.home)">
-              <i class="fas fa-play-circle"></i> Start a Test
-            </button>
-          </div>
-        `;
-        return;
-      }
-      
-      filteredTests.forEach(test => {
-        const completedDate = new Date(test.completedAt);
-        const formattedDate = completedDate.toLocaleDateString();
-        const formattedTime = completedDate.toLocaleTimeString();
-        
-        // Format time taken
-        const minutes = Math.floor(test.timeSpent / 60);
-        const seconds = test.timeSpent % 60;
-        const timeTaken = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        const card = document.createElement('div');
-        card.className = 'test-card';
-        card.innerHTML = `
-          <div class="test-card-header">
-            <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
-            <div class="test-card-date">${formattedDate} at ${formattedTime}</div>
-          </div>
-          <div class="test-card-info">
-            <div class="test-card-stat">
-              <i class="fas fa-clipboard-check"></i>
-              <span>Score: ${test.score}/${test.questionCount}</span>
-            </div>
-            <div class="test-card-stat">
-              <i class="fas fa-percentage"></i>
-              <span>${test.percentage}%</span>
-            </div>
-            <div class="test-card-stat">
-              <i class="fas fa-clock"></i>
-              <span>Time: ${timeTaken}</span>
-            </div>
-          </div>
-          <button class="btn btn-primary" style="margin-top:1rem;">
-            <i class="fas fa-search"></i> View Details
-          </button>
-        `;
-        
-        // Add event listener to view test details
-        const viewButton = card.querySelector('.btn');
-        viewButton.addEventListener('click', () => {
-          showTestDetail(test);
-        });
-        
-        container.appendChild(card);
-      });
-    }
-
-    // Show test detail page
-    async function showTestDetail(test) {
-      toggleLoading(true);
-      
-      try {
-        // Set the current test detail
-        appState.currentTestDetail = test;
-        
-        // Update test detail elements
-        testDetailElements.title.textContent = test.testKey.replace(/-/g, ' ').toUpperCase();
-        
-        const completedDate = new Date(test.completedAt);
-        testDetailElements.date.textContent = `Completed on ${completedDate.toLocaleDateString()} at ${completedDate.toLocaleTimeString()}`;
-        
-        testDetailElements.score.textContent = `${test.score}/${test.questionCount}`;
-        testDetailElements.percentage.textContent = `${test.percentage}%`;
-        
-        // Format time taken
-        const minutes = Math.floor(test.timeSpent / 60);
-        const seconds = test.timeSpent % 60;
-        testDetailElements.time.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        // Create pie chart
-        createTestDetailChart(test.score, test.questionCount);
-        
-        // Fetch questions for this test
-        const testKey = test.testKey;
-        
-        const qs = await Promise.all(test.questions.map(id =>
-          database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
-        ));
-        
-        const questions = qs.filter(q => q !== null).map((q, idx) => ({
-          id: test.questions[idx],
-          ...q
-        }));
-        
-        // Render review
-        testDetailElements.reviewContainer.innerHTML = '';
-        
-        questions.forEach((q, index) => {
-          const userAnswer = test.answers[index];
-          const isCorrect = userAnswer === q.correctAnswer;
-          
-          const questionDiv = document.createElement('div');
-          questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
-          
-          const header = document.createElement('h3');
-          const icon = document.createElement('span');
-          icon.className = `icon ${isCorrect ? 'correct' : 'incorrect'}`;
-          icon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
-          
-          header.appendChild(icon);
-          header.appendChild(document.createTextNode(` Question ${index + 1}`));
-          
-          const questionText = document.createElement('p');
-          questionText.textContent = q.question || "";
-          
-          questionDiv.appendChild(header);
-          questionDiv.appendChild(questionText);
-          
-          // Add options with indicators
-          const optionsList = document.createElement('div');
-          optionsList.className = 'options-list';
-          
-          q.options && q.options.forEach((option, optIndex) => {
-            const optionItem = document.createElement('div');
-            optionItem.className = 'review-option';
-            
-            if (optIndex === q.correctAnswer) {
-              optionItem.classList.add('correct-answer');
-            }
-            
-            if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
-              optionItem.classList.add('wrong-answer');
-            }
-            
-            // Create icon for correct/incorrect
-            const optIcon = document.createElement('span');
-            optIcon.className = 'icon';
-            
-            if (optIndex === q.correctAnswer) {
-              optIcon.innerHTML = '<i class="fas fa-check"></i>';
-            } else if (optIndex === userAnswer) {
-              optIcon.innerHTML = '<i class="fas fa-times"></i>';
-            }
-            
-            optionItem.appendChild(optIcon);
-            optionItem.appendChild(document.createTextNode(` ${option}`));
-            optionsList.appendChild(optionItem);
-          });
-          
-          questionDiv.appendChild(optionsList);
-          testDetailElements.reviewContainer.appendChild(questionDiv);
-        });
-        
-        // Show test detail page
-        showPage(pages.testDetail);
-      } catch (err) {
-        console.error('Error showing test detail:', err);
-        alert('Could not load test details. Please try again.');
-      } finally {
-        toggleLoading(false);
-      }
-    }
-
-    // Render in-progress tests
-    function renderInProgressTests() {
-      const container = resumeElements.inProgressTestsContainer;
-      container.innerHTML = '';
-      
-      const tests = appState.inProgressTests;
-      const testIds = Object.keys(tests);
-      
-      if (testIds.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-hourglass-half"></i>
-            <p>No in-progress tests found</p>
-            <button class="btn btn-primary" onclick="showPage(pages.home)">
-              <i class="fas fa-play-circle"></i> Start a Test
-            </button>
-          </div>
-        `;
-        return;
-      }
-      
-      testIds.forEach(testId => {
-        const test = tests[testId];
-        const startDate = new Date(test.startTime);
-        const formattedDate = startDate.toLocaleDateString();
-        const formattedTime = startDate.toLocaleTimeString();
-        
-        // Calculate progress
-        const answeredCount = test.answers ? test.answers.filter(a => a !== null).length : 0;
-        const progressPercent = Math.round((answeredCount / test.questionCount) * 100);
-        
-        const card = document.createElement('div');
-        card.className = 'test-card';
-        card.innerHTML = `
-          <div class="test-card-header">
-            <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
-            <div class="test-card-date">Started: ${formattedDate} at ${formattedTime}</div>
-          </div>
-          <div class="progress-container">
-            <div class="progress-bar" style="width:${progressPercent}%"></div>
-          </div>
-          <div class="test-card-info">
-            <div class="test-card-stat">
-              <i class="fas fa-tasks"></i>
-              <span>Progress: ${answeredCount}/${test.questionCount} questions</span>
-            </div>
-            <div class="test-card-stat">
-              <i class="fas fa-percentage"></i>
-              <span>${progressPercent}% Complete</span>
-            </div>
-          </div>
-          <button class="btn btn-primary" style="margin-top:1rem;">
-            <i class="fas fa-play-circle"></i> Resume Test
-          </button>
-        `;
-        
-        // Add event listener to resume this test
-        const resumeButton = card.querySelector('.btn');
-        resumeButton.addEventListener('click', () => {
-          resumeSpecificTest(testId);
-        });
-        
-        container.appendChild(card);
-      });
-    }
-
-    // Resume a specific test
-    async function resumeSpecificTest(testId) {
-      toggleLoading(true);
-      
-      try {
-        const test = appState.inProgressTests[testId];
-        if (!test) throw new Error('Test not found');
-        
-        // Get testKey from saved data
-        const testKey = test.testKey;
-        
-        const qs = await Promise.all(test.questions.map(id =>
-          database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
-        ));
-        
-        const valid = qs.filter(q => q !== null).map((q, idx) => ({
-          id: test.questions[idx],
-          ...q
-        }));
-        
-        appState.testQuestions = valid;
-        appState.userAnswers = test.answers || Array(valid.length).fill(null);
-        appState.currentQuestionIndex = test.lastQuestionIndex || 0;
-        appState.testData = test;
-        
-        // Set the current in-progress test ID
-        appState.currentInProgressTestId = testId;
-        
-        // timeRemaining
-        if (test.timeLimit > 0) {
-          const elapsed = Math.floor((new Date() - new Date(test.startTime)) / 1000);
-          appState.timeRemaining = Math.max(0, test.timeLimit * 60 - elapsed);
-        }
-        
-        showTestPage();
-      } catch (err) {
-        console.error('Error resuming test:', err);
-        alert('Could not resume test. Please try again or start a new test.');
-      } finally {
-        toggleLoading(false);
-      }
-    }
-
-    // Start New Test
-    homeElements.startTestButton.addEventListener('click', async () => {
-      const testKey = testSelect.value;
-      if (!testKey) {
-        alert('Please choose a test.');
-        return;
-      }
-      
-      toggleLoading(true);
-      homeElements.startTestButton.disabled = true;
-      
-      try {
-        // Load every question under that test
-        const snap = await database.ref(`questions/${testKey}`).once('value');
-        const data = snap.val();
-        if (!data) throw new Error(`No questions for "${testKey}".`);
-        
-        const questions = Object.entries(data).map(([id,q]) => ({ id, ...q }));
-        appState.testQuestions = questions;
-        appState.userAnswers = Array(questions.length).fill(null);
-        appState.currentQuestionIndex = 0;
-        
-        // Setup testData
-        const timeLimitMin = parseInt(homeElements.timeLimit.value);
-        appState.timeRemaining = timeLimitMin * 60;
-        
-        const testData = {
-          startTime: new Date().toString(),
-          answers: Array(questions.length).fill(null),
-          completed: false,
-          questions: questions.map(q=>q.id),
-          questionCount: questions.length,
-          timeLimit: timeLimitMin,
-          testKey: testKey // Store testKey here
-        };
-        
-        appState.testData = testData;
-        
-        // Generate a unique ID for this test
-        const newTestId = Date.now().toString();
-        appState.currentInProgressTestId = newTestId;
-        
-        // Save to in-progress tests
-        appState.inProgressTests[newTestId] = testData;
-        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${newTestId}`).set(testData);
-        
-        showTestPage();
-      } catch (err) {
-        console.error('Error loading test:', err);
-        alert('Error: ' + err.message);
-        homeElements.startTestButton.disabled = false;
-      } finally {
-        toggleLoading(false);
-      }
-    });
-
-    // Navigation to Resume Tests page
-    homeElements.resumeTestsButton.addEventListener('click', () => {
-      showPage(pages.resumeTests);
-      renderInProgressTests();
-    });
-
-    // Navigation to Summary page
-    homeElements.summaryButton.addEventListener('click', () => {
-      showPage(pages.summary);
-      renderCompletedTests();
-      createSummaryCharts();
-    });
-
-    // Navigation back to Home from Summary
-    summaryElements.backButton.addEventListener('click', () => {
-      showHomePage(appState.currentUser.name);
-    });
-
-    // Navigation back to Home from Resume
-    resumeElements.backButton.addEventListener('click', () => {
-      showHomePage(appState.currentUser.name);
-    });
-
-    // Navigation back to Summary from Test Detail
-    testDetailElements.backButton.addEventListener('click', () => {
-      showPage(pages.summary);
-    });
-
-    // Filter and sort change events
-    summaryElements.filterTest.addEventListener('change', renderCompletedTests);
-    summaryElements.sortBy.addEventListener('change', renderCompletedTests);
-
-    // Save test progress
-    async function saveTestProgress() {
-      if (!appState.currentUser || !appState.testData) return;
-      
-      try {
-        appState.testData.lastUpdated = new Date().toString();
-        appState.testData.answers = appState.userAnswers;
-        appState.testData.lastQuestionIndex = appState.currentQuestionIndex;
-        
-        const testId = appState.currentInProgressTestId || 'default';
-        
-        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${testId}`).set(appState.testData);
-      } catch (err) {
-        console.error('Error saving progress:', err);
-      }
-    }
-
-    // Display current question
-    function displayQuestion() {
-      const q = appState.testQuestions[appState.currentQuestionIndex];
-      if (!q) return;
-      
-      // Update question text
-      testElements.questionText.textContent = q.question || "";
-      
-      // Clear options container
-      testElements.optionsContainer.innerHTML = '';
-      
-      // Update question counter
-      testElements.questionCounter.textContent = `Question ${appState.currentQuestionIndex + 1} of ${appState.testQuestions.length}`;
-      
-      // Update progress bar
-      const progress = ((appState.currentQuestionIndex + 1) / appState.testQuestions.length) * 100;
-      testElements.questionProgress.style.width = `${progress}%`;
-      
-      // Create option elements
-      if (q.options) {
-        q.options.forEach((option, index) => {
-          const optionDiv = document.createElement('div');
-          optionDiv.className = 'option';
-          
-          const radioInput = document.createElement('input');
-          radioInput.type = 'radio';
-          radioInput.name = 'answer';
-          radioInput.id = `option-${index}`;
-          radioInput.value = index;
-          
-          // Check if user already answered this question
-          if (appState.userAnswers[appState.currentQuestionIndex] === index) {
-            radioInput.checked = true;
-          }
-          
-          const label = document.createElement('label');
-          label.htmlFor = `option-${index}`;
-          label.textContent = option;
-          
-          optionDiv.appendChild(radioInput);
-          optionDiv.appendChild(label);
-          testElements.optionsContainer.appendChild(optionDiv);
-          
-          // Add event listener to save answer when selected
-          radioInput.addEventListener('change', () => {
-            appState.userAnswers[appState.currentQuestionIndex] = index;
-            saveTestProgress();
-          });
-        });
-      }
-      
-      // Update navigation buttons
-      testElements.prevButton.disabled = appState.currentQuestionIndex === 0;
-      testElements.nextButton.style.display = 
-        appState.currentQuestionIndex < appState.testQuestions.length - 1 ? 'inline-block' : 'none';
-      testElements.submitTestButton.style.display = 
-        appState.currentQuestionIndex === appState.testQuestions.length - 1 ? 'inline-block' : 'none';
-    }
-
-    // Timer functions
-    function startTimer() {
-      if (appState.testData.timeLimit <= 0) {
-        testElements.timerDisplay.textContent = 'No Time Limit';
-        return;
-      }
-      
-      updateTimerDisplay();
-      appState.timerInterval = setInterval(() => {
-        appState.timeRemaining--;
-        updateTimerDisplay();
-        
-        // Auto-submit when time is up
-        if (appState.timeRemaining <= 0) {
-          clearInterval(appState.timerInterval);
-          alert('Time is up! Your test will be submitted.');
-          submitTest();
-        }
       }, 1000);
+    } else {
+      // Email not verified yet
+      showVerificationMessage('Email not verified yet. Please check your inbox and click the verification link.', 'error');
+      toggleLoading(false);
     }
+  } catch (error) {
+    console.error('Error checking email verification:', error);
+    showVerificationMessage('Failed to check verification status. Please try again.', 'error');
+    toggleLoading(false);
+  }
+}
 
-    function updateTimerDisplay() {
-      const minutes = Math.floor(appState.timeRemaining / 60);
-      const seconds = appState.timeRemaining % 60;
-      testElements.timerDisplay.textContent = 
-        `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    function stopTimer() {
-      clearInterval(appState.timerInterval);
-    }
-
-    // Navigation handlers
-    testElements.prevButton.addEventListener('click', () => {
-      if (appState.currentQuestionIndex > 0) {
-        appState.currentQuestionIndex--;
-        displayQuestion();
-      }
-    });
-
-    testElements.nextButton.addEventListener('click', () => {
-      if (appState.currentQuestionIndex < appState.testQuestions.length - 1) {
-        appState.currentQuestionIndex++;
-        displayQuestion();
-      }
-    });
-
-    testElements.saveAndExitButton.addEventListener('click', async () => {
-      stopTimer();
-      await saveTestProgress();
-      showHomePage(appState.currentUser.name);
-    });
-
-    testElements.submitTestButton.addEventListener('click', () => {
-      if (confirm('Are you sure you want to submit this test? You cannot change your answers after submission.')) {
-        submitTest();
-      }
-    });
-
-    // Submit test
-    async function submitTest() {
-      stopTimer();
+// Process email verification from URL
+async function processEmailVerification() {
+  // Extract verification parameters from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const mode = urlParams.get('mode');
+  const oobCode = urlParams.get('oobCode');
+  const uid = urlParams.get('uid');
+  
+  if (mode === 'verifyEmail' && oobCode && uid) {
+    try {
       toggleLoading(true);
       
-      try {
-        const score = calculateScore();
-        const percentage = Math.round((score / appState.testQuestions.length) * 100);
-        const timeSpent = appState.testData.timeLimit * 60 - appState.timeRemaining;
-        
-        // Create completed test data
-        const completedTest = {
-          ...appState.testData,
-          completed: true,
-          completedAt: new Date().toString(),
-          score: score,
-          percentage: percentage,
-          timeSpent: timeSpent
-        };
-        
-        // Save to user's completed tests
-        const testId = Date.now();
-        await database.ref(`users/${appState.currentUser.uid}/tests/completed/${testId}`).set(completedTest);
-        
-        // Remove from in-progress
-        const inProgressTestId = appState.currentInProgressTestId || 'default';
-        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${inProgressTestId}`).remove();
-        
-        // Update appState
-        delete appState.inProgressTests[inProgressTestId];
-        appState.completedTests.push({
-          id: testId,
-          ...completedTest
+      // Check if token matches
+      const verificationSnapshot = await database.ref(`userVerifications/${uid}`).once('value');
+      const verificationData = verificationSnapshot.val();
+      
+      if (verificationData && verificationData.token === oobCode) {
+        // Verify the email
+        await database.ref(`userVerifications/${uid}`).update({
+          verified: true,
+          verifiedAt: new Date().toString()
         });
         
-        // Create pie chart for results
-        createResultsPieChart(score, appState.testQuestions.length);
-        
-        // Show results
-        showResultsPage(score, percentage, timeSpent);
-      } catch (error) {
-        console.error('Error submitting test:', error);
-        alert('There was an error submitting your test. Please try again.');
-      } finally {
-        toggleLoading(false);
-      }
-    }
-
-    function calculateScore() {
-      let score = 0;
-      appState.testQuestions.forEach((q, index) => {
-        const userAnswer = appState.userAnswers[index];
-        if (userAnswer !== null && userAnswer === q.correctAnswer) {
-          score++;
-        }
-      });
-      return score;
-    }
-
-    // Results and review handling
-    resultsElements.reviewTestButton.addEventListener('click', () => {
-      showPage(pages.review);
-      renderReview();
-    });
-
-    resultsElements.returnHomeButton.addEventListener('click', () => {
-      showHomePage(appState.currentUser.name);
-    });
-
-    reviewElements.backButton.addEventListener('click', () => {
-      showPage(pages.results);
-    });
-
-    function renderReview() {
-      reviewElements.container.innerHTML = '';
-      
-      appState.testQuestions.forEach((q, index) => {
-        const userAnswer = appState.userAnswers[index];
-        const isCorrect = userAnswer === q.correctAnswer;
-        
-        const questionDiv = document.createElement('div');
-        questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
-        
-        const header = document.createElement('h3');
-        const icon = document.createElement('span');
-        icon.className = `icon ${isCorrect ? 'correct' : 'incorrect'}`;
-        icon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
-        
-        header.appendChild(icon);
-        header.appendChild(document.createTextNode(` Question ${index + 1}`));
-        
-        const questionText = document.createElement('p');
-        questionText.textContent = q.question || "";
-        
-        questionDiv.appendChild(header);
-        questionDiv.appendChild(questionText);
-        
-        // Add options with indicators
-        const optionsList = document.createElement('div');
-        optionsList.className = 'options-list';
-        
-        q.options && q.options.forEach((option, optIndex) => {
-          const optionItem = document.createElement('div');
-          optionItem.className = 'review-option';
-          
-          if (optIndex === q.correctAnswer) {
-            optionItem.classList.add('correct-answer');
-          }
-          
-          if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
-            optionItem.classList.add('wrong-answer');
-          }
-          
-          // Create icon for correct/incorrect
-          const optIcon = document.createElement('span');
-          optIcon.className = 'icon';
-          
-          if (optIndex === q.correctAnswer) {
-            optIcon.innerHTML = '<i class="fas fa-check"></i>';
-          } else if (optIndex === userAnswer) {
-            optIcon.innerHTML = '<i class="fas fa-times"></i>';
-          }
-          
-          optionItem.appendChild(optIcon);
-          optionItem.appendChild(document.createTextNode(` ${option}`));
-          optionsList.appendChild(optionItem);
+        // Update user status
+        await database.ref(`users/${uid}`).update({
+          emailVerified: true
         });
         
-        questionDiv.appendChild(optionsList);
-        reviewElements.container.appendChild(questionDiv);
-      });
-    }
-
-    // Page navigation functions
-    function showPage(p) {
-      Object.values(pages).forEach(pg => pg.style.display = 'none');
-      p.style.display = 'block';
-    }
-    
-    function showHomePage(name) {
-      showPage(pages.home);
-      homeElements.startTestButton.disabled = false;
-      formInputs.email.value = '';
-      formInputs.password.value = '';
-      formInputs.name.value = '';
-      homeElements.welcomeMessage.textContent = `Hello, ${name}!`;
-      
-      // Check if user is admin and add admin button if needed
-      if (appState.isAdmin) {
-        if (!document.getElementById('adminButton')) {
-          const adminBtn = homeElements.adminButton;
-          adminBtn.id = 'adminButton';
-          adminBtn.className = 'btn btn-primary';
-          adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Admin Dashboard';
-          adminBtn.style.marginTop = '1rem';
-          adminBtn.addEventListener('click', () => {
-            showAdminVerificationPage();
-          });
-          
-          // Add to DOM after logout button
-          homeElements.logoutButton.parentNode.insertBefore(adminBtn, homeElements.logoutButton);
-        }
+        // Show success message
+        alert('Email verified successfully! You can now sign in to your account.');
+      } else {
+        alert('Invalid or expired verification link. Please try again or request a new verification email.');
       }
-    }
-    
-    function showTestPage() {
-      showPage(pages.test);
-      displayQuestion();
-      startTimer();
-    }
-    
-    function showResultsPage(score, pct, timeTaken) {
-      showPage(pages.results);
-      resultsElements.scoreDisplay.textContent = `${score}/${appState.testQuestions.length}`;
-      resultsElements.percentageDisplay.textContent = `${pct}%`;
       
-      // Format time taken
-      const minutes = Math.floor(timeTaken / 60);
-      const seconds = timeTaken % 60;
-      resultsElements.timeTakenDisplay.textContent = 
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Redirect to login page
+      showAuthPage();
+      toggleLoading(false);
+    } catch (error) {
+      console.error('Error verifying email:', error);
+      alert('Error verifying email. Please try again.');
+      toggleLoading(false);
     }
-    
-    function showAuthPage() {
-      showPage(pages.auth);
-      appState.isLoginMode = true;
-      authElements.title.textContent = 'Sign In';
-      authElements.button.textContent = 'Sign In';
-      authElements.toggleText.textContent = "Don't have an account?";
-      authElements.toggleLink.textContent = 'Sign Up';
-      authElements.nameGroup.style.display = 'none';
-    }
+  }
+}
 
-    function showVerificationMessage(msg, type) {
-      verificationElements.messageContainer.innerHTML =
-        `<div class="message ${type}">${msg}</div>`;
-    }
+// Show email verification page
+function showEmailVerificationPage(user, email, name) {
+  // Set pending verification state
+  appState.pendingVerification = { user, email, name };
+  
+  // Update email display
+  document.getElementById('userEmailDisplay').textContent = email;
+  
+  // Show verification page
+  showPage(pages.emailVerification);
+}
+
+// Modified Sign Up function
+async function handleSignUp() {
+  const email = formInputs.email.value.trim();
+  const password = formInputs.password.value.trim();
+  const name = formInputs.name.value.trim();
+  
+  if (!email || !password || !name) {
+    showMessage('Please fill in all fields.', 'error');
+    return;
+  }
+  
+  toggleLoading(true);
+  
+  try {
+    // Create user account
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
     
-    function clearVerificationMessage() {
-      verificationElements.messageContainer.innerHTML = '';
-    }
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
     
-    // Generate verification code
-    function generateVerificationCode() {
-      return Math.floor(100000 + Math.random() * 900000).toString();
-    }
+    // Create initial user data
+    await database.ref('users/' + user.uid).set({
+      email, 
+      name, 
+      lastLogin: new Date().toString(),
+      emailVerified: false, // Add this field
+      tests: {}
+    });
     
-    // Send verification code (simulated)
-    function sendVerificationCode() {
-      // Generate a new 6-digit code
-      appState.adminVerificationCode = generateVerificationCode();
-      
-      // In a real app, this would send an email with the code
-      // For now, we'll just show it in a message for demo purposes
-      showVerificationMessage(`Verification code sent! (For demo purposes, your code is: ${appState.adminVerificationCode})`, 'success');
-      
-      console.log('Verification code:', appState.adminVerificationCode);
-    }
+    // Send verification email
+    const emailSent = await sendVerificationEmail(user, email, verificationToken);
     
-    // Show admin verification page
-    function showAdminVerificationPage() {
-      // Reset state
-      appState.adminVerified = false;
-      verificationElements.codeInput.value = '';
-      clearVerificationMessage();
-      
-      // Send initial verification code
-      sendVerificationCode();
+    if (emailSent) {
+      showMessage('Account created! Please verify your email to continue.', 'success');
       
       // Show verification page
-      showPage(pages.adminVerification);
-    }
-    
-    // Verify admin code
-    function verifyAdminCode() {
-      const enteredCode = verificationElements.codeInput.value.trim();
-      
-      if (!enteredCode) {
-        showVerificationMessage('Please enter the verification code.', 'error');
-        return;
-      }
-      
-      if (enteredCode !== appState.adminVerificationCode) {
-        showVerificationMessage('Invalid verification code. Please try again.', 'error');
-        return;
-      }
-      
-      // Code is valid, mark as verified and proceed to admin dashboard
-      appState.adminVerified = true;
-      showAdminPage();
-    }
-    
-    // Admin page functions
-    async function showAdminPage() {
-      // Check if admin is verified
-      if (!appState.isAdmin) {
-        alert('You do not have permission to access the admin dashboard.');
-        showHomePage(appState.currentUser.name);
-        return;
-      }
-      
-      if (!appState.adminVerified) {
-        showAdminVerificationPage();
-        return;
-      }
-      
-      toggleLoading(true);
-      
-      try {
-        // Load all users
-        await loadAllUsers();
-        
-        // Create admin charts
-        createAdminCharts();
-        
-        // Render users list
-        renderUsersList();
-        
-        // Set welcome message
-        adminElements.welcomeMessage.textContent = `Hello, ${appState.currentUser.name}!`;
-        
-        // Show admin page
-        showPage(pages.admin);
-      } catch (err) {
-        console.error('Error loading admin page:', err);
-        alert('Error loading admin dashboard. Please try again.');
-      } finally {
+      setTimeout(() => {
+        showEmailVerificationPage(user, email, name);
         toggleLoading(false);
-      }
+      }, 1000);
+    } else {
+      showMessage('Account created, but failed to send verification email. Please try again.', 'error');
+      toggleLoading(false);
+    }
+  } catch (err) {
+    showMessage(err.message, 'error');
+    toggleLoading(false);
+  }
+}
+
+// Modified Sign In function
+async function handleSignIn() {
+  const email = formInputs.email.value.trim();
+  const password = formInputs.password.value.trim();
+  
+  if (!email || !password) {
+    showMessage('Please enter both email and password.', 'error');
+    return;
+  }
+  
+  toggleLoading(true);
+  
+  try {
+    // Sign in
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    
+    // Get user data
+    const userSnapshot = await database.ref('users/' + user.uid).once('value');
+    const userData = userSnapshot.val();
+    
+    // Check if email is verified
+    const verificationSnapshot = await database.ref(`userVerifications/${user.uid}`).once('value');
+    const verificationData = verificationSnapshot.val();
+    
+    if (userData.emailVerified !== true && (!verificationData || verificationData.verified !== true)) {
+      // Email not verified
+      showMessage('Please verify your email before signing in.', 'error');
+      
+      // Set pending verification
+      appState.pendingVerification = { user, email, name: userData.name };
+      
+      // Show verification page
+      setTimeout(() => {
+        showEmailVerificationPage(user, email, userData.name);
+        toggleLoading(false);
+      }, 1000);
+      return;
     }
     
-    async function loadAllUsers() {
-      appState.allUsers = [];
+    // Email is verified, proceed with login
+    await database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
+    showMessage('Login successful!', 'success');
+    
+    appState.currentUser = { uid: user.uid, name: userData.name, email: userData.email };
+    appState.isAdmin = (userData.email === appState.adminEmail);
+    
+    setTimeout(() => {
+      showHomePage(userData.name);
+      toggleLoading(false);
+    }, 1000);
+  } catch (err) {
+    showMessage(err.message, 'error');
+    toggleLoading(false);
+  }
+}
+
+// Initialize email verification system
+function initEmailVerification() {
+  // Set up verification page
+  appState.emailVerificationElements = setupEmailVerification();
+  
+  // Check for verification links in URL
+  processEmailVerification();
+}
+
+function toggleLoading(show) {
+  loadingOverlay.style.display = show ? 'flex' : 'none';
+}
+
+function showMessage(msg, type) {
+  authElements.messageContainer.innerHTML =
+    `<div class="message ${type}">${msg}</div>`;
+}
+
+function clearMessage() {
+  authElements.messageContainer.innerHTML = '';
+}
+
+// Toggle auth form
+authElements.toggleLink.addEventListener('click', () => {
+  appState.isLoginMode = !appState.isLoginMode;
+  if (appState.isLoginMode) {
+    authElements.title.textContent = 'Sign In';
+    authElements.button.textContent = 'Sign In';
+    authElements.toggleText.textContent = "Don't have an account?";
+    authElements.toggleLink.textContent = 'Sign Up';
+    authElements.nameGroup.style.display = 'none';
+  } else {
+    authElements.title.textContent = 'Sign Up';
+    authElements.button.textContent = 'Sign Up';
+    authElements.toggleText.textContent = 'Already have an account?';
+    authElements.toggleLink.textContent = 'Sign In';
+    authElements.nameGroup.style.display = 'block';
+  }
+  clearMessage();
+});
+
+// Sign In / Sign Up - Replace the original event listener
+authElements.button.addEventListener('click', () => {
+  if (appState.isLoginMode) {
+    handleSignIn();
+  } else {
+    handleSignUp();
+  }
+});
+
+// Load tests and check auth on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize email verification system
+  initEmailVerification();
+  
+  try {
+    const snap = await database.ref('questions').once('value');
+    const tests = snap.exists() ? Object.keys(snap.val()) : [];
+    appState.testTypes = tests;
+    
+    // Populate testSelect
+    testSelect.innerHTML = '';
+    tests.forEach(key => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = key.replace(/-/g,' ').toUpperCase();
+      testSelect.appendChild(opt);
+    });
+    
+    // Populate filterTest
+    summaryElements.filterTest.innerHTML = '<option value="all">All Tests</option>';
+    tests.forEach(key => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = key.replace(/-/g,' ').toUpperCase();
+      summaryElements.filterTest.appendChild(opt);
+    });
+    
+    // Populate admin filterTest
+    adminElements.filterTest.innerHTML = '<option value="all">All Tests</option>';
+    tests.forEach(key => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = key.replace(/-/g,' ').toUpperCase();
+      adminElements.filterTest.appendChild(opt);
+    });
+  } catch (err) {
+    console.error('Error loading tests:', err);
+    testSelect.innerHTML = '<option disabled>Error loading tests</option>';
+  }
+  
+  // Check user auth state immediately
+  auth.onAuthStateChanged(async (usr) => {
+    if (usr) {
+      toggleLoading(true);
+      const snap = await database.ref('users/' + usr.uid).once('value');
+      const data = snap.val();
       
-      const snap = await database.ref('users').once('value');
+      // Check if email is verified
+      if (data.emailVerified !== true) {
+        // Get verification status
+        const verificationSnapshot = await database.ref(`userVerifications/${usr.uid}`).once('value');
+        const verificationData = verificationSnapshot.val();
+        
+        if (!verificationData || verificationData.verified !== true) {
+          // Show verification page
+          appState.pendingVerification = { user: usr, email: data.email, name: data.name };
+          showEmailVerificationPage(usr, data.email, data.name);
+          toggleLoading(false);
+          return;
+        }
+        
+        // Update user verified status if needed
+        await database.ref('users/' + usr.uid).update({ emailVerified: true });
+      }
       
-      if (snap.exists()) {
+      appState.currentUser = { uid: usr.uid, name: data.name, email: data.email };
+      
+      // Check if this user is the admin
+      appState.isAdmin = (data.email === appState.adminEmail);
+      appState.adminVerified = false; // Reset verification state
+      
+      // Load user's completed tests
+      await loadCompletedTests();
+      
+      // Load user's in-progress tests
+      await loadInProgressTests();
+      
+      showHomePage(data.name);
+      toggleLoading(false);
+    } else {
+      showAuthPage();
+    }
+  });
+});
+
+// Load completed tests
+async function loadCompletedTests() {
+  try {
+    const snap = await database.ref(`users/${appState.currentUser.uid}/tests/completed`).once('value');
+    const data = snap.val() || {};
+    
+    // Convert to array
+    appState.completedTests = Object.entries(data).map(([id, test]) => ({
+      id,
+      ...test
+    }));
+    
+    // Update summary stats
+    updateSummaryStats();
+    
+    // Create summary charts
+    createSummaryCharts();
+  } catch (err) {
+    console.error('Error loading completed tests:', err);
+  }
+}
+
+// Load in-progress tests
+async function loadInProgressTests() {
+  try {
+    const snap = await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).once('value');
+    if (snap.exists()) {
+      // Convert to object with keys
+      const tests = {};
+      
+      // Check if it's an object with keys or a single in-progress test
+      if (snap.hasChildren()) {
         snap.forEach(childSnap => {
-          const uid = childSnap.key;
-          const userData = childSnap.val();
-          
-          // Skip the current user (admin)
-          if (uid !== appState.currentUser.uid) {
-            appState.allUsers.push({
-              uid,
-              name: userData.name,
-              email: userData.email,
-              lastLogin: userData.lastLogin,
-              tests: userData.tests || {}
-            });
+          const key = childSnap.key;
+          const val = childSnap.val();
+          tests[key] = val;
+        });
+      } else {
+        // For backward compatibility - old structure had a single in-progress test
+        const val = snap.val();
+        if (val) {
+          tests['default'] = val;
+        }
+      }
+      
+      appState.inProgressTests = tests;
+    } else {
+      appState.inProgressTests = {};
+    }
+  } catch (err) {
+    console.error('Error loading in-progress tests:', err);
+  }
+}
+
+// Update summary stats
+function updateSummaryStats() {
+  const tests = appState.completedTests;
+  
+  // Total tests
+  summaryElements.totalTestsValue.textContent = tests.length;
+  
+  // Average score
+  if (tests.length > 0) {
+    const avgScore = tests.reduce((acc, test) => acc + test.percentage, 0) / tests.length;
+    summaryElements.avgScoreValue.textContent = `${Math.round(avgScore)}%`;
+    
+    // Best score
+    const bestScore = Math.max(...tests.map(test => test.percentage));
+    summaryElements.bestScoreValue.textContent = `${bestScore}%`;
+  } else {
+    summaryElements.avgScoreValue.textContent = '0%';
+    summaryElements.bestScoreValue.textContent = '0%';
+  }
+}
+
+// Create summary charts
+function createSummaryCharts() {
+  const tests = appState.completedTests;
+  
+  // Clear existing charts
+  if (overallPieChart) {
+    overallPieChart.destroy();
+  }
+  
+  if (progressionChart) {
+    progressionChart.destroy();
+  }
+  
+  if (tests.length === 0) {
+    return;
+  }
+  
+  // Calculate total correct and incorrect answers
+  let totalCorrect = 0;
+  let totalIncorrect = 0;
+  
+  tests.forEach(test => {
+    totalCorrect += test.score;
+    totalIncorrect += test.questionCount - test.score;
+  });
+  
+  // Create overall pie chart
+  const pieCtx = summaryElements.overallPieChart.getContext('2d');
+  overallPieChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+      labels: ['Correct', 'Incorrect'],
+      datasets: [{
+        data: [totalCorrect, totalIncorrect],
+        backgroundColor: ['#10B981', '#EF4444'],
+        borderColor: ['#D1FAE5', '#FEE2E2'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+  
+  // Create progression chart
+  // Sort tests by date and get the last 10
+  const sortedTests = [...tests].sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
+  const recentTests = sortedTests.slice(-10);
+  
+  const progressionCtx = summaryElements.progressionChart.getContext('2d');
+  progressionChart = new Chart(progressionCtx, {
+    type: 'line',
+    data: {
+      labels: recentTests.map((test, index) => `Test ${index + 1}`),
+      datasets: [{
+        label: 'Score %',
+        data: recentTests.map(test => test.percentage),
+        borderColor: '#0056A4',
+        backgroundColor: 'rgba(0, 86, 164, 0.1)',
+        fill: true,
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          title: {
+            display: true,
+            text: 'Score (%)'
           }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+  });
+}
+
+// Create results pie chart
+function createResultsPieChart(correct, total) {
+  const incorrect = total - correct;
+  
+  // Clear existing chart
+  if (resultsPieChart) {
+    resultsPieChart.destroy();
+  }
+  
+  const pieCtx = resultsElements.pieChart.getContext('2d');
+  resultsPieChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+      labels: ['Correct', 'Incorrect'],
+      datasets: [{
+        data: [correct, incorrect],
+        backgroundColor: ['#10B981', '#EF4444'],
+        borderColor: ['#D1FAE5', '#FEE2E2'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+}
+
+// Create test detail chart
+function createTestDetailChart(correct, total) {
+  const incorrect = total - correct;
+  
+  // Clear existing chart
+  if (testDetailChart) {
+    testDetailChart.destroy();
+  }
+  
+  const pieCtx = testDetailElements.chart.getContext('2d');
+  testDetailChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+      labels: ['Correct', 'Incorrect'],
+      datasets: [{
+        data: [correct, incorrect],
+        backgroundColor: ['#10B981', '#EF4444'],
+        borderColor: ['#D1FAE5', '#FEE2E2'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+}
+
+// Filter and render completed tests
+function renderCompletedTests() {
+  const container = summaryElements.completedTestsContainer;
+  const filterValue = summaryElements.filterTest.value;
+  const sortValue = summaryElements.sortBy.value;
+  
+  // Filter tests
+  let filteredTests = [...appState.completedTests];
+  if (filterValue !== 'all') {
+    filteredTests = filteredTests.filter(test => test.testKey === filterValue);
+  }
+  
+  // Sort tests
+  switch (sortValue) {
+    case 'date-desc':
+      filteredTests.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+      break;
+    case 'date-asc':
+      filteredTests.sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
+      break;
+    case 'score-desc':
+      filteredTests.sort((a, b) => b.percentage - a.percentage);
+      break;
+    case 'score-asc':
+      filteredTests.sort((a, b) => a.percentage - b.percentage);
+      break;
+  }
+  
+  // Render tests
+  container.innerHTML = '';
+  
+  if (filteredTests.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-clipboard-list"></i>
+        <p>No completed tests found</p>
+        <button class="btn btn-primary" onclick="showPage(pages.home)">
+          <i class="fas fa-play-circle"></i> Start a Test
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
+  filteredTests.forEach(test => {
+    const completedDate = new Date(test.completedAt);
+    const formattedDate = completedDate.toLocaleDateString();
+    const formattedTime = completedDate.toLocaleTimeString();
+    
+    // Format time taken
+    const minutes = Math.floor(test.timeSpent / 60);
+    const seconds = test.timeSpent % 60;
+    const timeTaken = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    const card = document.createElement('div');
+    card.className = 'test-card';
+    card.innerHTML = `
+      <div class="test-card-header">
+        <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
+        <div class="test-card-date">${formattedDate} at ${formattedTime}</div>
+      </div>
+      <div class="test-card-info">
+        <div class="test-card-stat">
+          <i class="fas fa-clipboard-check"></i>
+          <span>Score: ${test.score}/${test.questionCount}</span>
+        </div>
+        <div class="test-card-stat">
+          <i class="fas fa-percentage"></i>
+          <span>${test.percentage}%</span>
+        </div>
+        <div class="test-card-stat">
+          <i class="fas fa-clock"></i>
+          <span>Time: ${timeTaken}</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1rem;">
+        <i class="fas fa-search"></i> View Details
+      </button>
+    `;
+    
+    // Add event listener to view test details
+    const viewButton = card.querySelector('.btn');
+    viewButton.addEventListener('click', () => {
+      showTestDetail(test);
+    });
+    
+    container.appendChild(card);
+  });
+}
+
+// Show test detail page
+async function showTestDetail(test) {
+  toggleLoading(true);
+  
+  try {
+    // Set the current test detail
+    appState.currentTestDetail = test;
+    
+    // Update test detail elements
+    testDetailElements.title.textContent = test.testKey.replace(/-/g, ' ').toUpperCase();
+    
+    const completedDate = new Date(test.completedAt);
+    testDetailElements.date.textContent = `Completed on ${completedDate.toLocaleDateString()} at ${completedDate.toLocaleTimeString()}`;
+    
+    testDetailElements.score.textContent = `${test.score}/${test.questionCount}`;
+    testDetailElements.percentage.textContent = `${test.percentage}%`;
+    
+    // Format time taken
+    const minutes = Math.floor(test.timeSpent / 60);
+    const seconds = test.timeSpent % 60;
+    testDetailElements.time.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Create pie chart
+    createTestDetailChart(test.score, test.questionCount);
+    
+    // Fetch questions for this test
+    const testKey = test.testKey;
+    
+    const qs = await Promise.all(test.questions.map(id =>
+      database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
+    ));
+    
+    const questions = qs.filter(q => q !== null).map((q, idx) => ({
+      id: test.questions[idx],
+      ...q
+    }));
+    
+    // Render review
+    testDetailElements.reviewContainer.innerHTML = '';
+    
+    questions.forEach((q, index) => {
+      const userAnswer = test.answers[index];
+      const isCorrect = userAnswer === q.correctAnswer;
+      
+      const questionDiv = document.createElement('div');
+      questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+      
+      const header = document.createElement('h3');
+      const icon = document.createElement('span');
+      icon.className = `icon ${isCorrect ? 'correct' : 'incorrect'}`;
+      icon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+      
+      header.appendChild(icon);
+      header.appendChild(document.createTextNode(` Question ${index + 1}`));
+      
+      const questionText = document.createElement('p');
+      questionText.textContent = q.question || "";
+      
+      questionDiv.appendChild(header);
+      questionDiv.appendChild(questionText);
+      
+      // Add options with indicators
+      const optionsList = document.createElement('div');
+      optionsList.className = 'options-list';
+      
+      q.options && q.options.forEach((option, optIndex) => {
+        const optionItem = document.createElement('div');
+        optionItem.className = 'review-option';
+        
+        if (optIndex === q.correctAnswer) {
+          optionItem.classList.add('correct-answer');
+        }
+        
+        if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
+          optionItem.classList.add('wrong-answer');
+        }
+        
+        // Create icon for correct/incorrect
+        const optIcon = document.createElement('span');
+        optIcon.className = 'icon';
+        
+        if (optIndex === q.correctAnswer) {
+          optIcon.innerHTML = '<i class="fas fa-check"></i>';
+        } else if (optIndex === userAnswer) {
+          optIcon.innerHTML = '<i class="fas fa-times"></i>';
+        }
+        
+        optionItem.appendChild(optIcon);
+        optionItem.appendChild(document.createTextNode(` ${option}`));
+        optionsList.appendChild(optionItem);
+      });
+      
+      questionDiv.appendChild(optionsList);
+      testDetailElements.reviewContainer.appendChild(questionDiv);
+    });
+    
+    // Show test detail page
+    showPage(pages.testDetail);
+  } catch (err) {
+    console.error('Error showing test detail:', err);
+    alert('Could not load test details. Please try again.');
+  } finally {
+    toggleLoading(false);
+  }
+}
+
+// Render in-progress tests
+function renderInProgressTests() {
+  const container = resumeElements.inProgressTestsContainer;
+  container.innerHTML = '';
+  
+  const tests = appState.inProgressTests;
+  const testIds = Object.keys(tests);
+  
+  if (testIds.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-hourglass-half"></i>
+        <p>No in-progress tests found</p>
+        <button class="btn btn-primary" onclick="showPage(pages.home)">
+          <i class="fas fa-play-circle"></i> Start a Test
+        </button>
+      </div>
+    `;
+    return;
+  }
+  
+  testIds.forEach(testId => {
+    const test = tests[testId];
+    const startDate = new Date(test.startTime);
+    const formattedDate = startDate.toLocaleDateString();
+    const formattedTime = startDate.toLocaleTimeString();
+    
+    // Calculate progress
+    const answeredCount = test.answers ? test.answers.filter(a => a !== null).length : 0;
+    const progressPercent = Math.round((answeredCount / test.questionCount) * 100);
+    
+    const card = document.createElement('div');
+    card.className = 'test-card';
+    card.innerHTML = `
+      <div class="test-card-header">
+        <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
+        <div class="test-card-date">Started: ${formattedDate} at ${formattedTime}</div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" style="width:${progressPercent}%"></div>
+      </div>
+      <div class="test-card-info">
+        <div class="test-card-stat">
+          <i class="fas fa-tasks"></i>
+          <span>Progress: ${answeredCount}/${test.questionCount} questions</span>
+        </div>
+        <div class="test-card-stat">
+          <i class="fas fa-percentage"></i>
+          <span>${progressPercent}% Complete</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1rem;">
+        <i class="fas fa-play-circle"></i> Resume Test
+      </button>
+    `;
+    
+    // Add event listener to resume this test
+    const resumeButton = card.querySelector('.btn');
+    resumeButton.addEventListener('click', () => {
+      resumeSpecificTest(testId);
+    });
+    
+    container.appendChild(card);
+  });
+}
+
+// Resume a specific test
+async function resumeSpecificTest(testId) {
+  toggleLoading(true);
+  
+  try {
+    const test = appState.inProgressTests[testId];
+    if (!test) throw new Error('Test not found');
+    
+    // Get testKey from saved data
+    const testKey = test.testKey;
+    
+    const qs = await Promise.all(test.questions.map(id =>
+      database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
+    ));
+    
+    const valid = qs.filter(q => q !== null).map((q, idx) => ({
+      id: test.questions[idx],
+      ...q
+    }));
+    
+    appState.testQuestions = valid;
+    appState.userAnswers = test.answers || Array(valid.length).fill(null);
+    appState.currentQuestionIndex = test.lastQuestionIndex || 0;
+    appState.testData = test;
+    
+    // Set the current in-progress test ID
+    appState.currentInProgressTestId = testId;
+    
+    // timeRemaining
+    if (test.timeLimit > 0) {
+      const elapsed = Math.floor((new Date() - new Date(test.startTime)) / 1000);
+      appState.timeRemaining = Math.max(0, test.timeLimit * 60 - elapsed);
+    }
+    
+    showTestPage();
+  } catch (err) {
+    console.error('Error resuming test:', err);
+    alert('Could not resume test. Please try again or start a new test.');
+  } finally {
+    toggleLoading(false);
+  }
+}
+
+// Start New Test
+homeElements.startTestButton.addEventListener('click', async () => {
+  const testKey = testSelect.value;
+  if (!testKey) {
+    alert('Please choose a test.');
+    return;
+  }
+  
+  toggleLoading(true);
+  homeElements.startTestButton.disabled = true;
+  
+  try {
+    // Load every question under that test
+    const snap = await database.ref(`questions/${testKey}`).once('value');
+    const data = snap.val();
+    if (!data) throw new Error(`No questions for "${testKey}".`);
+    
+    const questions = Object.entries(data).map(([id,q]) => ({ id, ...q }));
+    appState.testQuestions = questions;
+    appState.userAnswers = Array(questions.length).fill(null);
+    appState.currentQuestionIndex = 0;
+    
+    // Setup testData
+    const timeLimitMin = parseInt(homeElements.timeLimit.value);
+    appState.timeRemaining = timeLimitMin * 60;
+    
+    const testData = {
+      startTime: new Date().toString(),
+      answers: Array(questions.length).fill(null),
+      completed: false,
+      questions: questions.map(q=>q.id),
+      questionCount: questions.length,
+      timeLimit: timeLimitMin,
+      testKey: testKey // Store testKey here
+    };
+    
+    appState.testData = testData;
+    
+    // Generate a unique ID for this test
+    const newTestId = Date.now().toString();
+    appState.currentInProgressTestId = newTestId;
+    
+    // Save to in-progress tests
+    appState.inProgressTests[newTestId] = testData;
+    await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${newTestId}`).set(testData);
+    
+    showTestPage();
+  } catch (err) {
+    console.error('Error loading test:', err);
+    alert('Error: ' + err.message);
+    homeElements.startTestButton.disabled = false;
+  } finally {
+    toggleLoading(false);
+  }
+});
+
+// Navigation to Resume Tests page
+homeElements.resumeTestsButton.addEventListener('click', () => {
+  showPage(pages.resumeTests);
+  renderInProgressTests();
+});
+
+// Navigation to Summary page
+homeElements.summaryButton.addEventListener('click', () => {
+  showPage(pages.summary);
+  renderCompletedTests();
+  createSummaryCharts();
+});
+
+// Navigation back to Home from Summary
+summaryElements.backButton.addEventListener('click', () => {
+  showHomePage(appState.currentUser.name);
+});
+
+// Navigation back to Home from Resume
+resumeElements.backButton.addEventListener('click', () => {
+  showHomePage(appState.currentUser.name);
+});
+
+// Navigation back to Summary from Test Detail
+testDetailElements.backButton.addEventListener('click', () => {
+  showPage(pages.summary);
+});
+
+// Filter and sort change events
+summaryElements.filterTest.addEventListener('change', renderCompletedTests);
+summaryElements.sortBy.addEventListener('change', renderCompletedTests);
+
+// Save test progress
+async function saveTestProgress() {
+  if (!appState.currentUser || !appState.testData) return;
+  
+  try {
+    appState.testData.lastUpdated = new Date().toString();
+    appState.testData.answers = appState.userAnswers;
+    appState.testData.lastQuestionIndex = appState.currentQuestionIndex;
+    
+    const testId = appState.currentInProgressTestId || 'default';
+    
+    await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${testId}`).set(appState.testData);
+  } catch (err) {
+    console.error('Error saving progress:', err);
+  }
+}
+
+// Display current question
+function displayQuestion() {
+  const q = appState.testQuestions[appState.currentQuestionIndex];
+  if (!q) return;
+  
+  // Update question text
+  testElements.questionText.textContent = q.question || "";
+  
+  // Clear options container
+  testElements.optionsContainer.innerHTML = '';
+  
+  // Update question counter
+  testElements.questionCounter.textContent = `Question ${appState.currentQuestionIndex + 1} of ${appState.testQuestions.length}`;
+  
+  // Update progress bar
+  const progress = ((appState.currentQuestionIndex + 1) / appState.testQuestions.length) * 100;
+  testElements.questionProgress.style.width = `${progress}%`;
+  
+  // Create option elements
+  if (q.options) {
+    q.options.forEach((option, index) => {
+      const optionDiv = document.createElement('div');
+      optionDiv.className = 'option';
+      
+      const radioInput = document.createElement('input');
+      radioInput.type = 'radio';
+      radioInput.name = 'answer';
+      radioInput.id = `option-${index}`;
+      radioInput.value = index;
+      
+      // Check if user already answered this question
+      if (appState.userAnswers[appState.currentQuestionIndex] === index) {
+        radioInput.checked = true;
+      }
+      
+      const label = document.createElement('label');
+      label.htmlFor = `option-${index}`;
+      label.textContent = option;
+      
+      optionDiv.appendChild(radioInput);
+      optionDiv.appendChild(label);
+      testElements.optionsContainer.appendChild(optionDiv);
+      
+      // Add event listener to save answer when selected
+      radioInput.addEventListener('change', () => {
+        appState.userAnswers[appState.currentQuestionIndex] = index;
+        saveTestProgress();
+      });
+    });
+  }
+  
+  // Update navigation buttons
+  testElements.prevButton.disabled = appState.currentQuestionIndex === 0;
+  testElements.nextButton.style.display = 
+    appState.currentQuestionIndex < appState.testQuestions.length - 1 ? 'inline-block' : 'none';
+  testElements.submitTestButton.style.display = 
+    appState.currentQuestionIndex === appState.testQuestions.length - 1 ? 'inline-block' : 'none';
+}
+
+// Timer functions
+function startTimer() {
+  if (appState.testData.timeLimit <= 0) {
+    testElements.timerDisplay.textContent = 'No Time Limit';
+    return;
+  }
+  
+  updateTimerDisplay();
+  appState.timerInterval = setInterval(() => {
+    appState.timeRemaining--;
+    updateTimerDisplay();
+    
+    // Auto-submit when time is up
+    if (appState.timeRemaining <= 0) {
+      clearInterval(appState.timerInterval);
+      alert('Time is up! Your test will be submitted.');
+      submitTest();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const minutes = Math.floor(appState.timeRemaining / 60);
+  const seconds = appState.timeRemaining % 60;
+  testElements.timerDisplay.textContent = 
+    `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function stopTimer() {
+  clearInterval(appState.timerInterval);
+}
+
+// Navigation handlers
+testElements.prevButton.addEventListener('click', () => {
+  if (appState.currentQuestionIndex > 0) {
+    appState.currentQuestionIndex--;
+    displayQuestion();
+  }
+});
+
+testElements.nextButton.addEventListener('click', () => {
+  if (appState.currentQuestionIndex < appState.testQuestions.length - 1) {
+    appState.currentQuestionIndex++;
+    displayQuestion();
+  }
+});
+
+testElements.saveAndExitButton.addEventListener('click', async () => {
+  stopTimer();
+  await saveTestProgress();
+  showHomePage(appState.currentUser.name);
+});
+
+testElements.submitTestButton.addEventListener('click', () => {
+  if (confirm('Are you sure you want to submit this test? You cannot change your answers after submission.')) {
+    submitTest();
+  }
+});
+
+// Submit test
+async function submitTest() {
+  stopTimer();
+  toggleLoading(true);
+  
+  try {
+    const score = calculateScore();
+    const percentage = Math.round((score / appState.testQuestions.length) * 100);
+    const timeSpent = appState.testData.timeLimit * 60 - appState.timeRemaining;
+    
+    // Create completed test data
+    const completedTest = {
+      ...appState.testData,
+      completed: true,
+      completedAt: new Date().toString(),
+      score: score,
+      percentage: percentage,
+      timeSpent: timeSpent
+    };
+    
+    // Save to user's completed tests
+    const testId = Date.now();
+    await database.ref(`users/${appState.currentUser.uid}/tests/completed/${testId}`).set(completedTest);
+    
+    // Remove from in-progress
+    const inProgressTestId = appState.currentInProgressTestId || 'default';
+    await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${inProgressTestId}`).remove();
+    
+    // Update appState
+    delete appState.inProgressTests[inProgressTestId];
+    appState.completedTests.push({
+      id: testId,
+      ...completedTest
+    });
+    
+    // Create pie chart for results
+    createResultsPieChart(score, appState.testQuestions.length);
+    
+    // Show results
+    showResultsPage(score, percentage, timeSpent);
+  } catch (error) {
+    console.error('Error submitting test:', error);
+    alert('There was an error submitting your test. Please try again.');
+  } finally {
+    toggleLoading(false);
+  }
+}
+
+function calculateScore() {
+  let score = 0;
+  appState.testQuestions.forEach((q, index) => {
+    const userAnswer = appState.userAnswers[index];
+    if (userAnswer !== null && userAnswer === q.correctAnswer) {
+      score++;
+    }
+  });
+  return score;
+}
+
+// Results and review handling
+resultsElements.reviewTestButton.addEventListener('click', () => {
+  showPage(pages.review);
+  renderReview();
+});
+
+resultsElements.returnHomeButton.addEventListener('click', () => {
+  showHomePage(appState.currentUser.name);
+});
+
+reviewElements.backButton.addEventListener('click', () => {
+  showPage(pages.results);
+});
+
+function renderReview() {
+  reviewElements.container.innerHTML = '';
+  
+  appState.testQuestions.forEach((q, index) => {
+    const userAnswer = appState.userAnswers[index];
+    const isCorrect = userAnswer === q.correctAnswer;
+    
+    const questionDiv = document.createElement('div');
+    questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+    
+    const header = document.createElement('h3');
+    const icon = document.createElement('span');
+    icon.className = `icon ${isCorrect ? 'correct' : 'incorrect'}`;
+    icon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+    
+    header.appendChild(icon);
+    header.appendChild(document.createTextNode(` Question ${index + 1}`));
+    
+    const questionText = document.createElement('p');
+    questionText.textContent = q.question || "";
+    
+    questionDiv.appendChild(header);
+    questionDiv.appendChild(questionText);
+    
+    // Add options with indicators
+    const optionsList = document.createElement('div');
+    optionsList.className = 'options-list';
+    
+    q.options && q.options.forEach((option, optIndex) => {
+      const optionItem = document.createElement('div');
+      optionItem.className = 'review-option';
+      
+      if (optIndex === q.correctAnswer) {
+        optionItem.classList.add('correct-answer');
+      }
+      
+      if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
+        optionItem.classList.add('wrong-answer');
+      }
+      
+      // Create icon for correct/incorrect
+      const optIcon = document.createElement('span');
+      optIcon.className = 'icon';
+      
+      if (optIndex === q.correctAnswer) {
+        optIcon.innerHTML = '<i class="fas fa-check"></i>';
+      } else if (optIndex === userAnswer) {
+        optIcon.innerHTML = '<i class="fas fa-times"></i>';
+      }
+      
+      optionItem.appendChild(optIcon);
+      optionItem.appendChild(document.createTextNode(` ${option}`));
+      optionsList.appendChild(optionItem);
+    });
+    
+    questionDiv.appendChild(optionsList);
+    reviewElements.container.appendChild(questionDiv);
+  });
+}
+
+// Page navigation functions
+function showPage(p) {
+  Object.values(pages).forEach(pg => pg.style.display = 'none');
+  p.style.display = 'block';
+}
+
+function showHomePage(name) {
+  showPage(pages.home);
+  homeElements.startTestButton.disabled = false;
+  formInputs.email.value = '';
+  formInputs.password.value = '';
+  formInputs.name.value = '';
+  homeElements.welcomeMessage.textContent = `Hello, ${name}!`;
+  
+  // Check if user is admin and add admin button if needed
+  if (appState.isAdmin) {
+    if (!document.getElementById('adminButton')) {
+      const adminBtn = homeElements.adminButton;
+      adminBtn.id = 'adminButton';
+      adminBtn.className = 'btn btn-primary';
+      adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Admin Dashboard';
+      adminBtn.style.marginTop = '1rem';
+      adminBtn.addEventListener('click', () => {
+        showAdminVerificationPage();
+      });
+      
+      // Add to DOM after logout button
+      homeElements.logoutButton.parentNode.insertBefore(adminBtn, homeElements.logoutButton);
+    }
+  }
+}
+
+function showTestPage() {
+  showPage(pages.test);
+  displayQuestion();
+  startTimer();
+}
+
+function showResultsPage(score, pct, timeTaken) {
+  showPage(pages.results);
+  resultsElements.scoreDisplay.textContent = `${score}/${appState.testQuestions.length}`;
+  resultsElements.percentageDisplay.textContent = `${pct}%`;
+  
+  // Format time taken
+  const minutes = Math.floor(timeTaken / 60);
+  const seconds = timeTaken % 60;
+  resultsElements.timeTakenDisplay.textContent = 
+    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function showAuthPage() {
+  showPage(pages.auth);
+  appState.isLoginMode = true;
+  authElements.title.textContent = 'Sign In';
+  authElements.button.textContent = 'Sign In';
+  authElements.toggleText.textContent = "Don't have an account?";
+  authElements.toggleLink.textContent = 'Sign Up';
+  authElements.nameGroup.style.display = 'none';
+}
+
+function showVerificationMessage(msg, type) {
+  verificationElements.messageContainer.innerHTML =
+    `<div class="message ${type}">${msg}</div>`;
+}
+
+function clearVerificationMessage() {
+  verificationElements.messageContainer.innerHTML = '';
+}
+
+// Generate verification code
+function generateVerificationCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Send verification code (simulated)
+function sendVerificationCode() {
+  // Generate a new 6-digit code
+  appState.adminVerificationCode = generateVerificationCode();
+  
+  // In a real app, this would send an email with the code
+  // For now, we'll just show it in a message for demo purposes
+  showVerificationMessage(`Verification code sent! (For demo purposes, your code is: ${appState.adminVerificationCode})`, 'success');
+  
+  console.log('Verification code:', appState.adminVerificationCode);
+}
+
+// Show admin verification page
+function showAdminVerificationPage() {
+  // Reset state
+  appState.adminVerified = false;
+  verificationElements.codeInput.value = '';
+  clearVerificationMessage();
+  
+  // Send initial verification code
+  sendVerificationCode();
+  
+  // Show verification page
+  showPage(pages.adminVerification);
+}
+
+// Verify admin code
+function verifyAdminCode() {
+  const enteredCode = verificationElements.codeInput.value.trim();
+  
+  if (!enteredCode) {
+    showVerificationMessage('Please enter the verification code.', 'error');
+    return;
+  }
+  
+  if (enteredCode !== appState.adminVerificationCode) {
+    showVerificationMessage('Invalid verification code. Please try again.', 'error');
+    return;
+  }
+  
+  // Code is valid, mark as verified and proceed to admin dashboard
+  appState.adminVerified = true;
+  showAdminPage();
+}
+
+// Admin page functions
+async function showAdminPage() {
+  // Check if admin is verified
+  if (!appState.isAdmin) {
+    alert('You do not have permission to access the admin dashboard.');
+    showHomePage(appState.currentUser.name);
+    return;
+  }
+  
+  if (!appState.adminVerified) {
+    showAdminVerificationPage();
+    return;
+  }
+  
+  toggleLoading(true);
+  
+  try {
+    // Load all users
+    await loadAllUsers();
+    
+    // Create admin charts
+    createAdminCharts();
+    
+    // Render users list
+    renderUsersList();
+    
+    // Set welcome message
+    adminElements.welcomeMessage.textContent = `Hello, ${appState.currentUser.name}!`;
+    
+    // Show admin page
+    showPage(pages.admin);
+  } catch (err) {
+    console.error('Error loading admin page:', err);
+    alert('Error loading admin dashboard. Please try again.');
+  } finally {
+    toggleLoading(false);
+  }
+}
+
+async function loadAllUsers() {
+  appState.allUsers = [];
+  
+  const snap = await database.ref('users').once('value');
+  
+  if (snap.exists()) {
+    snap.forEach(childSnap => {
+      const uid = childSnap.key;
+      const userData = childSnap.val();
+      
+      // Skip the current user (admin)
+      if (uid !== appState.currentUser.uid) {
+        appState.allUsers.push({
+          uid,
+          name: userData.name,
+          email: userData.email,
+          lastLogin: userData.lastLogin,
+          tests: userData.tests || {}
         });
       }
-    }
-    
-    function createAdminCharts() {
-      // Clear existing charts
-      if (adminElements.userParticipationChart._chart) {
-        adminElements.userParticipationChart._chart.destroy();
-      }
+    });
+  }
+}
+
+function createAdminCharts() {
+  // Clear existing charts
+  if (adminElements.userParticipationChart._chart) {
+    adminElements.userParticipationChart._chart.destroy();
+  }
+  
+  if (adminElements.testTypeScoresChart._chart) {
+    adminElements.testTypeScoresChart._chart.destroy();
+  }
+  
+  // Calculate statistics
+  const testTypeTotals = {};
+  const testTypeScores = {};
+  let totalUsers = appState.allUsers.length;
+  let usersWithTests = 0;
+  
+  appState.allUsers.forEach(user => {
+    if (user.tests && user.tests.completed) {
+      usersWithTests++;
       
-      if (adminElements.testTypeScoresChart._chart) {
-        adminElements.testTypeScoresChart._chart.destroy();
-      }
-      
-      // Calculate statistics
-      const testTypeTotals = {};
-      const testTypeScores = {};
-      let totalUsers = appState.allUsers.length;
-      let usersWithTests = 0;
-      
-      appState.allUsers.forEach(user => {
-        if (user.tests && user.tests.completed) {
-          usersWithTests++;
-          
-          Object.values(user.tests.completed).forEach(test => {
-            const testType = test.testKey;
-            
-            if (!testTypeTotals[testType]) {
-              testTypeTotals[testType] = 0;
-              testTypeScores[testType] = 0;
-            }
-            
-            testTypeTotals[testType]++;
-            testTypeScores[testType] += test.percentage;
-          });
-        }
-      });
-      
-      // Calculate averages
-      Object.keys(testTypeScores).forEach(testType => {
-        if (testTypeTotals[testType] > 0) {
-          testTypeScores[testType] = Math.round(testTypeScores[testType] / testTypeTotals[testType]);
-        }
-      });
-      
-      // Create user participation chart
-      const participationCtx = adminElements.userParticipationChart.getContext('2d');
-      adminElements.userParticipationChart._chart = new Chart(participationCtx, {
-        type: 'pie',
-        data: {
-          labels: ['Active Users', 'Inactive Users'],
-          datasets: [{
-            data: [usersWithTests, totalUsers - usersWithTests],
-            backgroundColor: ['#10B981', '#E5E7EB'],
-            borderColor: ['#D1FAE5', '#F9FAFB'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }
-      });
-      
-      // Create test type scores chart
-      const testTypes = Object.keys(testTypeScores);
-      const scores = testTypes.map(type => testTypeScores[type]);
-      
-      const scoresCtx = adminElements.testTypeScoresChart.getContext('2d');
-      adminElements.testTypeScoresChart._chart = new Chart(scoresCtx, {
-        type: 'bar',
-        data: {
-          labels: testTypes.map(type => type.replace(/-/g, ' ').toUpperCase()),
-          datasets: [{
-            label: 'Average Score (%)',
-            data: scores,
-            backgroundColor: '#3A7DC0',
-            borderColor: '#0056A4',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              title: {
-                display: true,
-                text: 'Score (%)'
-              }
-            }
-          }
-        }
-      });
-    }
-    
-    function renderUsersList() {
-      const container = adminElements.usersContainer;
-      const filterValue = adminElements.filterTest.value;
-      const sortValue = adminElements.sortBy.value;
-      
-      // Sort users
-      let users = [...appState.allUsers];
-      
-      // Calculate average scores and test counts
-      users.forEach(user => {
-        user.testCount = 0;
-        user.totalScore = 0;
-        user.avgScore = 0;
-        
-        if (user.tests && user.tests.completed) {
-          const completedTests = Object.values(user.tests.completed);
-          user.testCount = completedTests.length;
-          
-          if (user.testCount > 0) {
-            user.totalScore = completedTests.reduce((acc, test) => acc + test.percentage, 0);
-            user.avgScore = Math.round(user.totalScore / user.testCount);
-          }
-        }
-      });
-      
-      // Filter users if needed
-      if (filterValue !== 'all') {
-        users = users.filter(user => {
-          if (!user.tests || !user.tests.completed) return false;
-          
-          return Object.values(user.tests.completed).some(test => test.testKey === filterValue);
-        });
-      }
-      
-      // Sort users
-      switch (sortValue) {
-        case 'name-asc':
-          users.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-        case 'name-desc':
-          users.sort((a, b) => b.name.localeCompare(a.name));
-          break;
-        case 'tests-desc':
-          users.sort((a, b) => b.testCount - a.testCount);
-          break;
-        case 'score-desc':
-          users.sort((a, b) => b.avgScore - a.avgScore);
-          break;
-        case 'score-asc':
-          users.sort((a, b) => a.avgScore - b.avgScore);
-          break;
-      }
-      
-      // Render users
-      container.innerHTML = '';
-      
-      if (users.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-users"></i>
-            <p>No users found</p>
-          </div>
-        `;
-        return;
-      }
-      
-      users.forEach(user => {
-        const card = document.createElement('div');
-        card.className = 'test-card';
-        
-        let lastLoginText = 'Never logged in';
-        if (user.lastLogin) {
-          const loginDate = new Date(user.lastLogin);
-          lastLoginText = `Last login: ${loginDate.toLocaleDateString()} at ${loginDate.toLocaleTimeString()}`;
-        }
-        
-        card.innerHTML = `
-          <div class="test-card-header">
-            <h3 class="test-card-title">${user.name}</h3>
-            <div class="test-card-date">${user.email}</div>
-          </div>
-          <div class="test-card-info">
-            <div class="test-card-stat">
-              <i class="fas fa-clipboard-check"></i>
-              <span>Tests: ${user.testCount}</span>
-            </div>
-            <div class="test-card-stat">
-              <i class="fas fa-percentage"></i>
-              <span>Avg. Score: ${user.avgScore}%</span>
-            </div>
-            <div class="test-card-stat">
-              <i class="fas fa-clock"></i>
-              <span>${lastLoginText}</span>
-            </div>
-          </div>
-          <button class="btn btn-primary" style="margin-top:1rem;">
-            <i class="fas fa-search"></i> View Details
-          </button>
-        `;
-        
-        // Add event listener
-        const viewButton = card.querySelector('.btn');
-        viewButton.addEventListener('click', () => {
-          showUserDetailPage(user);
-        });
-        
-        container.appendChild(card);
-      });
-    }
-    
-    async function showUserDetailPage(user) {
-      toggleLoading(true);
-      
-      try {
-        appState.currentUserDetail = user;
-        
-        // Update user detail elements
-        userDetailElements.name.textContent = user.name;
-        userDetailElements.email.textContent = user.email;
-        
-        // Calculate statistics
-        let completedTests = [];
-        if (user.tests && user.tests.completed) {
-          completedTests = Object.entries(user.tests.completed).map(([id, test]) => ({
-            id,
-            ...test
-          }));
-        }
-        
-        // Set statistics
-        userDetailElements.totalTests.textContent = completedTests.length;
-        
-        if (completedTests.length > 0) {
-          const totalScore = completedTests.reduce((acc, test) => acc + test.percentage, 0);
-          const avgScore = Math.round(totalScore / completedTests.length);
-          const bestScore = Math.max(...completedTests.map(test => test.percentage));
-          
-          userDetailElements.avgScore.textContent = `${avgScore}%`;
-          userDetailElements.bestScore.textContent = `${bestScore}%`;
-        } else {
-          userDetailElements.avgScore.textContent = '0%';
-          userDetailElements.bestScore.textContent = '0%';
-        }
-        
-        // Create charts
-        createUserDetailCharts(completedTests);
-        
-        // Render completed tests
-        renderUserCompletedTests(completedTests);
-        
-        // Show user detail page
-        showPage(pages.userDetail);
-      } catch (err) {
-        console.error('Error showing user detail:', err);
-        alert('Could not load user details. Please try again.');
-      } finally {
-        toggleLoading(false);
-      }
-    }
-    
-    function createUserDetailCharts(tests) {
-      // Clear existing charts
-      if (userDetailElements.testTypeChart._chart) {
-        userDetailElements.testTypeChart._chart.destroy();
-      }
-      
-      if (userDetailElements.progressionChart._chart) {
-        userDetailElements.progressionChart._chart.destroy();
-      }
-      
-      if (tests.length === 0) {
-        return;
-      }
-      
-      // Calculate test type statistics
-      const testTypes = {};
-      
-      tests.forEach(test => {
+      Object.values(user.tests.completed).forEach(test => {
         const testType = test.testKey;
         
-        if (!testTypes[testType]) {
-          testTypes[testType] = {
-            count: 0,
-            totalScore: 0,
-            avgScore: 0
-          };
+        if (!testTypeTotals[testType]) {
+          testTypeTotals[testType] = 0;
+          testTypeScores[testType] = 0;
         }
         
-        testTypes[testType].count++;
-        testTypes[testType].totalScore += test.percentage;
-      });
-      
-      // Calculate averages
-      Object.keys(testTypes).forEach(type => {
-        testTypes[type].avgScore = Math.round(testTypes[type].totalScore / testTypes[type].count);
-      });
-      
-      // Create test type chart
-      const types = Object.keys(testTypes);
-      const scores = types.map(type => testTypes[type].avgScore);
-      
-      const testTypeCtx = userDetailElements.testTypeChart.getContext('2d');
-      userDetailElements.testTypeChart._chart = new Chart(testTypeCtx, {
-        type: 'bar',
-        data: {
-          labels: types.map(type => type.replace(/-/g, ' ').toUpperCase()),
-          datasets: [{
-            label: 'Average Score (%)',
-            data: scores,
-            backgroundColor: '#3A7DC0',
-            borderColor: '#0056A4',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              title: {
-                display: true,
-                text: 'Score (%)'
-              }
-            }
-          }
-        }
-      });
-      
-      // Create progression chart
-      // Sort tests by date and get the last 10
-      const sortedTests = [...tests].sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
-      const recentTests = sortedTests.slice(-10);
-      
-      const progressionCtx = userDetailElements.progressionChart.getContext('2d');
-      userDetailElements.progressionChart._chart = new Chart(progressionCtx, {
-        type: 'line',
-        data: {
-          labels: recentTests.map((test, index) => `Test ${index + 1}`),
-          datasets: [{
-            label: 'Score %',
-            data: recentTests.map(test => test.percentage),
-            borderColor: '#0056A4',
-            backgroundColor: 'rgba(0, 86, 164, 0.1)',
-            fill: true,
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              title: {
-                display: true,
-                text: 'Score (%)'
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              display: false
-            }
-          }
-        }
+        testTypeTotals[testType]++;
+        testTypeScores[testType] += test.percentage;
       });
     }
-    
-    function renderUserCompletedTests(tests) {
-      const container = userDetailElements.completedTestsContainer;
-      container.innerHTML = '';
-      
-      if (tests.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-clipboard-list"></i>
-            <p>No completed tests found</p>
-          </div>
-        `;
-        return;
+  });
+  
+  // Calculate averages
+  Object.keys(testTypeScores).forEach(testType => {
+    if (testTypeTotals[testType] > 0) {
+      testTypeScores[testType] = Math.round(testTypeScores[testType] / testTypeTotals[testType]);
+    }
+  });
+  
+  // Create user participation chart
+  const participationCtx = adminElements.userParticipationChart.getContext('2d');
+  adminElements.userParticipationChart._chart = new Chart(participationCtx, {
+    type: 'pie',
+    data: {
+      labels: ['Active Users', 'Inactive Users'],
+      datasets: [{
+        data: [usersWithTests, totalUsers - usersWithTests],
+        backgroundColor: ['#10B981', '#E5E7EB'],
+        borderColor: ['#D1FAE5', '#F9FAFB'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
       }
+    }
+  });
+  
+  // Create test type scores chart
+  const testTypes = Object.keys(testTypeScores);
+  const scores = testTypes.map(type => testTypeScores[type]);
+  
+  const scoresCtx = adminElements.testTypeScoresChart.getContext('2d');
+  adminElements.testTypeScoresChart._chart = new Chart(scoresCtx, {
+    type: 'bar',
+    data: {
+      labels: testTypes.map(type => type.replace(/-/g, ' ').toUpperCase()),
+      datasets: [{
+        label: 'Average Score (%)',
+        data: scores,
+        backgroundColor: '#3A7DC0',
+        borderColor: '#0056A4',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          title: {
+            display: true,
+            text: 'Score (%)'
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderUsersList() {
+  const container = adminElements.usersContainer;
+  const filterValue = adminElements.filterTest.value;
+  const sortValue = adminElements.sortBy.value;
+  
+  // Sort users
+  let users = [...appState.allUsers];
+  
+  // Calculate average scores and test counts
+  users.forEach(user => {
+    user.testCount = 0;
+    user.totalScore = 0;
+    user.avgScore = 0;
+    
+    if (user.tests && user.tests.completed) {
+      const completedTests = Object.values(user.tests.completed);
+      user.testCount = completedTests.length;
       
-      // Sort tests by date (newest first)
-      const sortedTests = [...tests].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+      if (user.testCount > 0) {
+        user.totalScore = completedTests.reduce((acc, test) => acc + test.percentage, 0);
+        user.avgScore = Math.round(user.totalScore / user.testCount);
+      }
+    }
+  });
+  
+  // Filter users if needed
+  if (filterValue !== 'all') {
+    users = users.filter(user => {
+      if (!user.tests || !user.tests.completed) return false;
       
-      sortedTests.forEach(test => {
-        const completedDate = new Date(test.completedAt);
-        const formattedDate = completedDate.toLocaleDateString();
-        const formattedTime = completedDate.toLocaleTimeString();
-        
-        // Format time taken
-        const minutes = Math.floor(test.timeSpent / 60);
-        const seconds = test.timeSpent % 60;
-        const timeTaken = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        const card = document.createElement('div');
-        card.className = 'test-card';
-        card.innerHTML = `
-          <div class="test-card-header">
-            <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
-            <div class="test-card-date">${formattedDate} at ${formattedTime}</div>
-          </div>
-          <div class="test-card-info">
-            <div class="test-card-stat">
-              <i class="fas fa-clipboard-check"></i>
-              <span>Score: ${test.score}/${test.questionCount}</span>
-            </div>
-            <div class="test-card-stat">
-              <i class="fas fa-percentage"></i>
-              <span>${test.percentage}%</span>
-            </div>
-            <div class="test-card-stat">
-              <i class="fas fa-clock"></i>
-              <span>Time: ${timeTaken}</span>
-            </div>
-          </div>
-        `;
-        
-        container.appendChild(card);
-      });
+      return Object.values(user.tests.completed).some(test => test.testKey === filterValue);
+    });
+  }
+  
+  // Sort users
+  switch (sortValue) {
+    case 'name-asc':
+      users.sort((a, b) => a.name.localeCompare(b.name));
+      break;
+    case 'name-desc':
+      users.sort((a, b) => b.name.localeCompare(a.name));
+      break;
+    case 'tests-desc':
+      users.sort((a, b) => b.testCount - a.testCount);
+      break;
+    case 'score-desc':
+      users.sort((a, b) => b.avgScore - a.avgScore);
+      break;
+    case 'score-asc':
+      users.sort((a, b) => a.avgScore - b.avgScore);
+      break;
+  }
+  
+  // Render users
+  container.innerHTML = '';
+  
+  if (users.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>No users found</p>
+      </div>
+    `;
+    return;
+  }
+  
+  users.forEach(user => {
+    const card = document.createElement('div');
+    card.className = 'test-card';
+    
+    let lastLoginText = 'Never logged in';
+    if (user.lastLogin) {
+      const loginDate = new Date(user.lastLogin);
+      lastLoginText = `Last login: ${loginDate.toLocaleDateString()} at ${loginDate.toLocaleTimeString()}`;
     }
     
-    // Event listeners for verification page elements
-    verificationElements.verifyButton.addEventListener('click', () => {
-      verifyAdminCode();
+    card.innerHTML = `
+      <div class="test-card-header">
+        <h3 class="test-card-title">${user.name}</h3>
+        <div class="test-card-date">${user.email}</div>
+      </div>
+      <div class="test-card-info">
+        <div class="test-card-stat">
+          <i class="fas fa-clipboard-check"></i>
+          <span>Tests: ${user.testCount}</span>
+        </div>
+        <div class="test-card-stat">
+          <i class="fas fa-percentage"></i>
+          <span>Avg. Score: ${user.avgScore}%</span>
+        </div>
+        <div class="test-card-stat">
+          <i class="fas fa-clock"></i>
+          <span>${lastLoginText}</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1rem;">
+        <i class="fas fa-search"></i> View Details
+      </button>
+    `;
+    
+    // Add event listener
+    const viewButton = card.querySelector('.btn');
+    viewButton.addEventListener('click', () => {
+      showUserDetailPage(user);
     });
     
-    verificationElements.resendButton.addEventListener('click', () => {
-      sendVerificationCode();
-    });
+    container.appendChild(card);
+  });
+}
+
+async function showUserDetailPage(user) {
+  toggleLoading(true);
+  
+  try {
+    appState.currentUserDetail = user;
     
-    verificationElements.cancelButton.addEventListener('click', () => {
-      showHomePage(appState.currentUser.name);
-    });
+    // Update user detail elements
+    userDetailElements.name.textContent = user.name;
+    userDetailElements.email.textContent = user.email;
     
-    // Allow pressing Enter to submit verification code
-    verificationElements.codeInput.addEventListener('keyup', (event) => {
-      if (event.key === 'Enter') {
-        verifyAdminCode();
+    // Calculate statistics
+    let completedTests = [];
+    if (user.tests && user.tests.completed) {
+      completedTests = Object.entries(user.tests.completed).map(([id, test]) => ({
+        id,
+        ...test
+      }));
+    }
+    
+    // Set statistics
+    userDetailElements.totalTests.textContent = completedTests.length;
+    
+    if (completedTests.length > 0) {
+      const totalScore = completedTests.reduce((acc, test) => acc + test.percentage, 0);
+      const avgScore = Math.round(totalScore / completedTests.length);
+      const bestScore = Math.max(...completedTests.map(test => test.percentage));
+      
+      userDetailElements.avgScore.textContent = `${avgScore}%`;
+      userDetailElements.bestScore.textContent = `${bestScore}%`;
+    } else {
+      userDetailElements.avgScore.textContent = '0%';
+      userDetailElements.bestScore.textContent = '0%';
+    }
+    
+    // Create charts
+    createUserDetailCharts(completedTests);
+    
+    // Render completed tests
+    renderUserCompletedTests(completedTests);
+    
+    // Show user detail page
+    showPage(pages.userDetail);
+  } catch (err) {
+    console.error('Error showing user detail:', err);
+    alert('Could not load user details. Please try again.');
+  } finally {
+    toggleLoading(false);
+  }
+}
+
+function createUserDetailCharts(tests) {
+  // Clear existing charts
+  if (userDetailElements.testTypeChart._chart) {
+    userDetailElements.testTypeChart._chart.destroy();
+  }
+  
+  if (userDetailElements.progressionChart._chart) {
+    userDetailElements.progressionChart._chart.destroy();
+  }
+  
+  if (tests.length === 0) {
+    return;
+  }
+  
+  // Calculate test type statistics
+  const testTypes = {};
+  
+  tests.forEach(test => {
+    const testType = test.testKey;
+    
+    if (!testTypes[testType]) {
+      testTypes[testType] = {
+        count: 0,
+        totalScore: 0,
+        avgScore: 0
+      };
+    }
+    
+    testTypes[testType].count++;
+    testTypes[testType].totalScore += test.percentage;
+  });
+  
+  // Calculate averages
+  Object.keys(testTypes).forEach(type => {
+    testTypes[type].avgScore = Math.round(testTypes[type].totalScore / testTypes[type].count);
+  });
+  
+  // Create test type chart
+  const types = Object.keys(testTypes);
+  const scores = types.map(type => testTypes[type].avgScore);
+  
+  const testTypeCtx = userDetailElements.testTypeChart.getContext('2d');
+  userDetailElements.testTypeChart._chart = new Chart(testTypeCtx, {
+    type: 'bar',
+    data: {
+      labels: types.map(type => type.replace(/-/g, ' ').toUpperCase()),
+      datasets: [{
+        label: 'Average Score (%)',
+        data: scores,
+        backgroundColor: '#3A7DC0',
+        borderColor: '#0056A4',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          title: {
+            display: true,
+            text: 'Score (%)'
+          }
+        }
       }
-    });
+    }
+  });
+  
+  // Create progression chart
+  // Sort tests by date and get the last 10
+  const sortedTests = [...tests].sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
+  const recentTests = sortedTests.slice(-10);
+  
+  const progressionCtx = userDetailElements.progressionChart.getContext('2d');
+  userDetailElements.progressionChart._chart = new Chart(progressionCtx, {
+    type: 'line',
+    data: {
+      labels: recentTests.map((test, index) => `Test ${index + 1}`),
+      datasets: [{
+        label: 'Score %',
+        data: recentTests.map(test => test.percentage),
+        borderColor: '#0056A4',
+        backgroundColor: 'rgba(0, 86, 164, 0.1)',
+        fill: true,
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          title: {
+            display: true,
+            text: 'Score (%)'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+  });
+}
+
+function renderUserCompletedTests(tests) {
+  const container = userDetailElements.completedTestsContainer;
+  container.innerHTML = '';
+  
+  if (tests.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-clipboard-list"></i>
+        <p>No completed tests found</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Sort tests by date (newest first)
+  const sortedTests = [...tests].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+  
+  sortedTests.forEach(test => {
+    const completedDate = new Date(test.completedAt);
+    const formattedDate = completedDate.toLocaleDateString();
+    const formattedTime = completedDate.toLocaleTimeString();
     
-    // Event listeners for admin elements
-    adminElements.backButton.addEventListener('click', () => {
-      showHomePage(appState.currentUser.name);
-    });
+    // Format time taken
+    const minutes = Math.floor(test.timeSpent / 60);
+    const seconds = test.timeSpent % 60;
+    const timeTaken = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
-    userDetailElements.backButton.addEventListener('click', () => {
-      showAdminPage();
-    });
+    const card = document.createElement('div');
+    card.className = 'test-card';
+    card.innerHTML = `
+      <div class="test-card-header">
+        <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
+        <div class="test-card-date">${formattedDate} at ${formattedTime}</div>
+      </div>
+      <div class="test-card-info">
+        <div class="test-card-stat">
+          <i class="fas fa-clipboard-check"></i>
+          <span>Score: ${test.score}/${test.questionCount}</span>
+        </div>
+        <div class="test-card-stat">
+          <i class="fas fa-percentage"></i>
+          <span>${test.percentage}%</span>
+        </div>
+        <div class="test-card-stat">
+          <i class="fas fa-clock"></i>
+          <span>Time: ${timeTaken}</span>
+        </div>
+      </div>
+    `;
     
-    adminElements.filterTest.addEventListener('change', renderUsersList);
-    adminElements.sortBy.addEventListener('change', renderUsersList);
-    
-    // Logout button
-    homeElements.logoutButton.addEventListener('click', () => {
-      auth.signOut().then(() => {
-        appState.currentUser = null;
-        appState.isAdmin = false;
-        appState.adminVerified = false;
-        showAuthPage();
-      }).catch(error => {
-        console.error('Error signing out:', error);
-      });
-    });
-  </script>
-</body>
-</html>
+    container.appendChild(card);
+  });
+}
+
+// Event listeners for verification page elements
+verificationElements.verifyButton.addEventListener('click', () => {
+  verifyAdminCode();
+});
+
+verificationElements.resendButton.addEventListener('click', () => {
+  sendVerificationCode();
+});
+
+verificationElements.cancelButton.addEventListener('click', () => {
+  showHomePage(appState.currentUser.name);
+});
+
+// Allow pressing Enter to submit verification code
+verificationElements.codeInput.addEventListener('keyup', (event) => {
+  if (event.key === 'Enter') {
+    verifyAdminCode();
+  }
+});
+
+// Event listeners for admin elements
+adminElements.backButton.addEventListener('click', () => {
+  showHomePage(appState.currentUser.name);
+});
+
+userDetailElements.backButton.addEventListener('click', () => {
+  showAdminPage();
+});
+
+adminElements.filterTest.addEventListener('change', renderUsersList);
+adminElements.sortBy.addEventListener('change', renderUsersList);
+
+// Logout button
+homeElements.logoutButton.addEventListener('click', () => {
+  auth.signOut().then(() => {
+    appState.currentUser = null;
+    appState.isAdmin = false;
+    appState.adminVerified = false;
+    showAuthPage();
+  }).catch(error => {
+    console.error('Error signing out:', error);
+  });
+});
