@@ -20,18 +20,22 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             padding: 30px;
-            width: 350px;
+            width: 90%;
+            max-width: 800px;
+            transition: all 0.3s ease;
         }
         .auth-page {
             display: block;
+            max-width: 350px;
+            margin: 0 auto;
         }
         .home-page {
             display: none;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         .form-group {
             margin-bottom: 20px;
@@ -60,6 +64,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-bottom: 10px;
         }
         button:hover {
             background-color: #3367D6;
@@ -100,9 +105,109 @@
         }
         .logout-btn {
             background-color: #F44336;
+            margin-top: 20px;
         }
         .logout-btn:hover {
             background-color: #D32F2F;
+        }
+        .test-options {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .action-btn {
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        .test-header {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .test-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .question-container {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+        .options-container {
+            margin-top: 20px;
+        }
+        .option-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-item:hover {
+            background-color: #f0f7ff;
+        }
+        .option-selected {
+            background-color: #e3f2fd;
+            border-color: #2196F3;
+        }
+        .test-navigation {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .nav-btn, .exit-btn, .submit-btn {
+            width: 48%;
+            margin: 5px 0;
+        }
+        .exit-btn {
+            background-color: #FFA000;
+        }
+        .exit-btn:hover {
+            background-color: #FF8F00;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+        }
+        .submit-btn:hover {
+            background-color: #388E3C;
+        }
+        .results-summary {
+            background-color: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .results-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+        .results-actions button {
+            width: 48%;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+            .test-navigation {
+                flex-direction: column;
+            }
+            .nav-btn, .exit-btn, .submit-btn {
+                width: 100%;
+            }
+            .results-actions {
+                flex-direction: column;
+            }
+            .results-actions button {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -144,7 +249,52 @@
         <div id="homePage" class="home-page">
             <h1>Welcome</h1>
             <div id="welcomeMessage" class="welcome-message"></div>
+            <div class="test-options">
+                <h2>Test Options</h2>
+                <button id="startTestButton" class="action-btn">Start New Test</button>
+                <button id="resumeTestButton" class="action-btn" style="display: none;">Resume Test</button>
+            </div>
             <button id="logoutButton" class="logout-btn">Logout</button>
+        </div>
+        
+        <!-- Test Page -->
+        <div id="testPage" style="display: none;">
+            <div class="test-header">
+                <h1>DECA Finance Cluster Practice Test 2025</h1>
+                <div class="test-info">
+                    <span id="questionCounter">Question 1 of 100</span>
+                    <span id="timerDisplay">Time Remaining: 60:00</span>
+                </div>
+            </div>
+            <div class="test-content">
+                <div id="questionContainer" class="question-container">
+                    <h3 id="questionText"></h3>
+                    <div id="optionsContainer" class="options-container">
+                        <!-- Options will be added dynamically -->
+                    </div>
+                </div>
+                <div class="test-navigation">
+                    <button id="prevButton" class="nav-btn">Previous</button>
+                    <button id="nextButton" class="nav-btn">Next</button>
+                    <button id="saveAndExitButton" class="exit-btn">Save & Exit</button>
+                    <button id="submitTestButton" class="submit-btn">Submit Test</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Page -->
+        <div id="resultsPage" style="display: none;">
+            <h1>Test Results</h1>
+            <div class="results-summary">
+                <h2>Summary</h2>
+                <p>Score: <span id="scoreDisplay">0/100</span></p>
+                <p>Percentage: <span id="percentageDisplay">0%</span></p>
+                <p>Time Taken: <span id="timeTakenDisplay">00:00</span></p>
+            </div>
+            <div class="results-actions">
+                <button id="reviewTestButton" class="action-btn">Review Answers</button>
+                <button id="returnHomeButton" class="action-btn">Return to Home</button>
+            </div>
         </div>
     </div>
 
@@ -171,9 +321,11 @@
         const auth = firebase.auth();
         const database = firebase.database();
 
-        // DOM Elements
+        // DOM Elements - Auth & Home
         const authPage = document.getElementById('authPage');
         const homePage = document.getElementById('homePage');
+        const testPage = document.getElementById('testPage');
+        const resultsPage = document.getElementById('resultsPage');
         const authTitle = document.getElementById('authTitle');
         const authButton = document.getElementById('authButton');
         const toggleText = document.getElementById('toggleText');
@@ -182,6 +334,25 @@
         const messageContainer = document.getElementById('messageContainer');
         const welcomeMessage = document.getElementById('welcomeMessage');
         const logoutButton = document.getElementById('logoutButton');
+        const startTestButton = document.getElementById('startTestButton');
+        const resumeTestButton = document.getElementById('resumeTestButton');
+        
+        // DOM Elements - Test
+        const questionCounter = document.getElementById('questionCounter');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        const saveAndExitButton = document.getElementById('saveAndExitButton');
+        const submitTestButton = document.getElementById('submitTestButton');
+        
+        // DOM Elements - Results
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const percentageDisplay = document.getElementById('percentageDisplay');
+        const timeTakenDisplay = document.getElementById('timeTakenDisplay');
+        const reviewTestButton = document.getElementById('reviewTestButton');
+        const returnHomeButton = document.getElementById('returnHomeButton');
         
         // Form inputs
         const emailInput = document.getElementById('email');
@@ -190,6 +361,69 @@
         
         // Auth state
         let isLoginMode = true;
+        let currentUser = null;
+        
+        // Test state
+        let currentTestData = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let timerInterval = null;
+        let timeRemaining = 60 * 60; // 60 minutes in seconds
+        
+        // Test questions (from the PDF)
+        const testQuestions = [
+            {
+                question: "A corporation is considering issuing a new series of bonds to finance expansion. The CFO needs to determine how quickly the company can expect to recoup the initial investment in the project. Which of the following capital investment analysis methods would be most appropriate?",
+                options: [
+                    "Internal rate of return",
+                    "Payback period",
+                    "Discounted break-even",
+                    "Net present value"
+                ],
+                correctAnswer: 1 // Index of correct answer (B. Payback period)
+            },
+            {
+                question: "Which of the following best describes an important aspect of diversification strategies in investment planning?",
+                options: [
+                    "Investing all available capital in one industry that is performing well",
+                    "Spreading investments across different asset classes to reduce risk",
+                    "Frequently trading securities to maximize short-term gains",
+                    "Focusing primarily on blue-chip stocks for guaranteed returns"
+                ],
+                correctAnswer: 1 // Index of correct answer (B. Spreading investments...)
+            },
+            {
+                question: "A financial analyst is studying patterns in stock price movements using charts and statistical indicators to predict future price movement. This approach is known as:",
+                options: [
+                    "Fundamental analysis",
+                    "Qualitative analysis", 
+                    "Technical analysis",
+                    "Actuarial analysis"
+                ],
+                correctAnswer: 2 // Index of correct answer (C. Technical analysis)
+            },
+            {
+                question: "Which of the following describes the process by which a corporation distributes a portion of its earnings to shareholders?",
+                options: [
+                    "Capital gain",
+                    "Dividend",
+                    "Interest payment",
+                    "Expense allocation"
+                ],
+                correctAnswer: 1 // Index of correct answer (B. Dividend)
+            },
+            {
+                question: "Securities and investment firms are required to adhere to regulations established by:",
+                options: [
+                    "Federal Communications Commission (FCC)",
+                    "Securities and Exchange Commission (SEC)",
+                    "Federal Deposit Insurance Corporation (FDIC)",
+                    "National Labor Relations Board (NLRB)"
+                ],
+                correctAnswer: 1 // Index of correct answer (B. SEC)
+            }
+            // Add more questions as needed - I've included the first 5 from the PDF
+        ];
         
         // Toggle between Login and Signup
         toggleLink.addEventListener('click', () => {
@@ -239,7 +473,8 @@
                         const userData = {
                             email: email,
                             name: name,
-                            lastLogin: new Date().toString()
+                            lastLogin: new Date().toString(),
+                            tests: {} // Initialize empty tests object
                         };
                         
                         database.ref('users/' + user.uid).set(userData)
@@ -247,6 +482,11 @@
                                 showMessage('Account created successfully!', 'success');
                                 // After a brief delay, show the home page
                                 setTimeout(() => {
+                                    currentUser = {
+                                        uid: user.uid,
+                                        name: name,
+                                        email: email
+                                    };
                                     showHomePage(name);
                                 }, 1500);
                             })
@@ -272,6 +512,20 @@
                                 // Update last login time
                                 database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
                                 
+                                // Store current user data
+                                currentUser = {
+                                    uid: user.uid,
+                                    name: userData.name,
+                                    email: userData.email
+                                };
+                                
+                                // Check if user has an in-progress test
+                                if (userData.tests && userData.tests.inProgress) {
+                                    resumeTestButton.style.display = 'block';
+                                } else {
+                                    resumeTestButton.style.display = 'none';
+                                }
+                                
                                 // After a brief delay, show the home page
                                 setTimeout(() => {
                                     showHomePage(userData.name);
@@ -287,10 +541,153 @@
             }
         });
         
+        // Start Test Button
+        startTestButton.addEventListener('click', () => {
+            // Initialize a new test
+            currentTestData = {
+                startTime: new Date().toString(),
+                answers: Array(testQuestions.length).fill(null),
+                completed: false
+            };
+            
+            userAnswers = Array(testQuestions.length).fill(null);
+            currentQuestionIndex = 0;
+            timeRemaining = 60 * 60; // Reset timer to 60 minutes
+            
+            // Save initial test state to database
+            saveTestProgress();
+            
+            // Show the test page with the first question
+            showTestPage();
+        });
+        
+        // Resume Test Button
+        resumeTestButton.addEventListener('click', () => {
+            // Load the in-progress test from the database
+            database.ref('users/' + currentUser.uid + '/tests/inProgress').once('value')
+                .then((snapshot) => {
+                    const savedTest = snapshot.val();
+                    if (savedTest) {
+                        currentTestData = savedTest;
+                        userAnswers = savedTest.answers || Array(testQuestions.length).fill(null);
+                        currentQuestionIndex = savedTest.lastQuestionIndex || 0;
+                        
+                        // Calculate remaining time
+                        if (savedTest.startTime) {
+                            const startTime = new Date(savedTest.startTime);
+                            const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+                            timeRemaining = Math.max(0, 60 * 60 - elapsedSeconds);
+                        } else {
+                            timeRemaining = 60 * 60; // Default to 60 minutes
+                        }
+                        
+                        // Show the test page
+                        showTestPage();
+                    } else {
+                        showMessage('No in-progress test found. Starting a new test...', 'error');
+                        startTestButton.click();
+                    }
+                })
+                .catch((error) => {
+                    showMessage('Error loading test: ' + error.message, 'error');
+                });
+        });
+        
+        // Previous Question Button
+        prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+                saveTestProgress();
+            }
+        });
+        
+        // Next Question Button
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < testQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+                saveTestProgress();
+            }
+        });
+        
+        // Save and Exit Button
+        saveAndExitButton.addEventListener('click', () => {
+            saveTestProgress();
+            stopTimer();
+            showHomePage(currentUser.name);
+        });
+        
+        // Submit Test Button
+        submitTestButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to submit your test? You will not be able to change your answers after submission.')) {
+                stopTimer();
+                
+                // Calculate score
+                let correctAnswers = 0;
+                for (let i = 0; i < testQuestions.length; i++) {
+                    if (userAnswers[i] === testQuestions[i].correctAnswer) {
+                        correctAnswers++;
+                    }
+                }
+                
+                const score = correctAnswers;
+                const percentage = Math.round((correctAnswers / testQuestions.length) * 100);
+                
+                // Calculate time taken
+                let timeTaken = 0;
+                if (currentTestData.startTime) {
+                    const startTime = new Date(currentTestData.startTime);
+                    const endTime = new Date();
+                    timeTaken = Math.floor((endTime - startTime) / 1000);
+                }
+                
+                // Update test data
+                currentTestData.completed = true;
+                currentTestData.endTime = new Date().toString();
+                currentTestData.score = score;
+                currentTestData.percentage = percentage;
+                currentTestData.timeTaken = timeTaken;
+                
+                // Save completed test to database
+                database.ref('users/' + currentUser.uid + '/tests/completed').push(currentTestData)
+                    .then(() => {
+                        // Remove in-progress test
+                        database.ref('users/' + currentUser.uid + '/tests/inProgress').remove();
+                        
+                        // Show results
+                        showResultsPage(score, percentage, timeTaken);
+                    })
+                    .catch((error) => {
+                        showMessage('Error saving test results: ' + error.message, 'error');
+                    });
+            }
+        });
+        
+        // Review Test Button
+        reviewTestButton.addEventListener('click', () => {
+            // Implement review functionality (would show all questions with user answers and correct answers)
+            alert('Review functionality would be implemented here.');
+            // For now, just return to home page
+            showHomePage(currentUser.name);
+        });
+        
+        // Return Home Button
+        returnHomeButton.addEventListener('click', () => {
+            showHomePage(currentUser.name);
+        });
+        
         // Logout functionality
         logoutButton.addEventListener('click', () => {
+            // If there's an active test, save progress first
+            if (testPage.style.display === 'block') {
+                saveTestProgress();
+                stopTimer();
+            }
+            
             auth.signOut()
                 .then(() => {
+                    currentUser = null;
                     showAuthPage();
                     showMessage('You have been logged out.', 'success');
                 })
@@ -307,6 +704,19 @@
                     .then((snapshot) => {
                         const userData = snapshot.val();
                         if (userData) {
+                            currentUser = {
+                                uid: user.uid,
+                                name: userData.name,
+                                email: userData.email
+                            };
+                            
+                            // Check if user has an in-progress test
+                            if (userData.tests && userData.tests.inProgress) {
+                                resumeTestButton.style.display = 'block';
+                            } else {
+                                resumeTestButton.style.display = 'none';
+                            }
+                            
                             showHomePage(userData.name);
                         }
                     });
@@ -315,6 +725,91 @@
                 showAuthPage();
             }
         });
+        
+        // Function to display the current question
+        function displayQuestion() {
+            // Update question counter
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${testQuestions.length}`;
+            
+            // Display the question
+            const question = testQuestions[currentQuestionIndex];
+            questionText.textContent = question.question;
+            
+            // Create option elements
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option-item';
+                if (userAnswers[currentQuestionIndex] === index) {
+                    optionElement.classList.add('option-selected');
+                }
+                optionElement.textContent = String.fromCharCode(65 + index) + '. ' + option; // A, B, C, D...
+                
+                // Add click event
+                optionElement.addEventListener('click', () => {
+                    userAnswers[currentQuestionIndex] = index;
+                    
+                    // Update UI to show selection
+                    document.querySelectorAll('.option-item').forEach(el => el.classList.remove('option-selected'));
+                    optionElement.classList.add('option-selected');
+                    
+                    // Save the answer
+                    saveTestProgress();
+                });
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update navigation buttons
+            prevButton.disabled = currentQuestionIndex === 0;
+            nextButton.disabled = currentQuestionIndex === testQuestions.length - 1;
+        }
+        
+        // Function to start the timer
+        function startTimer() {
+            stopTimer(); // Clear any existing timer
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                
+                if (timeRemaining <= 0) {
+                    // Time's up - force submission
+                    clearInterval(timerInterval);
+                    alert('Time\'s up! Your test will be submitted automatically.');
+                    submitTestButton.click();
+                    return;
+                }
+                
+                // Update timer display
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                timerDisplay.textContent = `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        // Function to stop the timer
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        // Function to save test progress
+        function saveTestProgress() {
+            if (!currentUser || !currentTestData) return;
+            
+            // Update test data
+            currentTestData.lastUpdated = new Date().toString();
+            currentTestData.answers = userAnswers;
+            currentTestData.lastQuestionIndex = currentQuestionIndex;
+            
+            // Save to database
+            database.ref('users/' + currentUser.uid + '/tests/inProgress').set(currentTestData)
+                .catch((error) => {
+                    console.error('Error saving test progress:', error);
+                });
+        }
         
         // Helper functions
         function showMessage(message, type) {
@@ -327,17 +822,72 @@
         
         function showHomePage(name) {
             authPage.style.display = 'none';
+            testPage.style.display = 'none';
+            resultsPage.style.display = 'none';
             homePage.style.display = 'block';
+            
             welcomeMessage.textContent = `Hello, ${name}! You are now logged in.`;
+            
+            // Check if user has an in-progress test
+            if (currentUser) {
+                database.ref('users/' + currentUser.uid + '/tests/inProgress').once('value')
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            resumeTestButton.style.display = 'block';
+                        } else {
+                            resumeTestButton.style.display = 'none';
+                        }
+                    });
+            }
             
             // Clear form fields
             emailInput.value = '';
             passwordInput.value = '';
             nameInput.value = '';
+            
+            // Adjust container width for home page
+            document.querySelector('.container').style.maxWidth = '800px';
+        }
+        
+        function showTestPage() {
+            authPage.style.display = 'none';
+            homePage.style.display = 'none';
+            resultsPage.style.display = 'none';
+            testPage.style.display = 'block';
+            
+            // Display the first/current question
+            displayQuestion();
+            
+            // Start the timer
+            startTimer();
+            
+            // Adjust container width for test page
+            document.querySelector('.container').style.maxWidth = '800px';
+        }
+        
+        function showResultsPage(score, percentage, timeTaken) {
+            authPage.style.display = 'none';
+            homePage.style.display = 'none';
+            testPage.style.display = 'none';
+            resultsPage.style.display = 'block';
+            
+            // Display results
+            scoreDisplay.textContent = `${score}/${testQuestions.length}`;
+            percentageDisplay.textContent = `${percentage}%`;
+            
+            // Format time taken
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            timeTakenDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Adjust container width for results page
+            document.querySelector('.container').style.maxWidth = '800px';
         }
         
         function showAuthPage() {
             homePage.style.display = 'none';
+            testPage.style.display = 'none';
+            resultsPage.style.display = 'none';
             authPage.style.display = 'block';
             
             // Reset to login mode
@@ -347,6 +897,9 @@
             toggleText.textContent = "Don't have an account?";
             toggleLink.textContent = 'Sign Up';
             nameGroup.style.display = 'none';
+            
+            // Adjust container width for auth page
+            document.querySelector('.container').style.maxWidth = '350px';
         }
     </script>
 </body>
