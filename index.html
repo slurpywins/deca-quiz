@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DEON Finance Test Platform</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <style>
     :root {
       --primary-color: #0056a4; /* DEON blue */
       --primary-light: #3a7dc0;
       --primary-dark: #004080;
       --secondary-color: #ffffff;
-      --accent-color: #4bb4e6; /* DECA light blue */
+      --accent-color: #4bb4e6; /* DEON light blue */
       --success-color: #10b981;
       --success-light: #d1fae5;
       --danger-color: #ef4444;
@@ -665,6 +667,80 @@
       margin-bottom: 0;
     }
     
+    /* New styles for charts and test detail view */
+    .charts-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .chart-card {
+      background: var(--background-secondary);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow-sm);
+    }
+    
+    .chart-card h3 {
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 200px;
+      width: 100%;
+    }
+    
+    .test-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .test-detail-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+    }
+    
+    .test-detail-date {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .test-detail-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .test-detail-stat {
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      background: var(--background-primary);
+      text-align: center;
+    }
+    
+    .test-detail-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.25rem;
+    }
+    
+    .test-detail-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
     @media (max-width: 768px) {
       body {
         padding: 1rem;
@@ -707,6 +783,10 @@
       
       .filter-sort {
         flex-direction: column;
+      }
+      
+      .charts-container {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -827,6 +907,21 @@
       
       <h1>Test History</h1>
       
+      <div class="charts-container">
+        <div class="chart-card">
+          <h3>Overall Performance</h3>
+          <div class="chart-container">
+            <canvas id="overallPieChart"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Score Progression</h3>
+          <div class="chart-container">
+            <canvas id="progressionChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
       <div class="summary-stats">
         <div class="stat-card">
           <div class="stat-label">Total Tests</div>
@@ -869,6 +964,54 @@
       </button>
     </div>
 
+    <!-- Test Detail Page -->
+    <div id="testDetailPage" class="page">
+      <div class="logo-container">
+        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+        </svg>
+      </div>
+      
+      <div class="test-detail-header">
+        <h1 id="testDetailTitle" class="test-detail-title">Test Details</h1>
+        <div id="testDetailDate" class="test-detail-date"></div>
+      </div>
+      
+      <div class="test-detail-stats">
+        <div class="test-detail-stat">
+          <div id="testDetailScore" class="test-detail-stat-value">0/0</div>
+          <div class="test-detail-stat-label">SCORE</div>
+        </div>
+        <div class="test-detail-stat">
+          <div id="testDetailPercentage" class="test-detail-stat-value">0%</div>
+          <div class="test-detail-stat-label">PERCENTAGE</div>
+        </div>
+        <div class="test-detail-stat">
+          <div id="testDetailTime" class="test-detail-stat-value">00:00</div>
+          <div class="test-detail-stat-label">TIME TAKEN</div>
+        </div>
+      </div>
+      
+      <div class="chart-card">
+        <h3>Test Performance</h3>
+        <div class="chart-container">
+          <canvas id="testDetailChart"></canvas>
+        </div>
+      </div>
+      
+      <div id="testDetailReviewContainer">
+        <!-- Test questions and answers will be inserted here -->
+      </div>
+      
+      <button id="backToSummaryButton" class="btn btn-secondary back-button">
+        <i class="fas fa-arrow-left"></i> Back to Test History
+      </button>
+    </div>
+
     <!-- Resume Tests Page -->
     <div id="resumeTestsPage" class="page">
       <div class="logo-container">
@@ -895,7 +1038,7 @@
     <!-- Test Page -->
     <div id="testPage" class="page">
       <div class="test-header">
-        <h1>DECA Finance Test</h1>
+        <h1>DEON Finance Test</h1>
         
         <div class="test-info">
           <div id="questionCounter">Question 1 of 50</div>
@@ -952,6 +1095,13 @@
         <p>Time Taken: <span id="timeTakenDisplay">00:00</span></p>
       </div>
       
+      <div class="chart-card">
+        <h3>Test Performance</h3>
+        <div class="chart-container">
+          <canvas id="resultsPieChart"></canvas>
+        </div>
+      </div>
+      
       <div class="results-actions">
         <button id="reviewTestButton" class="btn btn-primary">
           <i class="fas fa-search"></i> Review Answers
@@ -993,10 +1143,10 @@
     // Initialize Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
-      authDomain: "deca-55fc4.firebaseapp.com",
-      databaseURL: "https://deca-55fc4-default-rtdb.firebaseio.com",
-      projectId: "deca-55fc4",
-      storageBucket: "deca-55fc4.appspot.com",
+      authDomain: "deon-55fc4.firebaseapp.com",
+      databaseURL: "https://deon-55fc4-default-rtdb.firebaseio.com",
+      projectId: "deon-55fc4",
+      storageBucket: "deon-55fc4.appspot.com",
       messagingSenderId: "368623997898",
       appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
       measurementId: "G-7ZT1H2WTWH"
@@ -1013,7 +1163,8 @@
       resumeTests: document.getElementById('resumeTestsPage'),
       test: document.getElementById('testPage'),
       results: document.getElementById('resultsPage'),
-      review: document.getElementById('reviewPage')
+      review: document.getElementById('reviewPage'),
+      testDetail: document.getElementById('testDetailPage')
     };
     
     // Auth elements
@@ -1044,7 +1195,21 @@
       filterTest: document.getElementById('filterTest'),
       sortBy: document.getElementById('sortBy'),
       completedTestsContainer: document.getElementById('completedTestsContainer'),
-      backButton: document.getElementById('backToHomeButton')
+      backButton: document.getElementById('backToHomeButton'),
+      overallPieChart: document.getElementById('overallPieChart'),
+      progressionChart: document.getElementById('progressionChart')
+    };
+    
+    // Test Detail elements
+    const testDetailElements = {
+      title: document.getElementById('testDetailTitle'),
+      date: document.getElementById('testDetailDate'),
+      score: document.getElementById('testDetailScore'),
+      percentage: document.getElementById('testDetailPercentage'),
+      time: document.getElementById('testDetailTime'),
+      chart: document.getElementById('testDetailChart'),
+      reviewContainer: document.getElementById('testDetailReviewContainer'),
+      backButton: document.getElementById('backToSummaryButton')
     };
     
     // Resume tests elements
@@ -1072,7 +1237,8 @@
       percentageDisplay: document.getElementById('percentageDisplay'),
       timeTakenDisplay: document.getElementById('timeTakenDisplay'),
       reviewTestButton: document.getElementById('reviewTestButton'),
-      returnHomeButton: document.getElementById('returnHomeButton')
+      returnHomeButton: document.getElementById('returnHomeButton'),
+      pieChart: document.getElementById('resultsPieChart')
     };
     
     // Review elements
@@ -1091,6 +1257,12 @@
     const testSelect = document.getElementById('testSelect');
     const loadingOverlay = document.getElementById('loadingOverlay');
 
+    // Chart instances
+    let overallPieChart = null;
+    let progressionChart = null;
+    let resultsPieChart = null;
+    let testDetailChart = null;
+
     let appState = {
       isLoginMode: true,
       currentUser: null,
@@ -1102,7 +1274,8 @@
       timeRemaining: 0,
       completedTests: [],
       inProgressTests: {},
-      testTypes: []
+      testTypes: [],
+      currentTestDetail: null
     };
 
     function toggleLoading(show) {
@@ -1262,6 +1435,9 @@
         
         // Update summary stats
         updateSummaryStats();
+        
+        // Create summary charts
+        createSummaryCharts();
       } catch (err) {
         console.error('Error loading completed tests:', err);
       }
@@ -1318,6 +1494,163 @@
         summaryElements.avgScoreValue.textContent = '0%';
         summaryElements.bestScoreValue.textContent = '0%';
       }
+    }
+
+    // Create summary charts
+    function createSummaryCharts() {
+      const tests = appState.completedTests;
+      
+      // Clear existing charts
+      if (overallPieChart) {
+        overallPieChart.destroy();
+      }
+      
+      if (progressionChart) {
+        progressionChart.destroy();
+      }
+      
+      if (tests.length === 0) {
+        return;
+      }
+      
+      // Calculate total correct and incorrect answers
+      let totalCorrect = 0;
+      let totalIncorrect = 0;
+      
+      tests.forEach(test => {
+        totalCorrect += test.score;
+        totalIncorrect += test.questionCount - test.score;
+      });
+      
+      // Create overall pie chart
+      const pieCtx = summaryElements.overallPieChart.getContext('2d');
+      overallPieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Correct', 'Incorrect'],
+          datasets: [{
+            data: [totalCorrect, totalIncorrect],
+            backgroundColor: ['#10B981', '#EF4444'],
+            borderColor: ['#D1FAE5', '#FEE2E2'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+      
+      // Create progression chart
+      // Sort tests by date and get the last 10
+      const sortedTests = [...tests].sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
+      const recentTests = sortedTests.slice(-10);
+      
+      const progressionCtx = summaryElements.progressionChart.getContext('2d');
+      progressionChart = new Chart(progressionCtx, {
+        type: 'line',
+        data: {
+          labels: recentTests.map((test, index) => `Test ${index + 1}`),
+          datasets: [{
+            label: 'Score %',
+            data: recentTests.map(test => test.percentage),
+            borderColor: '#0056A4',
+            backgroundColor: 'rgba(0, 86, 164, 0.1)',
+            fill: true,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Score (%)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    // Create results pie chart
+    function createResultsPieChart(correct, total) {
+      const incorrect = total - correct;
+      
+      // Clear existing chart
+      if (resultsPieChart) {
+        resultsPieChart.destroy();
+      }
+      
+      const pieCtx = resultsElements.pieChart.getContext('2d');
+      resultsPieChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Correct', 'Incorrect'],
+          datasets: [{
+            data: [correct, incorrect],
+            backgroundColor: ['#10B981', '#EF4444'],
+            borderColor: ['#D1FAE5', '#FEE2E2'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    // Create test detail chart
+    function createTestDetailChart(correct, total) {
+      const incorrect = total - correct;
+      
+      // Clear existing chart
+      if (testDetailChart) {
+        testDetailChart.destroy();
+      }
+      
+      const pieCtx = testDetailElements.chart.getContext('2d');
+      testDetailChart = new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Correct', 'Incorrect'],
+          datasets: [{
+            data: [correct, incorrect],
+            backgroundColor: ['#10B981', '#EF4444'],
+            borderColor: ['#D1FAE5', '#FEE2E2'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
     }
 
     // Filter and render completed tests
@@ -1395,16 +1728,125 @@
               <span>Time: ${timeTaken}</span>
             </div>
           </div>
+          <button class="btn btn-primary" style="margin-top:1rem;">
+            <i class="fas fa-search"></i> View Details
+          </button>
         `;
         
         // Add event listener to view test details
-        card.addEventListener('click', () => {
-          // Future implementation: View detailed test results
-          alert('Detailed test view will be implemented in a future update.');
+        const viewButton = card.querySelector('.btn');
+        viewButton.addEventListener('click', () => {
+          showTestDetail(test);
         });
         
         container.appendChild(card);
       });
+    }
+
+    // Show test detail page
+    async function showTestDetail(test) {
+      toggleLoading(true);
+      
+      try {
+        // Set the current test detail
+        appState.currentTestDetail = test;
+        
+        // Update test detail elements
+        testDetailElements.title.textContent = test.testKey.replace(/-/g, ' ').toUpperCase();
+        
+        const completedDate = new Date(test.completedAt);
+        testDetailElements.date.textContent = `Completed on ${completedDate.toLocaleDateString()} at ${completedDate.toLocaleTimeString()}`;
+        
+        testDetailElements.score.textContent = `${test.score}/${test.questionCount}`;
+        testDetailElements.percentage.textContent = `${test.percentage}%`;
+        
+        // Format time taken
+        const minutes = Math.floor(test.timeSpent / 60);
+        const seconds = test.timeSpent % 60;
+        testDetailElements.time.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Create pie chart
+        createTestDetailChart(test.score, test.questionCount);
+        
+        // Fetch questions for this test
+        const testKey = test.testKey;
+        
+        const qs = await Promise.all(test.questions.map(id =>
+          database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
+        ));
+        
+        const questions = qs.filter(q => q !== null).map((q, idx) => ({
+          id: test.questions[idx],
+          ...q
+        }));
+        
+        // Render review
+        testDetailElements.reviewContainer.innerHTML = '';
+        
+        questions.forEach((q, index) => {
+          const userAnswer = test.answers[index];
+          const isCorrect = userAnswer === q.correctAnswer;
+          
+          const questionDiv = document.createElement('div');
+          questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+          
+          const header = document.createElement('h3');
+          const icon = document.createElement('span');
+          icon.className = `icon ${isCorrect ? 'correct' : 'incorrect'}`;
+          icon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
+          
+          header.appendChild(icon);
+          header.appendChild(document.createTextNode(` Question ${index + 1}`));
+          
+          const questionText = document.createElement('p');
+          questionText.textContent = q.question || "";
+          
+          questionDiv.appendChild(header);
+          questionDiv.appendChild(questionText);
+          
+          // Add options with indicators
+          const optionsList = document.createElement('div');
+          optionsList.className = 'options-list';
+          
+          q.options && q.options.forEach((option, optIndex) => {
+            const optionItem = document.createElement('div');
+            optionItem.className = 'review-option';
+            
+            if (optIndex === q.correctAnswer) {
+              optionItem.classList.add('correct-answer');
+            }
+            
+            if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
+              optionItem.classList.add('wrong-answer');
+            }
+            
+            // Create icon for correct/incorrect
+            const optIcon = document.createElement('span');
+            optIcon.className = 'icon';
+            
+            if (optIndex === q.correctAnswer) {
+              optIcon.innerHTML = '<i class="fas fa-check"></i>';
+            } else if (optIndex === userAnswer) {
+              optIcon.innerHTML = '<i class="fas fa-times"></i>';
+            }
+            
+            optionItem.appendChild(optIcon);
+            optionItem.appendChild(document.createTextNode(` ${option}`));
+            optionsList.appendChild(optionItem);
+          });
+          
+          questionDiv.appendChild(optionsList);
+          testDetailElements.reviewContainer.appendChild(questionDiv);
+        });
+        
+        // Show test detail page
+        showPage(pages.testDetail);
+      } catch (err) {
+        console.error('Error showing test detail:', err);
+        alert('Could not load test details. Please try again.');
+      } finally {
+        toggleLoading(false);
+      }
     }
 
     // Render in-progress tests
@@ -1582,6 +2024,7 @@
     homeElements.summaryButton.addEventListener('click', () => {
       showPage(pages.summary);
       renderCompletedTests();
+      createSummaryCharts();
     });
 
     // Navigation back to Home from Summary
@@ -1592,6 +2035,11 @@
     // Navigation back to Home from Resume
     resumeElements.backButton.addEventListener('click', () => {
       showHomePage(appState.currentUser.name);
+    });
+
+    // Navigation back to Summary from Test Detail
+    testDetailElements.backButton.addEventListener('click', () => {
+      showPage(pages.summary);
     });
 
     // Filter and sort change events
@@ -1768,6 +2216,9 @@
           ...completedTest
         });
         
+        // Create pie chart for results
+        createResultsPieChart(score, appState.testQuestions.length);
+        
         // Show results
         showResultsPage(score, percentage, timeSpent);
       } catch (error) {
@@ -1831,7 +2282,7 @@
         const optionsList = document.createElement('div');
         optionsList.className = 'options-list';
         
-        q.options.forEach((option, optIndex) => {
+        q.options && q.options.forEach((option, optIndex) => {
           const optionItem = document.createElement('div');
           optionItem.className = 'review-option';
           
