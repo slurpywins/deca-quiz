@@ -1,244 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DECA Finance Quiz</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root { --primary: #4f46e5; --bg: #f9fafb; --card: #fff; --text: #1f2937; --light: #6b7280; --border: #e5e7eb; --radius: .5rem; }
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
-    #auth-ui, #home-screen, .quiz-container, #result { max-width:700px; margin:2rem auto; padding:1rem; background: var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 4px 8px rgba(0,0,0,0.05); }
-    #auth-ui input { width:100%; padding:.75rem; margin-bottom:.75rem; border:1px solid var(--border); border-radius:var(--radius); }
-    #auth-ui button { width:48%; margin:.25rem 1%; padding:.75rem; border:none; border-radius:var(--radius); background:var(--primary); color:#fff; font-weight:600; cursor:pointer; }
-    #auth-ui button#btnLogout { background:#dc2626; }
-    #home-screen { display:none; text-align:center; }
-    #home-screen h2 { margin-bottom:1rem; color:var(--primary); }
-    #home-screen .home-buttons { display:flex; gap:1rem; justify-content:center; margin-bottom:1rem; }
-    #home-screen button { flex:1; padding:1rem; border:none; border-radius:var(--radius); cursor:pointer; font-weight:600; }
-    #btnResume { background:#4f46e5; color:#fff; }
-    #btnStartNew { background:#10b981; color:#fff; }
-    #btnLogoutHome { background:#dc2626; color:#fff; margin-top:1rem; }
-    .quiz-container { display:none; padding:2rem; }
-    h1 { text-align:center; color:var(--primary); margin-bottom:.5rem; }
-    .timer { text-align:center; margin-bottom:1rem; }
-    .timer span { font-weight:600; color:var(--primary); }
-    .progress { margin-bottom:1rem; color:var(--light); }
-    .progress-bar { width:100%; height:6px; background:var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:1.5rem; }
-    .bar { height:100%; background:var(--primary); width:0; transition: width .2s; }
-    #question { margin-bottom:1rem; font-size:1.1rem; }
-    .choices { list-style:none; padding:0; }
-    .choices li { margin-bottom:.75rem; }
-    .choices label { display:flex; align-items:center; padding:.6rem 1rem; border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:background .2s, border-color .2s; }
-    .choices input { margin-right:.8rem; accent-color:var(--primary); }
-    .choices label:hover { background:var(--bg); border-color:var(--primary); }
-    .nav { display:flex; justify-content:space-between; margin-top:1.5rem; }
-    .nav button { background:var(--primary); color:#fff; border:none; padding:.75rem 1.5rem; border-radius:var(--radius); cursor:pointer; font-weight:600; }
-    .nav button:disabled { background:var(--border); cursor:default; }
-    #result { display:none; text-align:center; margin-top:1rem; }
-    #result h2 { color:var(--primary); margin-bottom:1rem; }
-    .review { text-align:left; }
-    .review p { margin-bottom:.6rem; }
-    .correct { color:#16a34a; }
-    .incorrect { color:#dc2626; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Auth Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 350px;
+        }
+        .auth-page {
+            display: block;
+        }
+        .home-page {
+            display: none;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3367D6;
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .toggle-form a {
+            color: #4285F4;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .error {
+            background-color: #FFEBEE;
+            color: #D32F2F;
+        }
+        .success {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+        .message-container {
+            min-height: 60px;
+        }
+        .welcome-message {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .logout-btn {
+            background-color: #F44336;
+        }
+        .logout-btn:hover {
+            background-color: #D32F2F;
+        }
+    </style>
 </head>
 <body>
-  <!-- Auth UI -->
-  <div id="auth-ui">
-    <h2>DECA Finance Quiz Login</h2>
-    <input id="email"    type="email"    placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <div style="text-align:center;">
-      <button id="btnSignUp">Sign Up</button>
-      <button id="btnLogin">Log In</button>
-      <button id="btnLogout" style="display:none;">Log Out</button>
+    <div class="container">
+        <!-- Authentication Page -->
+        <div id="authPage" class="auth-page">
+            <h1 id="authTitle">Sign In</h1>
+            
+            <div id="messageContainer" class="message-container"></div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            
+            <!-- Only shown during sign up -->
+            <div id="nameGroup" class="form-group" style="display: none;">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Enter your full name">
+            </div>
+            
+            <button id="authButton">Sign In</button>
+            
+            <div class="toggle-form">
+                <p>
+                    <span id="toggleText">Don't have an account?</span> 
+                    <a id="toggleLink">Sign Up</a>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Home Page -->
+        <div id="homePage" class="home-page">
+            <h1>Welcome</h1>
+            <div id="welcomeMessage" class="welcome-message"></div>
+            <button id="logoutButton" class="logout-btn">Logout</button>
+        </div>
     </div>
-  </div>
 
-  <!-- Home Screen -->
-  <div id="home-screen">
-    <h2>Welcome!</h2>
-    <div class="home-buttons">
-      <button id="btnResume">Resume Test</button>
-      <button id="btnStartNew">Start New Test</button>
-    </div>
-    <button id="btnLogoutHome">Log Out</button>
-  </div>
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-database-compat.min.js"></script>
 
-  <!-- Quiz -->
-  <div class="quiz-container">
-    <h1>DECA Finance Quiz</h1>
-    <div class="timer">Time Remaining: <span id="timer">60:00</span></div>
-    <div class="progress">Question <span id="current">1</span> of <span id="total">100</span></div>
-    <div class="progress-bar"><div class="bar" id="bar"></div></div>
-    <div id="quiz">
-      <div id="question"></div>
-      <ul class="choices" id="choices"></ul>
-      <div class="nav">
-        <button id="prev">Previous</button>
-        <button id="next">Next</button>
-      </div>
-    </div>
-  </div>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+  apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
+  authDomain: "deca-55fc4.firebaseapp.com",
+  databaseURL: "https://deca-55fc4-default-rtdb.firebaseio.com",
+  projectId: "deca-55fc4",
+  storageBucket: "deca-55fc4.firebasestorage.app",
+  messagingSenderId: "368623997898",
+  appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
+  measurementId: "G-7ZT1H2WTWH"
+        };
 
-  <!-- Results -->
-  <div id="result">
-    <h2>Your Score: <span id="score"></span></h2>
-    <div class="review" id="review"></div>
-  </div>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
 
-  <!-- Main Logic -->
-  <script>
-    let auth, db;
-    const questions = [
-      // … insert all 100 question objects here with {question, choices:[…], correct:…}
-    ];
-    const total = questions.length;
-    let current = 0, timeLeft = 60*60;
-    const answers = Array(total).fill(null);
-    const qEls = {
-      authUI:    document.getElementById('auth-ui'),
-      home:      document.getElementById('home-screen'),
-      quiz:      document.querySelector('.quiz-container'),
-      result:    document.getElementById('result'),
-      email:     document.getElementById('email'),
-      password:  document.getElementById('password'),
-      btnSU:     document.getElementById('btnSignUp'),
-      btnLI:     document.getElementById('btnLogin'),
-      btnLO:     document.getElementById('btnLogout'),
-      btnR:      document.getElementById('btnResume'),
-      btnN:      document.getElementById('btnStartNew'),
-      btnLH:     document.getElementById('btnLogoutHome'),
-      question:  document.getElementById('question'),
-      choices:   document.getElementById('choices'),
-      prev:      document.getElementById('prev'),
-      next:      document.getElementById('next'),
-      curr:      document.getElementById('current'),
-      tot:       document.getElementById('total'),
-      bar:       document.getElementById('bar'),
-      timer:     document.getElementById('timer'),
-      score:     document.getElementById('score'),
-      review:    document.getElementById('review')
-    };
-
-    function fmt(sec) {
-      const m=String(Math.floor(sec/60)).padStart(2,'0');
-      const s=String(sec%60).padStart(2,'0');
-      return `${m}:${s}`;
-    }
-
-    async function saveP(uid){
-      await db.collection('progress').doc(uid).set({answers,current,timeLeft},{merge:true});
-    }
-    async function loadP(uid){
-      const doc = await db.collection('progress').doc(uid).get();
-      if(doc.exists){
-        const d=doc.data();
-        Object.assign(answers,d.answers);
-        current=d.current; timeLeft=d.timeLeft||60*60;
-      }
-      render(); startT(uid);
-    }
-
-    function startT(uid){
-      qEls.timer.textContent=fmt(timeLeft);
-      const iv = setInterval(async()=>{
-        timeLeft--; qEls.timer.textContent=fmt(timeLeft);
-        if(timeLeft<=0){ clearInterval(iv); await saveP(uid); showR(); }
-      },1000);
-    }
-
-    function showR(){
-      qEls.quiz.style.display=qEls.home.style.display='none';
-      qEls.result.style.display='block';
-      let sc=answers.reduce((sum,a,i)=>sum+(a===questions[i].correct),0);
-      qEls.score.textContent=`${sc}/${total}`;
-      qEls.review.innerHTML='';
-      questions.forEach((q,i)=>{
-        if(answers[i]!==q.correct){
-          const p=document.createElement('p');
-          p.innerHTML=`Q${i+1}: Correct is <strong>${q.choices[q.correct]}</strong>`;
-          qEls.review.appendChild(p);
+        // DOM Elements
+        const authPage = document.getElementById('authPage');
+        const homePage = document.getElementById('homePage');
+        const authTitle = document.getElementById('authTitle');
+        const authButton = document.getElementById('authButton');
+        const toggleText = document.getElementById('toggleText');
+        const toggleLink = document.getElementById('toggleLink');
+        const nameGroup = document.getElementById('nameGroup');
+        const messageContainer = document.getElementById('messageContainer');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const logoutButton = document.getElementById('logoutButton');
+        
+        // Form inputs
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const nameInput = document.getElementById('name');
+        
+        // Auth state
+        let isLoginMode = true;
+        
+        // Toggle between Login and Signup
+        toggleLink.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            
+            if (isLoginMode) {
+                authTitle.textContent = 'Sign In';
+                authButton.textContent = 'Sign In';
+                toggleText.textContent = "Don't have an account?";
+                toggleLink.textContent = 'Sign Up';
+                nameGroup.style.display = 'none';
+            } else {
+                authTitle.textContent = 'Sign Up';
+                authButton.textContent = 'Sign Up';
+                toggleText.textContent = 'Already have an account?';
+                toggleLink.textContent = 'Sign In';
+                nameGroup.style.display = 'block';
+            }
+            
+            clearMessage();
+        });
+        
+        // Handle auth actions (login/signup)
+        authButton.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            // Basic validation
+            if (!email || !password) {
+                showMessage('Please enter both email and password.', 'error');
+                return;
+            }
+            
+            if (!isLoginMode) {
+                // Sign up mode
+                const name = nameInput.value.trim();
+                if (!name) {
+                    showMessage('Please enter your name.', 'error');
+                    return;
+                }
+                
+                // Create user with email and password
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        // Save user data to database
+                        const user = userCredential.user;
+                        const userData = {
+                            email: email,
+                            name: name,
+                            lastLogin: new Date().toString()
+                        };
+                        
+                        database.ref('users/' + user.uid).set(userData)
+                            .then(() => {
+                                showMessage('Account created successfully!', 'success');
+                                // After a brief delay, show the home page
+                                setTimeout(() => {
+                                    showHomePage(name);
+                                }, 1500);
+                            })
+                            .catch((error) => {
+                                showMessage('Error saving user data: ' + error.message, 'error');
+                            });
+                    })
+                    .catch((error) => {
+                        showMessage(error.message, 'error');
+                    });
+            } else {
+                // Login mode
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        showMessage('Login successful!', 'success');
+                        
+                        // Get user data from the database
+                        const user = userCredential.user;
+                        database.ref('users/' + user.uid).once('value')
+                            .then((snapshot) => {
+                                const userData = snapshot.val();
+                                
+                                // Update last login time
+                                database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
+                                
+                                // After a brief delay, show the home page
+                                setTimeout(() => {
+                                    showHomePage(userData.name);
+                                }, 1500);
+                            })
+                            .catch((error) => {
+                                showMessage('Error fetching user data: ' + error.message, 'error');
+                            });
+                    })
+                    .catch((error) => {
+                        showMessage('Login failed: ' + error.message, 'error');
+                    });
+            }
+        });
+        
+        // Logout functionality
+        logoutButton.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => {
+                    showAuthPage();
+                    showMessage('You have been logged out.', 'success');
+                })
+                .catch((error) => {
+                    console.error('Error signing out:', error);
+                });
+        });
+        
+        // Check auth state on page load
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                database.ref('users/' + user.uid).once('value')
+                    .then((snapshot) => {
+                        const userData = snapshot.val();
+                        if (userData) {
+                            showHomePage(userData.name);
+                        }
+                    });
+            } else {
+                // User is signed out
+                showAuthPage();
+            }
+        });
+        
+        // Helper functions
+        function showMessage(message, type) {
+            messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
         }
-      });
-    }
-
-    function render(){
-      qEls.tot.textContent=total;
-      qEls.curr.textContent=current+1;
-      qEls.bar.style.width=`${(current+1)/total*100}%`;
-      const q=questions[current];
-      qEls.question.textContent=q.question;
-      qEls.choices.innerHTML='';
-      q.choices.forEach((c,i)=>{
-        const li=document.createElement('li');
-        li.innerHTML=`<label><input type="radio" name="c" value="${i}" ${answers[current]===i?'checked':''}/> ${c}</label>`;
-        qEls.choices.appendChild(li);
-      });
-      qEls.prev.disabled=current===0;
-      qEls.next.textContent=current===total-1?'Submit':'Next';
-    }
-
-    // Nav listeners
-    qEls.choices.addEventListener('change',async e=>{
-      answers[current]=+e.target.value;
-      if(auth.currentUser) await saveP(auth.currentUser.uid);
-    });
-    qEls.prev.addEventListener('click',async()=>{
-      if(current>0){ current--; render(); await saveP(auth.currentUser.uid); }
-    });
-    qEls.next.addEventListener('click',async()=>{
-      if(current<total-1){ current++; render(); await saveP(auth.currentUser.uid); }
-      else { await saveP(auth.currentUser.uid); showR(); }
-    });
-    qEls.btnR.onclick =()=>{ qEls.home.style.display='none'; qEls.quiz.style.display='block'; loadP(auth.currentUser.uid); };
-    qEls.btnN.onclick=async()=>{
-      answers.fill(null); current=0; timeLeft=60*60;
-      await saveP(auth.currentUser.uid);
-      qEls.home.style.display='none';
-      qEls.quiz.style.display='block';
-      render(); startT(auth.currentUser.uid);
-    };
-    qEls.btnLH.onclick=()=> auth.signOut();
-
-    // Firebase SDKs & init
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script>
-    const cfg = {
-      apiKey:    "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
-      authDomain:"deca-55fc4.firebaseapp.com",
-      projectId: "deca-55fc4",
-      storageBucket:"deca-55fc4.appspot.com",
-      messagingSenderId:"368623997898",
-      appId:"1:368623997898:web:79b9952ee9e9fa0edb7533",
-      measurementId:"G-7ZT1H2WTWH"
-    };
-    firebase.initializeApp(cfg);
-    auth = firebase.auth();
-    db   = firebase.firestore();
-
-    qEls.btnSU.onclick =async()=>{ try{await auth.createUserWithEmailAndPassword(qEls.email.value,qEls.password.value);}catch(e){alert(e.message);} };
-    qEls.btnLI.onclick =async()=>{ try{await auth.signInWithEmailAndPassword(qEls.email.value,qEls.password.value);}catch(e){alert(e.message);} };
-    qEls.btnLO.onclick =()=> auth.signOut();
-
-    auth.onAuthStateChanged(u=>{
-      if(u){
-        qEls.authUI.style.display='none';
-        qEls.home.style.display='block';
-        qEls.quiz.style.display='none';
-        qEls.result.style.display='none';
-      } else {
-        qEls.authUI.style.display='block';
-        qEls.home.style.display='none';
-        qEls.quiz.style.display='none';
-        qEls.result.style.display='none';
-      }
-    });
-  </script>
+        
+        function clearMessage() {
+            messageContainer.innerHTML = '';
+        }
+        
+        function showHomePage(name) {
+            authPage.style.display = 'none';
+            homePage.style.display = 'block';
+            welcomeMessage.textContent = `Hello, ${name}! You are now logged in.`;
+            
+            // Clear form fields
+            emailInput.value = '';
+            passwordInput.value = '';
+            nameInput.value = '';
+        }
+        
+        function showAuthPage() {
+            homePage.style.display = 'none';
+            authPage.style.display = 'block';
+            
+            // Reset to login mode
+            isLoginMode = true;
+            authTitle.textContent = 'Sign In';
+            authButton.textContent = 'Sign In';
+            toggleText.textContent = "Don't have an account?";
+            toggleLink.textContent = 'Sign Up';
+            nameGroup.style.display = 'none';
+        }
+    </script>
 </body>
 </html>
