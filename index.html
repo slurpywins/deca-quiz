@@ -72,7 +72,7 @@
             color: #555;
         }
         
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border-color);
@@ -159,6 +159,13 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             background-color: #f9f9f9;
+        }
+        
+        .test-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
         .action-btn {
@@ -284,6 +291,9 @@
             .results-actions button {
                 width: 100%;
             }
+            .test-settings {
+                grid-template-columns: 1fr;
+            }
         }
 
         #loadingOverlay {
@@ -360,6 +370,35 @@
             <div class="test-options">
                 <h2>Test Options</h2>
                 <p>Practice your finance knowledge with our comprehensive question bank.</p>
+                
+                <div class="test-settings">
+                    <div class="form-group">
+                        <label for="questionCount">Number of Questions</label>
+                        <select id="questionCount">
+                            <option value="5">5 Questions</option>
+                            <option value="10">10 Questions</option>
+                            <option value="20" selected>20 Questions</option>
+                            <option value="30">30 Questions</option>
+                            <option value="50">50 Questions</option>
+                            <option value="80">80 Questions (All)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timeLimit">Time Limit</label>
+                        <select id="timeLimit">
+                            <option value="10">10 Minutes</option>
+                            <option value="20">20 Minutes</option>
+                            <option value="30">30 Minutes</option>
+                            <option value="45">45 Minutes</option>
+                            <option value="60" selected>60 Minutes</option>
+                            <option value="90">90 Minutes</option>
+                            <option value="120">2 Hours</option>
+                            <option value="0">No Time Limit</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="progress-container">
                     <div id="testProgress" class="progress-bar" style="width: 0%"></div>
                 </div>
@@ -430,19 +469,15 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-          apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
-          authDomain: "deca-55fc4.firebaseapp.com",
-          databaseURL: "https://deca-55fc4-default-rtdb.firebaseio.com",
-          projectId: "deca-55fc4",
-          storageBucket: "deca-55fc4.firebasestorage.app",
-          messagingSenderId: "368623997898",
-          appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
-          measurementId: "G-7ZT1H2WTWH"
+            apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
+            authDomain: "deca-55fc4.firebaseapp.com",
+            databaseURL: "https://deca-55fc4-default-rtdb.firebaseio.com",
+            projectId: "deca-55fc4",
+            storageBucket: "deca-55fc4.firebasestorage.app",
+            messagingSenderId: "368623997898",
+            appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
+            measurementId: "G-7ZT1H2WTWH"
         };
-
-        // Application Constants
-        const TEST_SIZE = 20; // Number of questions per test
-        const TEST_TIME = 60 * 60; // 60 minutes in seconds
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -474,7 +509,9 @@
             logoutButton: document.getElementById('logoutButton'),
             startTestButton: document.getElementById('startTestButton'),
             resumeTestButton: document.getElementById('resumeTestButton'),
-            testProgress: document.getElementById('testProgress')
+            testProgress: document.getElementById('testProgress'),
+            questionCount: document.getElementById('questionCount'),
+            timeLimit: document.getElementById('timeLimit')
         };
 
         // DOM Elements - Test
@@ -524,7 +561,7 @@
             userAnswers: [],
             testData: null,
             timerInterval: null,
-            timeRemaining: TEST_TIME
+            timeRemaining: 0
         };
 
         // Show/hide loading spinner
@@ -640,8 +677,8 @@
                     homeElements.resumeTestButton.style.display = hasInProgressTest ? 'block' : 'none';
                     
                     // Update progress bar if test in progress
-                    if (hasInProgressTest && userData.tests.inProgress.lastQuestionIndex) {
-                        const progress = (userData.tests.inProgress.lastQuestionIndex / TEST_SIZE) * 100;
+                    if (hasInProgressTest && userData.tests.inProgress.lastQuestionIndex && userData.tests.inProgress.questions) {
+                        const progress = (userData.tests.inProgress.lastQuestionIndex / userData.tests.inProgress.questions.length) * 100;
                         homeElements.testProgress.style.width = `${progress}%`;
                     } else {
                         homeElements.testProgress.style.width = '0%';
@@ -665,8 +702,13 @@
             homeElements.startTestButton.disabled = true;
             
             try {
+                // Get user settings
+                const questionCount = parseInt(homeElements.questionCount.value);
+                const timeLimitMinutes = parseInt(homeElements.timeLimit.value);
+                const timeInSeconds = timeLimitMinutes * 60; // Convert minutes to seconds
+                
                 // Fetch questions from Firebase
-                const questions = await getRandomQuestions(TEST_SIZE);
+                const questions = await getRandomQuestions(questionCount);
                 
                 if (!questions || questions.length === 0) {
                     throw new Error("No questions found in the database");
@@ -675,14 +717,16 @@
                 appState.testQuestions = questions;
                 appState.userAnswers = Array(questions.length).fill(null);
                 appState.currentQuestionIndex = 0;
-                appState.timeRemaining = TEST_TIME;
+                appState.timeRemaining = timeInSeconds;
                 
                 // Initialize test data
                 appState.testData = {
                     startTime: new Date().toString(),
                     answers: Array(questions.length).fill(null),
                     completed: false,
-                    questions: questions.map(q => q.id)  // Store question IDs for reference
+                    questions: questions.map(q => q.id),  // Store question IDs for reference
+                    questionCount: questionCount,
+                    timeLimit: timeLimitMinutes
                 };
                 
                 // Save initial test state to database
@@ -732,13 +776,21 @@
                 appState.currentQuestionIndex = savedTest.lastQuestionIndex || 0;
                 appState.testData = savedTest;
                 
-                // Calculate remaining time
-                if (savedTest.startTime) {
+                // Set time remaining based on saved test
+                const timeLimitMinutes = savedTest.timeLimit || 60;
+                
+                // Calculate remaining time if there's a time limit
+                if (timeLimitMinutes > 0 && savedTest.startTime) {
                     const startTime = new Date(savedTest.startTime);
                     const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
-                    appState.timeRemaining = Math.max(0, TEST_TIME - elapsedSeconds);
+                    const totalSeconds = timeLimitMinutes * 60;
+                    appState.timeRemaining = Math.max(0, totalSeconds - elapsedSeconds);
+                } else if (timeLimitMinutes === 0) {
+                    // No time limit
+                    appState.timeRemaining = 0;
                 } else {
-                    appState.timeRemaining = TEST_TIME;
+                    // Default to the full time if something went wrong
+                    appState.timeRemaining = timeLimitMinutes * 60;
                 }
                 
                 // Show the test page
@@ -770,9 +822,12 @@
                     id
                 }));
                 
+                // Limit count to the number of available questions
+                const questionCount = Math.min(count, allQuestions.length);
+                
                 // Randomly select 'count' questions
                 const shuffledQuestions = shuffleArray(allQuestions);
-                return shuffledQuestions.slice(0, count);
+                return shuffledQuestions.slice(0, questionCount);
             } catch (error) {
                 console.error("Error fetching questions:", error);
                 throw error;
@@ -841,6 +896,7 @@
                     const percentage = Math.round((correctAnswers / appState.testQuestions.length) * 100);
                     
                     // Calculate time taken
+// Calculate time taken
                     let timeTaken = 0;
                     if (appState.testData.startTime) {
                         const startTime = new Date(appState.testData.startTime);
@@ -908,7 +964,7 @@
             } catch (error) {
                 console.error('Error signing out:', error);
                 showMessage('Error signing out: ' + error.message, 'error');
-        } finally {
+            } finally {
                 toggleLoading(false);
             }
         });
@@ -934,8 +990,8 @@
                         homeElements.resumeTestButton.style.display = hasInProgressTest ? 'block' : 'none';
                         
                         // Update progress bar if test in progress
-                        if (hasInProgressTest && userData.tests.inProgress.lastQuestionIndex) {
-                            const progress = (userData.tests.inProgress.lastQuestionIndex / TEST_SIZE) * 100;
+                        if (hasInProgressTest && userData.tests.inProgress.lastQuestionIndex && userData.tests.inProgress.questions) {
+                            const progress = (userData.tests.inProgress.lastQuestionIndex / userData.tests.inProgress.questions.length) * 100;
                             homeElements.testProgress.style.width = `${progress}%`;
                         } else {
                             homeElements.testProgress.style.width = '0%';
@@ -1011,6 +1067,15 @@
         function startTimer() {
             stopTimer(); // Clear any existing timer
             
+            // If no time limit (value is 0), just display "No Time Limit"
+            if (appState.timeRemaining === 0) {
+                testElements.timerDisplay.textContent = 'No Time Limit';
+                return;
+            }
+            
+            // Update timer display initially
+            updateTimerDisplay();
+            
             appState.timerInterval = setInterval(() => {
                 appState.timeRemaining--;
                 
@@ -1023,10 +1088,15 @@
                 }
                 
                 // Update timer display
-                const minutes = Math.floor(appState.timeRemaining / 60);
-                const seconds = appState.timeRemaining % 60;
-                testElements.timerDisplay.textContent = `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                updateTimerDisplay();
             }, 1000);
+        }
+        
+        // Helper function to update timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(appState.timeRemaining / 60);
+            const seconds = appState.timeRemaining % 60;
+            testElements.timerDisplay.textContent = `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
         // Function to stop the timer
