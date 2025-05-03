@@ -370,60 +370,8 @@
         let timerInterval = null;
         let timeRemaining = 60 * 60; // 60 minutes in seconds
         
-        // Test questions (from the PDF)
-        const testQuestions = [
-            {
-                question: "A corporation is considering issuing a new series of bonds to finance expansion. The CFO needs to determine how quickly the company can expect to recoup the initial investment in the project. Which of the following capital investment analysis methods would be most appropriate?",
-                options: [
-                    "Internal rate of return",
-                    "Payback period",
-                    "Discounted break-even",
-                    "Net present value"
-                ],
-                correctAnswer: 1 // Index of correct answer (B. Payback period)
-            },
-            {
-                question: "Which of the following best describes an important aspect of diversification strategies in investment planning?",
-                options: [
-                    "Investing all available capital in one industry that is performing well",
-                    "Spreading investments across different asset classes to reduce risk",
-                    "Frequently trading securities to maximize short-term gains",
-                    "Focusing primarily on blue-chip stocks for guaranteed returns"
-                ],
-                correctAnswer: 1 // Index of correct answer (B. Spreading investments...)
-            },
-            {
-                question: "A financial analyst is studying patterns in stock price movements using charts and statistical indicators to predict future price movement. This approach is known as:",
-                options: [
-                    "Fundamental analysis",
-                    "Qualitative analysis", 
-                    "Technical analysis",
-                    "Actuarial analysis"
-                ],
-                correctAnswer: 2 // Index of correct answer (C. Technical analysis)
-            },
-            {
-                question: "Which of the following describes the process by which a corporation distributes a portion of its earnings to shareholders?",
-                options: [
-                    "Capital gain",
-                    "Dividend",
-                    "Interest payment",
-                    "Expense allocation"
-                ],
-                correctAnswer: 1 // Index of correct answer (B. Dividend)
-            },
-            {
-                question: "Securities and investment firms are required to adhere to regulations established by:",
-                options: [
-                    "Federal Communications Commission (FCC)",
-                    "Securities and Exchange Commission (SEC)",
-                    "Federal Deposit Insurance Corporation (FDIC)",
-                    "National Labor Relations Board (NLRB)"
-                ],
-                correctAnswer: 1 // Index of correct answer (B. SEC)
-            }
-            // Add more questions as needed - I've included the first 5 from the PDF
-        ];
+        // Test questions array (placeholder - will be loaded from database)
+        let testQuestions = [];
         
         // Toggle between Login and Signup
         toggleLink.addEventListener('click', () => {
@@ -543,6 +491,63 @@
         
         // Start Test Button
         startTestButton.addEventListener('click', () => {
+            // Show loading state
+            startTestButton.textContent = "Loading questions...";
+            startTestButton.disabled = true;
+            
+            // Fetch questions from Firebase
+            const questionsRef = firebase.database().ref('questions/finance-test');
+            
+            questionsRef.once('value')
+                .then((snapshot) => {
+                    // Convert Firebase snapshot to array of questions
+                    const questionsData = snapshot.val();
+                    
+                    if (!questionsData) {
+                        // If no questions in database, use setupQuestionsInDatabase function to populate it
+                        setupQuestionsInDatabase().then(() => {
+                            // After populating, try fetching again
+                            return firebase.database().ref('questions/finance-test').once('value');
+                        }).then((newSnapshot) => {
+                            const newQuestionsData = newSnapshot.val();
+                            if (!newQuestionsData) {
+                                throw new Error("Failed to set up questions in the database");
+                            }
+                            
+                            // Clear existing test questions array
+                            testQuestions.length = 0;
+                            
+                            // Add each question from database to testQuestions array
+                            Object.values(newQuestionsData).forEach(question => {
+                                testQuestions.push(question);
+                            });
+                            
+                            initializeTest();
+                        });
+                    } else {
+                        // Clear existing test questions array
+                        testQuestions.length = 0;
+                        
+                        // Add each question from database to testQuestions array
+                        Object.values(questionsData).forEach(question => {
+                            testQuestions.push(question);
+                        });
+                        
+                        initializeTest();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error loading questions:", error);
+                    startTestButton.textContent = "Start New Test";
+                    startTestButton.disabled = false;
+                    alert("Error loading questions: " + error.message);
+                });
+        });
+        
+        // Function to initialize test after questions are loaded
+        function initializeTest() {
+            console.log(`Loaded ${testQuestions.length} questions from database`);
+                
             // Initialize a new test
             currentTestData = {
                 startTime: new Date().toString(),
@@ -557,14 +562,45 @@
             // Save initial test state to database
             saveTestProgress();
             
+            // Reset button state
+            startTestButton.textContent = "Start New Test";
+            startTestButton.disabled = false;
+            
             // Show the test page with the first question
             showTestPage();
-        });
+        }
         
         // Resume Test Button
         resumeTestButton.addEventListener('click', () => {
-            // Load the in-progress test from the database
-            database.ref('users/' + currentUser.uid + '/tests/inProgress').once('value')
+            // Show loading state
+            resumeTestButton.textContent = "Loading...";
+            resumeTestButton.disabled = true;
+            
+            // First, fetch questions from Firebase
+            const questionsRef = firebase.database().ref('questions/finance-test');
+            
+            questionsRef.once('value')
+                .then((snapshot) => {
+                    // Convert Firebase snapshot to array of questions
+                    const questionsData = snapshot.val();
+                    
+                    if (!questionsData) {
+                        throw new Error("No questions found in the database");
+                    }
+                    
+                    // Clear existing test questions array
+                    testQuestions.length = 0;
+                    
+                    // Add each question from database to testQuestions array
+                    Object.values(questionsData).forEach(question => {
+                        testQuestions.push(question);
+                    });
+                    
+                    console.log(`Loaded ${testQuestions.length} questions from database`);
+                    
+                    // Now load the in-progress test
+                    return database.ref('users/' + currentUser.uid + '/tests/inProgress').once('value');
+                })
                 .then((snapshot) => {
                     const savedTest = snapshot.val();
                     if (savedTest) {
@@ -581,6 +617,10 @@
                             timeRemaining = 60 * 60; // Default to 60 minutes
                         }
                         
+                        // Reset button state
+                        resumeTestButton.textContent = "Resume Test";
+                        resumeTestButton.disabled = false;
+                        
                         // Show the test page
                         showTestPage();
                     } else {
@@ -589,7 +629,10 @@
                     }
                 })
                 .catch((error) => {
-                    showMessage('Error loading test: ' + error.message, 'error');
+                    console.error("Error:", error);
+                    resumeTestButton.textContent = "Resume Test";
+                    resumeTestButton.disabled = false;
+                    alert("Error: " + error.message);
                 });
         });
         
@@ -833,6 +876,9 @@
                 database.ref('users/' + currentUser.uid + '/tests/inProgress').once('value')
                     .then((snapshot) => {
                         if (snapshot.exists()) {
+                            resumeTestButton.style
+.then((snapshot) => {
+                        if (snapshot.exists()) {
                             resumeTestButton.style.display = 'block';
                         } else {
                             resumeTestButton.style.display = 'none';
@@ -902,58 +948,103 @@
             document.querySelector('.container').style.maxWidth = '350px';
         }
 
-        // This code ensures the test functionality works with the existing dummy questions
-        // You can paste this at the end of your existing JavaScript code
-
-        // Make sure the test questions array has at least a few questions
-        if (testQuestions.length === 0) {
-          // Only add these if your testQuestions array is empty
-          testQuestions.push(
-            {
-              question: "What is the primary purpose of a balance sheet?",
-              options: [
-                "To show revenue and expenses over time",
-                "To show assets, liabilities, and equity at a point in time",
-                "To track cash flow from operations",
-                "To project future financial performance"
-              ],
-              correctAnswer: 1 // Index of correct answer (B)
-            },
-            {
-              question: "Which financial ratio measures a company's ability to pay short-term obligations?",
-              options: [
-                "Debt-to-equity ratio",
-                "Current ratio",
-                "Return on assets",
-                "Gross profit margin"
-              ],
-              correctAnswer: 1 // Index of correct answer (B)
-            },
-            {
-              question: "What does ROI stand for in finance?",
-              options: [
-                "Rate of Inflation",
-                "Return on Investment",
-                "Record of Income",
-                "Ratio of Interest"
-              ],
-              correctAnswer: 1 // Index of correct answer (B)
-            }
-          );
+        // Function to set up questions in the database
+        async function setupQuestionsInDatabase() {
+            console.log("Setting up questions in the database...");
+            
+            // Reference to the questions collection in your Firebase database
+            const questionsRef = firebase.database().ref('questions/finance-test');
+            
+            // Sample questions to add to the database
+            const questionsToAdd = [
+                {
+                    id: "q1",
+                    question: "A corporation is considering issuing a new series of bonds to finance expansion. The CFO needs to determine how quickly the company can expect to recoup the initial investment in the project. Which of the following capital investment analysis methods would be most appropriate?",
+                    options: [
+                        "Internal rate of return",
+                        "Payback period",
+                        "Discounted break-even",
+                        "Net present value"
+                    ],
+                    correctAnswer: 1 // Index of correct answer (B. Payback period)
+                },
+                {
+                    id: "q2",
+                    question: "Which of the following best describes an important aspect of diversification strategies in investment planning?",
+                    options: [
+                        "Investing all available capital in one industry that is performing well",
+                        "Spreading investments across different asset classes to reduce risk",
+                        "Frequently trading securities to maximize short-term gains",
+                        "Focusing primarily on blue-chip stocks for guaranteed returns"
+                    ],
+                    correctAnswer: 1 // Index of correct answer (B. Spreading investments...)
+                },
+                {
+                    id: "q3",
+                    question: "A financial analyst is studying patterns in stock price movements using charts and statistical indicators to predict future price movement. This approach is known as:",
+                    options: [
+                        "Fundamental analysis",
+                        "Qualitative analysis", 
+                        "Technical analysis",
+                        "Actuarial analysis"
+                    ],
+                    correctAnswer: 2 // Index of correct answer (C. Technical analysis)
+                },
+                {
+                    id: "q4",
+                    question: "Which of the following describes the process by which a corporation distributes a portion of its earnings to shareholders?",
+                    options: [
+                        "Capital gain",
+                        "Dividend",
+                        "Interest payment",
+                        "Expense allocation"
+                    ],
+                    correctAnswer: 1 // Index of correct answer (B. Dividend)
+                },
+                {
+                    id: "q5",
+                    question: "Securities and investment firms are required to adhere to regulations established by:",
+                    options: [
+                        "Federal Communications Commission (FCC)",
+                        "Securities and Exchange Commission (SEC)",
+                        "Federal Deposit Insurance Corporation (FDIC)",
+                        "National Labor Relations Board (NLRB)"
+                    ],
+                    correctAnswer: 1 // Index of correct answer (B. SEC)
+                }
+            ];
+            
+            // Add each question to the database
+            const promises = [];
+            questionsToAdd.forEach(question => {
+                promises.push(
+                    questionsRef.child(question.id).set(question)
+                        .then(() => console.log(`Question ${question.id} added successfully`))
+                        .catch(error => console.error(`Error adding question ${question.id}:`, error))
+                );
+            });
+            
+            // Wait for all questions to be added
+            await Promise.all(promises);
+            console.log("All questions have been added to the database");
+            return true;
         }
 
-        // Ensure the test page loads correctly when a user starts a test
+        // Check if questions exist in the database on page load
         document.addEventListener('DOMContentLoaded', () => {
-          console.log("Test system initialized with " + testQuestions.length + " questions");
-          
-          // If these elements exist, make sure their event listeners are properly set up
-          if (startTestButton && resumeTestButton) {
-            console.log("Test buttons are ready");
-          }
+            firebase.database().ref('questions/finance-test').once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        console.log("No questions found in the database. Setting up sample questions...");
+                        setupQuestionsInDatabase();
+                    } else {
+                        console.log("Questions already exist in the database");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error checking for questions:", error);
+                });
         });
-
-        // Optional: Add a welcome message to confirm the code is loaded
-        console.log("Additional test functionality loaded successfully");
     </script>
 </body>
 </html>
