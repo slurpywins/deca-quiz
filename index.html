@@ -503,9 +503,343 @@
       authElements.nameGroup.style.display='none';
     }
 
-    // Implement displayQuestion, startTimer, updateTimerDisplay, stopTimer,
-    // submit handler, review handler, logout handler exactly as before,
-    // so I haven’t repeated them here to keep this snippet focused on test-selection.
+    // ADD THE NEW CODE BELOW THIS LINE
+    
+    // Display current question
+    function displayQuestion() {
+      const q = appState.testQuestions[appState.currentQuestionIndex];
+      if (!q) return;
+      
+      testElements.questionText.textContent = q.text;
+      testElements.optionsContainer.innerHTML = '';
+      testElements.questionCounter.textContent = `Question ${appState.currentQuestionIndex + 1} of ${appState.testQuestions.length}`;
+      
+      // Update progress bar
+      const progress = ((appState.currentQuestionIndex + 1) / appState.testQuestions.length) * 100;
+      testElements.questionProgress.style.width = `${progress}%`;
+      
+      // Create option elements
+      if (q.options) {
+        q.options.forEach((option, index) => {
+          const optionDiv = document.createElement('div');
+          optionDiv.className = 'option';
+          
+          const radioInput = document.createElement('input');
+          radioInput.type = 'radio';
+          radioInput.name = 'answer';
+          radioInput.id = `option-${index}`;
+          radioInput.value = index;
+          
+          // Check if user already answered this question
+          if (appState.userAnswers[appState.currentQuestionIndex] === index) {
+            radioInput.checked = true;
+          }
+          
+          const label = document.createElement('label');
+          label.htmlFor = `option-${index}`;
+          label.textContent = option;
+          
+          optionDiv.appendChild(radioInput);
+          optionDiv.appendChild(label);
+          testElements.optionsContainer.appendChild(optionDiv);
+          
+          // Add event listener to save answer when selected
+          radioInput.addEventListener('change', () => {
+            appState.userAnswers[appState.currentQuestionIndex] = index;
+            saveTestProgress();
+          });
+        });
+      }
+      
+      // Update navigation buttons
+      testElements.prevButton.disabled = appState.currentQuestionIndex === 0;
+      testElements.submitTestButton.style.display = 
+        appState.currentQuestionIndex === appState.testQuestions.length - 1 ? 'block' : 'none';
+      testElements.nextButton.style.display = 
+        appState.currentQuestionIndex < appState.testQuestions.length - 1 ? 'block' : 'none';
+    }
+
+    // Timer functions
+    function startTimer() {
+      if (appState.testData.timeLimit <= 0) {
+        testElements.timerDisplay.textContent = 'No Time Limit';
+        return;
+      }
+      
+      updateTimerDisplay();
+      appState.timerInterval = setInterval(() => {
+        appState.timeRemaining--;
+        updateTimerDisplay();
+        
+        if (appState.timeRemaining <= 0) {
+          alert('Time is up! Your test will be submitted.');
+          stopTimer();
+          submitTest();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(appState.timeRemaining / 60);
+      const seconds = appState.timeRemaining % 60;
+      testElements.timerDisplay.textContent = 
+        `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function stopTimer() {
+      clearInterval(appState.timerInterval);
+    }
+
+    // Navigation handlers
+    testElements.prevButton.addEventListener('click', () => {
+      if (appState.currentQuestionIndex > 0) {
+        appState.currentQuestionIndex--;
+        displayQuestion();
+      }
+    });
+
+    testElements.nextButton.addEventListener('click', () => {
+      if (appState.currentQuestionIndex < appState.testQuestions.length - 1) {
+        appState.currentQuestionIndex++;
+        displayQuestion();
+      }
+    });
+
+    testElements.saveAndExitButton.addEventListener('click', async () => {
+      stopTimer();
+      await saveTestProgress();
+      showHomePage(appState.currentUser.name);
+    });
+
+    testElements.submitTestButton.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to submit this test? You cannot change your answers after submission.')) {
+        await submitTest();
+      }
+    });
+
+    // Submit test
+    async function submitTest() {
+      stopTimer();
+      toggleLoading(true);
+      
+      try {
+        const score = calculateScore();
+        const percentage = Math.round((score / appState.testQuestions.length) * 100);
+        const timeSpent = appState.testData.timeLimit * 60 - appState.timeRemaining;
+        
+        // Create completed test data
+        const completedTest = {
+          ...appState.testData,
+          completed: true,
+          completedAt: new Date().toString(),
+          score: score,
+          percentage: percentage,
+          timeSpent: timeSpent
+        };
+        
+        // Save to user's completed tests and remove from in-progress
+        const testId = Date.now();
+        await database.ref(`users/${appState.currentUser.uid}/tests/completed/${testId}`).set(completedTest);
+        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).remove();
+        
+        // Show results
+        showResultsPage(score, percentage, timeSpent);
+      } catch (error) {
+        console.error('Error submitting test:', error);
+        alert('There was an error submitting your test. Please try again.');
+      } finally {
+        toggleLoading(false);
+      }
+    }
+
+    function calculateScore() {
+      let score = 0;
+      appState.testQuestions.forEach((q, index) => {
+        const userAnswer = appState.userAnswers[index];
+        if (userAnswer !== null && userAnswer === q.correctAnswer) {
+          score++;
+        }
+      });
+      return score;
+    }
+
+    // Results and review handling
+    resultsElements.reviewTestButton.addEventListener('click', () => {
+      showPage(pages.review);
+      renderReview();
+    });
+
+    resultsElements.returnHomeButton.addEventListener('click', () => {
+      showHomePage(appState.currentUser.name);
+    });
+
+    reviewElements.backButton.addEventListener('click', () => {
+      showPage(pages.results);
+    });
+
+    function renderReview() {
+      reviewElements.container.innerHTML = '';
+      
+      appState.testQuestions.forEach((q, index) => {
+        const userAnswer = appState.userAnswers[index];
+        const isCorrect = userAnswer === q.correctAnswer;
+        
+        const questionDiv = document.createElement('div');
+        questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+        
+        const header = document.createElement('h3');
+        header.textContent = `Question ${index + 1}: ${isCorrect ? '✓' : '✗'}`;
+        header.style.color = isCorrect ? 'var(--success-dark)' : 'var(--danger-dark)';
+        
+        const questionText = document.createElement('p');
+        questionText.textContent = q.text;
+        
+        questionDiv.appendChild(header);
+        questionDiv.appendChil
+        questionDiv.appendChild(questionText);
+        
+        // Add options with indicators
+        const optionsList = document.createElement('div');
+        optionsList.className = 'options-list';
+        
+        q.options.forEach((option, optIndex) => {
+          const optionItem = document.createElement('div');
+          optionItem.className = 'review-option';
+          
+          if (optIndex === q.correctAnswer) {
+            optionItem.classList.add('correct-answer');
+          }
+          if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
+            optionItem.classList.add('wrong-answer');
+          }
+          
+          optionItem.textContent = `${optIndex === q.correctAnswer ? '✓ ' : ''}${optIndex === userAnswer ? '• ' : ''}${option}`;
+          optionsList.appendChild(optionItem);
+        });
+        
+        questionDiv.appendChild(optionsList);
+        reviewElements.container.appendChild(questionDiv);
+      });
+    }
+
+    // Logout button
+    homeElements.logoutButton.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        appState.currentUser = null;
+        showAuthPage();
+      }).catch(error => {
+        console.error('Error signing out:', error);
+      });
+    });
+
+    // Add CSS for test page and review page
+    const style = document.createElement('style');
+    style.textContent = `
+      .test-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .test-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      .test-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .nav-btn, .exit-btn, .submit-btn {
+        padding: 10px 20px;
+        width: auto;
+      }
+      .exit-btn {
+        background: var(--warning-color);
+      }
+      .exit-btn:hover {
+        background: var(--warning-dark);
+      }
+      .submit-btn {
+        background: var(--success-color);
+        display: none;
+      }
+      .submit-btn:hover {
+        background: var(--success-dark);
+      }
+      .question-container {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        min-height: 200px;
+      }
+      .option {
+        margin: 10px 0;
+        padding: 10px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+      }
+      .option:hover {
+        background: #f0f7ff;
+      }
+      .option input {
+        width: auto;
+        margin-right: 10px;
+      }
+      .review-question {
+        background: #f9f9f9;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border-left: 5px solid #ccc;
+      }
+      .review-question.correct {
+        border-left-color: var(--success-color);
+      }
+      .review-question.incorrect {
+        border-left-color: var(--danger-color);
+      }
+      .options-list {
+        margin-top: 15px;
+      }
+      .review-option {
+        margin: 8px 0;
+        padding: 8px;
+        background: white;
+        border-radius: 4px;
+      }
+      .correct-answer {
+        background: #e8f5e9;
+      }
+      .wrong-answer {
+        background: #ffebee;
+      }
+      .results-summary {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: var(--box-shadow);
+      }
+      .results-summary p {
+        font-size: 18px;
+        margin: 10px 0;
+      }
+      .results-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 </body>
 </html>
