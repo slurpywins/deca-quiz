@@ -502,6 +502,169 @@
       margin: 0 auto;
     }
     
+    /* New styles for summary and resume pages */
+    .home-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .home-nav .btn {
+      margin-top: 0;
+    }
+    
+    .test-card {
+      padding: 1.5rem;
+      background: var(--background-primary);
+      border-radius: var(--border-radius);
+      border: 1px solid var(--border-color);
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .test-card:hover {
+      border-color: var(--primary-color);
+      box-shadow: var(--box-shadow);
+      transform: translateY(-2px);
+    }
+    
+    .test-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .test-card-title {
+      font-weight: 600;
+      color: var(--primary-color);
+      font-size: 1.125rem;
+      margin: 0;
+    }
+    
+    .test-card-date {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .test-card-info {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .test-card-stat {
+      background: var(--background-secondary);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .test-card-stat i {
+      color: var(--primary-color);
+    }
+    
+    .test-card .progress-container {
+      margin: 0.75rem 0;
+    }
+    
+    .summary-stats {
+      background: var(--background-primary);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .stat-card {
+      background: var(--background-secondary);
+      padding: 1.25rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      box-shadow: var(--box-shadow-sm);
+    }
+    
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      background: var(--background-primary);
+      border-radius: var(--border-radius);
+      margin: 1.5rem 0;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .back-button {
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .nav-tabs {
+      display: flex;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .nav-tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    
+    .nav-tab:hover {
+      color: var(--primary-color);
+    }
+    
+    .nav-tab.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+    
+    .filter-sort {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .filter-sort .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    
     @media (max-width: 768px) {
       body {
         padding: 1rem;
@@ -532,6 +695,18 @@
         width: 100%;
         align-items: flex-start;
         margin-top: 1rem;
+      }
+      
+      .summary-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .home-nav {
+        grid-template-columns: 1fr;
+      }
+      
+      .filter-sort {
+        flex-direction: column;
       }
     }
   </style>
@@ -591,11 +766,20 @@
         </svg>
       </div>
       
-      <h1>Finance Test Platform</h1>
+      <h1>DECA Finance Test Platform</h1>
       <div id="welcomeMessage" class="welcome-message"></div>
       
+      <div class="home-nav">
+        <button id="summaryButton" class="btn btn-secondary">
+          <i class="fas fa-chart-bar"></i> View Test History
+        </button>
+        <button id="resumeTestsButton" class="btn btn-secondary">
+          <i class="fas fa-history"></i> Resume Tests
+        </button>
+      </div>
+      
       <div class="card">
-        <h2>Test Options</h2>
+        <h2>Start New Test</h2>
         <div class="test-settings">
           <div class="form-group">
             <label for="testSelect">Choose a Test</label>
@@ -619,21 +803,92 @@
           </div>
         </div>
         
-        <div class="progress-container">
-          <div id="testProgress" class="progress-bar" style="width:0%"></div>
-        </div>
-        
         <button id="startTestButton" class="btn btn-primary">
           <i class="fas fa-play-circle"></i> Start New Test
-        </button>
-        
-        <button id="resumeTestButton" class="btn btn-secondary" style="display:none;">
-          <i class="fas fa-redo"></i> Resume Test
         </button>
       </div>
       
       <button id="logoutButton" class="btn btn-danger">
         <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+
+    <!-- Summary Page -->
+    <div id="summaryPage" class="page">
+      <div class="logo-container">
+        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+        </svg>
+      </div>
+      
+      <h1>Test History</h1>
+      
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-label">Total Tests</div>
+          <div id="totalTestsValue" class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Average Score</div>
+          <div id="avgScoreValue" class="stat-value">0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Best Score</div>
+          <div id="bestScoreValue" class="stat-value">0%</div>
+        </div>
+      </div>
+      
+      <div class="filter-sort">
+        <div class="form-group">
+          <label for="filterTest">Filter by Test</label>
+          <select id="filterTest">
+            <option value="all">All Tests</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sortBy">Sort by</label>
+          <select id="sortBy">
+            <option value="date-desc">Date (Newest First)</option>
+            <option value="date-asc">Date (Oldest First)</option>
+            <option value="score-desc">Score (Highest First)</option>
+            <option value="score-asc">Score (Lowest First)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="completedTestsContainer">
+        <!-- Test history cards will be inserted here -->
+      </div>
+      
+      <button id="backToHomeButton" class="btn btn-secondary back-button">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </button>
+    </div>
+
+    <!-- Resume Tests Page -->
+    <div id="resumeTestsPage" class="page">
+      <div class="logo-container">
+        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+        </svg>
+      </div>
+      
+      <h1>Resume Tests</h1>
+      
+      <div id="inProgressTestsContainer">
+        <!-- In-progress test cards will be inserted here -->
+      </div>
+      
+      <button id="backFromResumeButton" class="btn btn-secondary back-button">
+        <i class="fas fa-arrow-left"></i> Back to Home
       </button>
     </div>
 
@@ -754,10 +1009,13 @@
     const pages = {
       auth: document.getElementById('authPage'),
       home: document.getElementById('homePage'),
+      summary: document.getElementById('summaryPage'),
+      resumeTests: document.getElementById('resumeTestsPage'),
       test: document.getElementById('testPage'),
       results: document.getElementById('resultsPage'),
       review: document.getElementById('reviewPage')
     };
+    
     // Auth elements
     const authElements = {
       title: document.getElementById('authTitle'),
@@ -767,15 +1025,34 @@
       nameGroup: document.getElementById('nameGroup'),
       messageContainer: document.getElementById('messageContainer')
     };
+    
     // Home elements
     const homeElements = {
       welcomeMessage: document.getElementById('welcomeMessage'),
       logoutButton: document.getElementById('logoutButton'),
       startTestButton: document.getElementById('startTestButton'),
-      resumeTestButton: document.getElementById('resumeTestButton'),
-      testProgress: document.getElementById('testProgress'),
+      summaryButton: document.getElementById('summaryButton'),
+      resumeTestsButton: document.getElementById('resumeTestsButton'),
       timeLimit: document.getElementById('timeLimit')
     };
+    
+    // Summary elements
+    const summaryElements = {
+      totalTestsValue: document.getElementById('totalTestsValue'),
+      avgScoreValue: document.getElementById('avgScoreValue'),
+      bestScoreValue: document.getElementById('bestScoreValue'),
+      filterTest: document.getElementById('filterTest'),
+      sortBy: document.getElementById('sortBy'),
+      completedTestsContainer: document.getElementById('completedTestsContainer'),
+      backButton: document.getElementById('backToHomeButton')
+    };
+    
+    // Resume tests elements
+    const resumeElements = {
+      inProgressTestsContainer: document.getElementById('inProgressTestsContainer'),
+      backButton: document.getElementById('backFromResumeButton')
+    };
+    
     // Test elements
     const testElements = {
       questionCounter: document.getElementById('questionCounter'),
@@ -788,6 +1065,7 @@
       submitTestButton: document.getElementById('submitTestButton'),
       questionProgress: document.getElementById('questionProgress')
     };
+    
     // Results elements
     const resultsElements = {
       scoreDisplay: document.getElementById('scoreDisplay'),
@@ -796,17 +1074,20 @@
       reviewTestButton: document.getElementById('reviewTestButton'),
       returnHomeButton: document.getElementById('returnHomeButton')
     };
+    
     // Review elements
     const reviewElements = {
       container: document.getElementById('reviewContainer'),
       backButton: document.getElementById('backToResultsButton')
     };
+    
     // Form inputs
     const formInputs = {
       email: document.getElementById('email'),
       password: document.getElementById('password'),
       name: document.getElementById('name')
     };
+    
     const testSelect = document.getElementById('testSelect');
     const loadingOverlay = document.getElementById('loadingOverlay');
 
@@ -818,16 +1099,21 @@
       userAnswers: [],
       testData: null,
       timerInterval: null,
-      timeRemaining: 0
+      timeRemaining: 0,
+      completedTests: [],
+      inProgressTests: {},
+      testTypes: []
     };
 
     function toggleLoading(show) {
       loadingOverlay.style.display = show ? 'flex' : 'none';
     }
+    
     function showMessage(msg, type) {
       authElements.messageContainer.innerHTML =
         `<div class="message ${type}">${msg}</div>`;
     }
+    
     function clearMessage() {
       authElements.messageContainer.innerHTML = '';
     }
@@ -859,7 +1145,9 @@
         showMessage('Please enter both email and password.', 'error');
         return;
       }
+      
       toggleLoading(true);
+      
       try {
         if (!appState.isLoginMode) {
           // Sign up
@@ -869,28 +1157,35 @@
             toggleLoading(false);
             return;
           }
+          
           const userCredential = await auth.createUserWithEmailAndPassword(email, password);
           const user = userCredential.user;
+          
           await database.ref('users/' + user.uid).set({
             email, name, lastLogin: new Date().toString(), tests: {}
           });
+          
           showMessage('Account created successfully!', 'success');
           appState.currentUser = { uid: user.uid, name, email };
+          
           setTimeout(() => {
             showHomePage(name);
             toggleLoading(false);
           }, 1000);
+          
         } else {
           // Sign in
           const userCredential = await auth.signInWithEmailAndPassword(email, password);
           showMessage('Login successful!', 'success');
+          
           const user = userCredential.user;
           const snap = await database.ref('users/' + user.uid).once('value');
           const userData = snap.val();
+          
           await database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
+          
           appState.currentUser = { uid: user.uid, name: userData.name, email: userData.email };
-          const hasInProgress = userData.tests && userData.tests.inProgress;
-          homeElements.resumeTestButton.style.display = hasInProgress ? 'block' : 'none';
+          
           setTimeout(() => {
             showHomePage(userData.name);
             toggleLoading(false);
@@ -902,11 +1197,14 @@
       }
     });
 
-    // Populate testSelect on load
+    // Load tests and check auth on page load
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         const snap = await database.ref('questions').once('value');
         const tests = snap.exists() ? Object.keys(snap.val()) : [];
+        appState.testTypes = tests;
+        
+        // Populate testSelect
         testSelect.innerHTML = '';
         tests.forEach(key => {
           const opt = document.createElement('option');
@@ -914,19 +1212,34 @@
           opt.textContent = key.replace(/-/g,' ').toUpperCase();
           testSelect.appendChild(opt);
         });
+        
+        // Populate filterTest
+        summaryElements.filterTest.innerHTML = '<option value="all">All Tests</option>';
+        tests.forEach(key => {
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = key.replace(/-/g,' ').toUpperCase();
+          summaryElements.filterTest.appendChild(opt);
+        });
       } catch (err) {
         console.error('Error loading tests:', err);
         testSelect.innerHTML = '<option disabled>Error loading tests</option>';
       }
-      // Also check user auth state immediately
+      
+      // Check user auth state immediately
       auth.onAuthStateChanged(async (usr) => {
         if (usr) {
           toggleLoading(true);
           const snap = await database.ref('users/' + usr.uid).once('value');
           const data = snap.val();
           appState.currentUser = { uid: usr.uid, name: data.name, email: data.email };
-          const inProg = data.tests && data.tests.inProgress;
-          homeElements.resumeTestButton.style.display = inProg ? 'block' : 'none';
+          
+          // Load user's completed tests
+          await loadCompletedTests();
+          
+          // Load user's in-progress tests
+          await loadInProgressTests();
+          
           showHomePage(data.name);
           toggleLoading(false);
         } else {
@@ -935,6 +1248,274 @@
       });
     });
 
+    // Load completed tests
+    async function loadCompletedTests() {
+      try {
+        const snap = await database.ref(`users/${appState.currentUser.uid}/tests/completed`).once('value');
+        const data = snap.val() || {};
+        
+        // Convert to array
+        appState.completedTests = Object.entries(data).map(([id, test]) => ({
+          id,
+          ...test
+        }));
+        
+        // Update summary stats
+        updateSummaryStats();
+      } catch (err) {
+        console.error('Error loading completed tests:', err);
+      }
+    }
+
+    // Load in-progress tests
+    async function loadInProgressTests() {
+      try {
+        const snap = await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).once('value');
+        if (snap.exists()) {
+          // Convert to object with keys
+          const tests = {};
+          
+          // Check if it's an object with keys or a single in-progress test
+          if (snap.hasChildren()) {
+            snap.forEach(childSnap => {
+              const key = childSnap.key;
+              const val = childSnap.val();
+              tests[key] = val;
+            });
+          } else {
+            // For backward compatibility - old structure had a single in-progress test
+            const val = snap.val();
+            if (val) {
+              tests['default'] = val;
+            }
+          }
+          
+          appState.inProgressTests = tests;
+        } else {
+          appState.inProgressTests = {};
+        }
+      } catch (err) {
+        console.error('Error loading in-progress tests:', err);
+      }
+    }
+
+    // Update summary stats
+    function updateSummaryStats() {
+      const tests = appState.completedTests;
+      
+      // Total tests
+      summaryElements.totalTestsValue.textContent = tests.length;
+      
+      // Average score
+      if (tests.length > 0) {
+        const avgScore = tests.reduce((acc, test) => acc + test.percentage, 0) / tests.length;
+        summaryElements.avgScoreValue.textContent = `${Math.round(avgScore)}%`;
+        
+        // Best score
+        const bestScore = Math.max(...tests.map(test => test.percentage));
+        summaryElements.bestScoreValue.textContent = `${bestScore}%`;
+      } else {
+        summaryElements.avgScoreValue.textContent = '0%';
+        summaryElements.bestScoreValue.textContent = '0%';
+      }
+    }
+
+    // Filter and render completed tests
+    function renderCompletedTests() {
+      const container = summaryElements.completedTestsContainer;
+      const filterValue = summaryElements.filterTest.value;
+      const sortValue = summaryElements.sortBy.value;
+      
+      // Filter tests
+      let filteredTests = [...appState.completedTests];
+      if (filterValue !== 'all') {
+        filteredTests = filteredTests.filter(test => test.testKey === filterValue);
+      }
+      
+      // Sort tests
+      switch (sortValue) {
+        case 'date-desc':
+          filteredTests.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+          break;
+        case 'date-asc':
+          filteredTests.sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
+          break;
+        case 'score-desc':
+          filteredTests.sort((a, b) => b.percentage - a.percentage);
+          break;
+        case 'score-asc':
+          filteredTests.sort((a, b) => a.percentage - b.percentage);
+          break;
+      }
+      
+      // Render tests
+      container.innerHTML = '';
+      
+      if (filteredTests.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <p>No completed tests found</p>
+            <button class="btn btn-primary" onclick="showPage(pages.home)">
+              <i class="fas fa-play-circle"></i> Start a Test
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      filteredTests.forEach(test => {
+        const completedDate = new Date(test.completedAt);
+        const formattedDate = completedDate.toLocaleDateString();
+        const formattedTime = completedDate.toLocaleTimeString();
+        
+        // Format time taken
+        const minutes = Math.floor(test.timeSpent / 60);
+        const seconds = test.timeSpent % 60;
+        const timeTaken = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        const card = document.createElement('div');
+        card.className = 'test-card';
+        card.innerHTML = `
+          <div class="test-card-header">
+            <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
+            <div class="test-card-date">${formattedDate} at ${formattedTime}</div>
+          </div>
+          <div class="test-card-info">
+            <div class="test-card-stat">
+              <i class="fas fa-clipboard-check"></i>
+              <span>Score: ${test.score}/${test.questionCount}</span>
+            </div>
+            <div class="test-card-stat">
+              <i class="fas fa-percentage"></i>
+              <span>${test.percentage}%</span>
+            </div>
+            <div class="test-card-stat">
+              <i class="fas fa-clock"></i>
+              <span>Time: ${timeTaken}</span>
+            </div>
+          </div>
+        `;
+        
+        // Add event listener to view test details
+        card.addEventListener('click', () => {
+          // Future implementation: View detailed test results
+          alert('Detailed test view will be implemented in a future update.');
+        });
+        
+        container.appendChild(card);
+      });
+    }
+
+    // Render in-progress tests
+    function renderInProgressTests() {
+      const container = resumeElements.inProgressTestsContainer;
+      container.innerHTML = '';
+      
+      const tests = appState.inProgressTests;
+      const testIds = Object.keys(tests);
+      
+      if (testIds.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-hourglass-half"></i>
+            <p>No in-progress tests found</p>
+            <button class="btn btn-primary" onclick="showPage(pages.home)">
+              <i class="fas fa-play-circle"></i> Start a Test
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      testIds.forEach(testId => {
+        const test = tests[testId];
+        const startDate = new Date(test.startTime);
+        const formattedDate = startDate.toLocaleDateString();
+        const formattedTime = startDate.toLocaleTimeString();
+        
+        // Calculate progress
+        const answeredCount = test.answers ? test.answers.filter(a => a !== null).length : 0;
+        const progressPercent = Math.round((answeredCount / test.questionCount) * 100);
+        
+        const card = document.createElement('div');
+        card.className = 'test-card';
+        card.innerHTML = `
+          <div class="test-card-header">
+            <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
+            <div class="test-card-date">Started: ${formattedDate} at ${formattedTime}</div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" style="width:${progressPercent}%"></div>
+          </div>
+          <div class="test-card-info">
+            <div class="test-card-stat">
+              <i class="fas fa-tasks"></i>
+              <span>Progress: ${answeredCount}/${test.questionCount} questions</span>
+            </div>
+            <div class="test-card-stat">
+              <i class="fas fa-percentage"></i>
+              <span>${progressPercent}% Complete</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:1rem;">
+            <i class="fas fa-play-circle"></i> Resume Test
+          </button>
+        `;
+        
+        // Add event listener to resume this test
+        const resumeButton = card.querySelector('.btn');
+        resumeButton.addEventListener('click', () => {
+          resumeSpecificTest(testId);
+        });
+        
+        container.appendChild(card);
+      });
+    }
+
+    // Resume a specific test
+    async function resumeSpecificTest(testId) {
+      toggleLoading(true);
+      
+      try {
+        const test = appState.inProgressTests[testId];
+        if (!test) throw new Error('Test not found');
+        
+        // Get testKey from saved data
+        const testKey = test.testKey;
+        
+        const qs = await Promise.all(test.questions.map(id =>
+          database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
+        ));
+        
+        const valid = qs.filter(q => q !== null).map((q, idx) => ({
+          id: test.questions[idx],
+          ...q
+        }));
+        
+        appState.testQuestions = valid;
+        appState.userAnswers = test.answers || Array(valid.length).fill(null);
+        appState.currentQuestionIndex = test.lastQuestionIndex || 0;
+        appState.testData = test;
+        
+        // Set the current in-progress test ID
+        appState.currentInProgressTestId = testId;
+        
+        // timeRemaining
+        if (test.timeLimit > 0) {
+          const elapsed = Math.floor((new Date() - new Date(test.startTime)) / 1000);
+          appState.timeRemaining = Math.max(0, test.timeLimit * 60 - elapsed);
+        }
+        
+        showTestPage();
+      } catch (err) {
+        console.error('Error resuming test:', err);
+        alert('Could not resume test. Please try again or start a new test.');
+      } finally {
+        toggleLoading(false);
+      }
+    }
+
     // Start New Test
     homeElements.startTestButton.addEventListener('click', async () => {
       const testKey = testSelect.value;
@@ -942,21 +1523,26 @@
         alert('Please choose a test.');
         return;
       }
+      
       toggleLoading(true);
       homeElements.startTestButton.disabled = true;
+      
       try {
         // Load every question under that test
         const snap = await database.ref(`questions/${testKey}`).once('value');
         const data = snap.val();
         if (!data) throw new Error(`No questions for "${testKey}".`);
+        
         const questions = Object.entries(data).map(([id,q]) => ({ id, ...q }));
         appState.testQuestions = questions;
         appState.userAnswers = Array(questions.length).fill(null);
         appState.currentQuestionIndex = 0;
+        
         // Setup testData
         const timeLimitMin = parseInt(homeElements.timeLimit.value);
         appState.timeRemaining = timeLimitMin * 60;
-        appState.testData = {
+        
+        const testData = {
           startTime: new Date().toString(),
           answers: Array(questions.length).fill(null),
           completed: false,
@@ -965,58 +1551,52 @@
           timeLimit: timeLimitMin,
           testKey: testKey // Store testKey here
         };
-        await saveTestProgress();
+        
+        appState.testData = testData;
+        
+        // Generate a unique ID for this test
+        const newTestId = Date.now().toString();
+        appState.currentInProgressTestId = newTestId;
+        
+        // Save to in-progress tests
+        appState.inProgressTests[newTestId] = testData;
+        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${newTestId}`).set(testData);
+        
         showTestPage();
       } catch (err) {
         console.error('Error loading test:', err);
-        showMessage('Error: ' + err.message, 'error');
+        alert('Error: ' + err.message);
         homeElements.startTestButton.disabled = false;
       } finally {
         toggleLoading(false);
       }
     });
 
-    // Resume Test
-    homeElements.resumeTestButton.addEventListener('click', async () => {
-      toggleLoading(true);
-      homeElements.resumeTestButton.disabled = true;
-      try {
-        const snap = await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).once('value');
-        const saved = snap.val();
-        if (!saved || !saved.questions) throw new Error('No in-progress test');
-        
-        // Get testKey from saved data
-        const testKey = saved.testKey;
-        
-        const qs = await Promise.all(saved.questions.map(id =>
-          database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
-        ));
-        const valid = qs.filter(q => q !== null).map((q, idx) => ({
-          id: saved.questions[idx],
-          ...q
-        }));
-        
-        appState.testQuestions = valid;
-        appState.userAnswers = saved.answers || Array(valid.length).fill(null);
-        appState.currentQuestionIndex = saved.lastQuestionIndex || 0;
-        appState.testData = saved;
-        
-        // timeRemaining
-        if (saved.timeLimit > 0) {
-          const elapsed = Math.floor((new Date() - new Date(saved.startTime)) / 1000);
-          appState.timeRemaining = Math.max(0, saved.timeLimit * 60 - elapsed);
-        }
-        
-        showTestPage();
-      } catch (err) {
-        console.error(err);
-        alert('Could not resume test. Starting new test.');
-        homeElements.resumeTestButton.disabled = false;
-        homeElements.startTestButton.click();
-      } finally {
-        toggleLoading(false);
-      }
+    // Navigation to Resume Tests page
+    homeElements.resumeTestsButton.addEventListener('click', () => {
+      showPage(pages.resumeTests);
+      renderInProgressTests();
     });
+
+    // Navigation to Summary page
+    homeElements.summaryButton.addEventListener('click', () => {
+      showPage(pages.summary);
+      renderCompletedTests();
+    });
+
+    // Navigation back to Home from Summary
+    summaryElements.backButton.addEventListener('click', () => {
+      showHomePage(appState.currentUser.name);
+    });
+
+    // Navigation back to Home from Resume
+    resumeElements.backButton.addEventListener('click', () => {
+      showHomePage(appState.currentUser.name);
+    });
+
+    // Filter and sort change events
+    summaryElements.filterTest.addEventListener('change', renderCompletedTests);
+    summaryElements.sortBy.addEventListener('change', renderCompletedTests);
 
     // Save test progress
     async function saveTestProgress() {
@@ -1027,11 +1607,9 @@
         appState.testData.answers = appState.userAnswers;
         appState.testData.lastQuestionIndex = appState.currentQuestionIndex;
         
-        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).set(appState.testData);
+        const testId = appState.currentInProgressTestId || 'default';
         
-        // Update progress bar
-        const progress = (appState.userAnswers.filter(a => a !== null).length / appState.testQuestions.length) * 100;
-        homeElements.testProgress.style.width = progress + '%';
+        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${testId}`).set(appState.testData);
       } catch (err) {
         console.error('Error saving progress:', err);
       }
@@ -1175,10 +1753,20 @@
           timeSpent: timeSpent
         };
         
-        // Save to user's completed tests and remove from in-progress
+        // Save to user's completed tests
         const testId = Date.now();
         await database.ref(`users/${appState.currentUser.uid}/tests/completed/${testId}`).set(completedTest);
-        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).remove();
+        
+        // Remove from in-progress
+        const inProgressTestId = appState.currentInProgressTestId || 'default';
+        await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${inProgressTestId}`).remove();
+        
+        // Update appState
+        delete appState.inProgressTests[inProgressTestId];
+        appState.completedTests.push({
+          id: testId,
+          ...completedTest
+        });
         
         // Show results
         showResultsPage(score, percentage, timeSpent);
@@ -1284,7 +1872,6 @@
     function showHomePage(name) {
       showPage(pages.home);
       homeElements.startTestButton.disabled = false;
-      homeElements.resumeTestButton.disabled = false;
       formInputs.email.value = '';
       formInputs.password.value = '';
       formInputs.name.value = '';
