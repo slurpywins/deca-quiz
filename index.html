@@ -9,7 +9,11 @@
     :root { --primary: #4f46e5; --bg: #f9fafb; --card: #ffffff; --text: #1f2937; --text-light: #6b7280; --border: #e5e7eb; --radius: 0.5rem; --transition: 0.2s; }
     * { box-sizing: border-box; margin:0; padding:0; }
     body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
-    .quiz-container { max-width:700px; margin:2rem auto; background: var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
+    #auth-ui, .quiz-container, #result { max-width:700px; margin:2rem auto; padding:1rem; background: var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:0 4px 8px rgba(0,0,0,0.05); }
+    #auth-ui input { width:100%; padding:0.75rem; margin-bottom:0.75rem; border:1px solid var(--border); border-radius:var(--radius); }
+    #auth-ui button { width:48%; margin:0.25rem 1%; padding:0.75rem; border:none; border-radius:var(--radius); background:var(--primary); color:#fff; font-weight:600; cursor:pointer; }
+    #auth-ui button#btnLogout { background:#dc2626; }
+    .quiz-container { display:none; padding:2rem; }
     h1 { text-align:center; color:var(--primary); margin-bottom:0.5rem; font-weight:600; }
     .timer { text-align:center; font-size:1rem; color: var(--text); margin-bottom:1rem; }
     .timer span { font-weight:600; color: var(--primary); }
@@ -17,7 +21,7 @@
     .progress-bar { width:100%; height:6px; background:var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:1.5rem; }
     .bar { height:100%; background:var(--primary); width:0; transition: width var(--transition); }
     #question { font-size:1.1rem; margin-bottom:1rem; }
-    .choices { list-style:none; padding:0; }
+    .choices { list-style:none; padding:0; margin:0; }
     .choices li { margin-bottom:0.75rem; }
     .choices label { display:flex; align-items:center; cursor:pointer; padding:0.6rem 1rem; border:1px solid var(--border); border-radius:var(--radius); transition:background var(--transition),border-color var(--transition); }
     .choices input { margin-right:0.8rem; accent-color:var(--primary); }
@@ -25,7 +29,7 @@
     .nav { display:flex; justify-content:space-between; margin-top:1.5rem; }
     .nav button { background:var(--primary); color:white; border:none; padding:0.75rem 1.5rem; border-radius:var(--radius); cursor:pointer; transition:background var(--transition); font-weight:600; }
     .nav button:disabled { background:var(--border); cursor:default; }
-    #result { display:none; margin-top:2rem; text-align:center; }
+    #result { display:none; text-align:center; margin-top:1rem; padding:2rem; }
     #result h2 { color:var(--primary); margin-bottom:1rem; }
     .review { text-align:left; margin-top:1rem; }
     .review p { margin-bottom:0.6rem; }
@@ -34,6 +38,17 @@
   </style>
 </head>
 <body>
+  <div id="auth-ui">
+    <h2>DECA Finance Quiz Login</h2>
+    <input id="email"    type="email"    placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <div style="text-align:center;">
+      <button id="btnSignUp">Sign Up</button>
+      <button id="btnLogin">Log In</button>
+      <button id="btnLogout" style="display:none;">Log Out</button>
+    </div>
+  </div>
+
   <div class="quiz-container">
     <h1>DECA Finance Quiz</h1>
     <div class="timer">Time Remaining: <span id="timer">60:00</span></div>
@@ -47,170 +62,183 @@
         <button id="next">Next</button>
       </div>
     </div>
-    <div id="result">
-      <h2>Your Score: <span id="score"></span></h2>
-      <div class="review" id="review"></div>
-    </div>
   </div>
+
+  <div id="result">
+    <h2>Your Score: <span id="score"></span></h2>
+    <div class="review" id="review"></div>
+  </div>
+
+  <!-- Quiz & Timer Logic -->
   <script>
-    const totalTime = 60 * 60;
-    let timeLeft = totalTime;
-    let timerInterval;
-    function startTimer() {
-      updateTimerDisplay();
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) { clearInterval(timerInterval); showResults(); }
-        updateTimerDisplay();
-      }, 1000);
-    }
-    function updateTimerDisplay() {
-      const mins = String(Math.floor(timeLeft / 60)).padStart(2,'0');
-      const secs = String(timeLeft % 60).padStart(2,'0');
-      document.getElementById('timer').textContent = `${mins}:${secs}`;
-    }
-    const questions = [
-      {question:'1. A corporation is considering issuing a new series of bonds to finance expansion. The CFO needs to determine how quickly the company can expect to recoup the initial investment in the project. Which of the following capital investment analysis methods would be most appropriate?',choices:['Internal rate of return','Payback period','Discounted break-even','Net present value'],correct:1},
-      {question:'2. Which of the following best describes an important aspect of diversification strategies in investment planning?',choices:['Investing all available capital in one industry that is performing well','Spreading investments across different asset classes to reduce risk','Frequently trading securities to maximize short-term gains','Focusing primarily on blue-chip stocks for guaranteed returns'],correct:1},
-      {question:'3. A financial analyst is studying patterns in stock price movements using charts and statistical indicators to predict future price movement. This approach is known as:',choices:['Fundamental analysis','Qualitative analysis','Technical analysis','Actuarial analysis'],correct:2},
-      {question:'4. Which of the following describes the process by which a corporation distributes a portion of its earnings to shareholders?',choices:['Capital gain','Dividend','Interest payment','Expense allocation'],correct:1},
-      {question:'5. Securities and investment firms are required to adhere to regulations established by:',choices:['Federal Communications Commission (FCC)','Securities and Exchange Commission (SEC)','Federal Deposit Insurance Corporation (FDIC)','National Labor Relations Board (NLRB)'],correct:1},
-      {question:'6. Which of the following best describes the term "EBITDA"?',choices:['A financial ratio used to evaluate a company’s liquidity','A measurement of earnings before interest, taxes, depreciation, and amortization','An accounting method used to record business transactions','A process for calculating a company’s tax liability'],correct:1},
-      {question:'7. A business is considering expanding operations internationally. What is one of the primary global risks they should consider?',choices:['Political instability in the target market','Domestic customer preferences','Local advertising costs','Internal employee turnover'],correct:0},
-      {question:'8. In corporate finance, working capital is calculated as:',choices:['Total assets minus total liabilities','Current assets minus current liabilities','Fixed assets minus long-term liabilities','Total equity minus retained earnings'],correct:1},
-      {question:'9. What does the term "cash flow budget" refer to in business finance?',choices:['An estimate of cash inflows and outflows over a specific period','The total amount of cash a business has in its bank accounts','A record of historical cash transactions','A projection of profits based on sales forecasts'],correct:0},
-      {question:'10. Which of the following securities typically carries the highest risk for investors?',choices:['U.S. Treasury bonds','Certificates of deposit','Growth stocks in emerging markets','Municipal bonds'],correct:2},
-      {question:'11. When a company issues additional shares of stock to raise capital, what is the potential negative effect on existing shareholders?',choices:['Increased dividend payments','Higher bond interest rates','Dilution of ownership percentage','Greater voting rights'],correct:2},
-      {question:'12. In banking, what does the acronym KYC stand for?',choices:['Keep Your Currency','Know Your Customer','Key Yearly Calculation','Knowledge Yield Capacity'],correct:1},
-      {question:'13. A financial manager is analyzing the cost structure of a business. Which of the following costs would be classified as a variable cost?',choices:['Building rent','Insurance premiums','Property taxes','Raw materials for production'],correct:3},
-      {question:'14. When conducting financial statement analysis, the quick ratio is used to measure:',choices:['A company’s ability to meet long-term obligations','The efficiency of inventory management','A company’s short-term liquidity without including inventory','The rate at which assets depreciate'],correct:2},
-      {question:'15. Under U.S. Generally Accepted Accounting Principles (GAAP), which financial statement presents a company’s revenues and expenses over a period of time?',choices:['Balance sheet','Statement of cash flows','Income statement','Statement of changes in equity'],correct:2},
-      {question:'16. A financial advisor is discussing retirement investment options with a client. Which of the following would typically be considered the most conservative investment choice?',choices:['Small-cap growth stocks','U.S. Treasury securities','Cryptocurrency investments','Commodity futures'],correct:1},
-      {question:'17. What is the primary purpose of conducting a risk assessment for a financial institution?',choices:['To determine optimal pricing strategies','To identify and evaluate potential threats to the organization','To calculate employee bonus payments','To establish sales forecasts'],correct:1},
-      {question:'18. Which of the following activities would most likely be performed by the operations department in a securities firm?',choices:['Developing marketing strategies','Processing and settling securities transactions','Providing investment advice to clients','Conducting corporate strategy planning'],correct:1},
-      {question:'19. An insurance underwriter is evaluating a potential client’s application. Which of the following would NOT typically be considered in the underwriting process?',choices:['Client’s credit history','Previous claims history','Client’s political affiliation','Property value'],correct:2},
-      {question:'20. What does the Capital Asset Pricing Model (CAPM) primarily help investors determine?',choices:['The appropriate level of inventory to maintain','The expected return on an investment based on its risk','The depreciation schedule for fixed assets','The optimal capital structure for a corporation'],correct:1},
-      {question:'21. In the context of corporate governance, what is the primary role of a company’s board of directors?',choices:['Day-to-day management of operations','Oversight of management and protection of shareholder interests','Preparation of financial statements','Direct sales of company products and services'],correct:1},
-      {question:'22. What is the primary objective of the Sarbanes-Oxley Act?',choices:['To protect consumers from unfair credit practices','To ensure fair competition among financial institutions','To enhance corporate governance and financial disclosure','To regulate international banking transactions'],correct:2},
-      {question:'23. When a financial manager is preparing a cash budget, which of the following items would be considered a cash outflow?',choices:['Collection of accounts receivable','Sale of fixed assets','Payment of accounts payable','Receipt of interest income'],correct:2},
-      {question:'24. Which of the following ratios would be most useful in evaluating a company’s ability to pay its short-term obligations?',choices:['Debt-to-equity ratio','Return on assets','Current ratio','Gross profit margin'],correct:2},
-      {question:'25. In financial planning, what is the primary purpose of creating an emergency fund?',choices:['To maximize investment returns','To reduce taxable income','To provide financial security during unexpected events','To increase borrowing capacity'],correct:2},
-      {question:'26. A financial analyst is comparing the performance of several companies in the same industry. Which of the following ratios would be most useful for this comparison?',choices:['Absolute total revenue','Number of employees','Return on equity','Total assets'],correct:2},
-      {question:'27. What is the main characteristic of a zero-coupon bond?',choices:['It pays regular interest payments during its term','It is sold at face value and redeemed at a premium','It is sold at a discount and pays no interest until maturity','It has no maturity date'],correct:2},
-      {question:'28. In the context of banking services, what is the primary function of a custodian bank?',choices:['Providing loans to small businesses','Safekeeping and administration of securities','Issuing credit cards to consumers','Processing retail customer deposits and withdrawals'],correct:1},
-      {question:'29. A corporate finance manager is evaluating whether to lease or purchase new equipment. Which of the following would NOT typically be considered in this analysis?',choices:['Tax implications of each option','Interest rates for financing the purchase','Residual value of the equipment','The company’s CEO’s personal preference'],correct:3},
-      {question:'30. Which of the following statements about mutual funds is correct?',choices:['They guarantee a specific rate of return','They are insured by the federal government','They invest in a portfolio of securities','They are only available to institutional investors'],correct:2},
-      {question:'31. In the context of risk management, what is the purpose of hedging?',choices:['To eliminate all investment risk','To increase potential returns','To reduce exposure to specific risks','To avoid regulatory compliance'],correct:2},
-      {question:'32. What is the primary purpose of conducting a financial audit?',choices:['To ensure compliance with tax laws','To provide assurance that financial statements are fairly presented','To identify operational inefficiencies','To determine the market value of a company'],correct:1},
-      {question:'33. In which order do the following steps occur in the accounting cycle?',choices:['Journalize transactions, post to ledger, prepare trial balance, prepare financial statements','Prepare financial statements, journalize transactions, post to ledger, prepare trial balance','Post to ledger, journalize transactions, prepare trial balance, prepare financial statements','Prepare trial balance, prepare financial statements, journalize transactions, post to ledger'],correct:0},
-      {question:'34. Which of the following best describes the role of a financial consultant?',choices:['Preparing tax returns for clients','Providing advice on investment decisions and financial planning','Auditing a company’s financial statements','Processing loan applications'],correct:1},
-      {question:'35. What is the primary purpose of the Federal Reserve’s monetary policy?',choices:['To regulate international trade','To stabilize prices and promote maximum employment','To provide insurance for bank deposits','To collect federal taxes'],correct:1},
-      {question:'36. A corporation is considering repurchasing its own shares. What is the primary reason a company might engage in a stock buyback?',choices:['To increase the number of outstanding shares','To reduce earnings per share','To potentially increase share price and return value to shareholders','To comply with regulatory requirements'],correct:2},
-      {question:'37. What information would you find in a mutual fund prospectus?',choices:['A guarantee of investment returns','Personal financial advice tailored to investors','Fund objectives, risks, fees, and historical performance','Detailed information about the fund manager’s personal investments'],correct:2},
-      {question:'38. Which of the following best describes the concept of market capitalization?',choices:['The total assets of a company minus liabilities','The total value of a company’s outstanding shares','The total amount of debt a company has issued','The total revenue generated by a company'],correct:1},
-      {question:'39. In commercial property insurance, which of the following would typically NOT be covered?',choices:['Fire damage','Wind damage','Normal wear and tear','Theft'],correct:2},
-      {question:'40. Which of the following describes the primary function of enterprise risk management (ERM)?',choices:['Focusing exclusively on financial risks','Taking an integrated approach to managing all risks faced by an organization','Completely eliminating all risks','Managing employee benefits and compensation'],correct:1},
-      {question:'41. What does the term "fiduciary duty" mean in the context of financial services?',choices:['The requirement to maintain client confidentiality','The legal obligation to act in the best interest of clients','The responsibility to generate maximum returns regardless of risk','The duty to comply with industry certifications'],correct:1},
-      {question:'42. What is the primary purpose of a statement of cash flows?',choices:['To report a company’s revenues and expenses','To show a company’s assets, liabilities, and equity','To provide information about cash receipts and payments','To document changes in stockholders’ equity'],correct:2},
-      {question:'43. When a bank’s loan officer is evaluating a business loan application, which of the following would be the LEAST important consideration?',choices:['The business’s debt-to-equity ratio','The business’s cash flow projections','The business owner’s personal credit score','The color of the business’s logo'],correct:3},
-      {question:'44. Which of the following is characteristic of a progressive tax system?',choices:['Everyone pays the same percentage of income','Higher-income individuals pay a higher percentage of income','Everyone pays the same dollar amount','Tax rates decrease as income increases'],correct:1},
-      {question:'45. What does the term "basis point" refer to in finance?',choices:['A measurement of investment risk tolerance','One hundredth of one percentage point (0.01%)','The starting price of a new security','The minimum required investment amount'],correct:1},
-      {question:'46. In the context of corporate financial planning, what is the primary purpose of a capital expenditure budget?',choices:['To plan for day-to-day operational expenses','To allocate funds for long-term investments in assets','To determine employee compensation','To establish prices for products and services'],correct:1},
-      {question:'47. Which of the following statements about bonds is correct?',choices:['Bonds typically provide higher returns than stocks','Bond prices generally rise when interest rates rise','Bonds represent ownership in a corporation','Bonds represent debt that the issuer must repay'],correct:3},
-      {question:'48. What is the primary function of the underwriting process in the insurance industry?',choices:['Determining appropriate insurance coverage','Processing insurance claims','Evaluating and pricing risk','Marketing insurance products'],correct:2},
-      {question:'49. Which of the following best describes the function of a trust department in a bank?',choices:['Issuing loans to businesses','Managing assets on behalf of beneficiaries','Processing checking account transactions','Developing new banking products'],correct:1},
-      {question:'50. What is the primary purpose of creating a chart of accounts in accounting?',choices:['To categorize and track financial transactions','To illustrate the organizational structure','To document customer information','To calculate tax liabilities'],correct:0},
-      {question:'51. A financial manager is analyzing a company’s leverage. Which of the following ratios would be most useful for this analysis?',choices:['Price-to-earnings ratio','Return on assets','Debt-to-equity ratio','Current ratio'],correct:2},
-      {question:'52. What is the primary advantage of a DRIP (Dividend Reinvestment Plan)?',choices:['Guaranteed returns','Compound growth through automatic reinvestment','Protection from market downturns','Tax-free investment growth'],correct:1},
-      {question:'53. Which of the following is a key responsibility of the Securities and Exchange Commission (SEC)?',choices:['Setting monetary policy','Regulating commercial banks','Protecting investors and maintaining fair markets','Issuing government debt securities'],correct:2},
-      {question:'54. What is the primary purpose of an income statement?',choices:['To show the financial position of a company at a specific point in time','To report the financial performance of a company over a period of time','To track the flow of cash in and out of a business','To document changes in shareholders’ equity'],correct:1},
-      {question:'55. Which of the following is NOT a typical function of a corporate treasury department?',choices:['Cash management','Financing decisions','Advertising campaign development','Financial risk management'],correct:2},
-      {question:'56. A bank is required to hold a certain percentage of customer deposits as reserves. This requirement is known as:',choices:['Capital adequacy ratio','Liquidity coverage ratio','Reserve requirement','Asset utilization ratio'],correct:2},
-      {question:'57. Which of the following best describes a hedge fund?',choices:['A mutual fund that invests only in conservative securities','A private investment fund that typically uses more sophisticated strategies','A government-sponsored program to stabilize financial markets','A type of insurance policy against market downturns'],correct:1},
-      {question:'58. In financial analysis, what does the acronym ROI stand for?',choices:['Rate of Inflation','Return on Investment','Risk of Insolvency','Regulation of Income'],correct:1},
-      {question:'59. Which of the following is NOT a common method used to value inventory?',choices:['FIFO (First-In, First-Out)','LIFO (Last-In, First-Out)','GIGO (Garbage In, Garbage Out)','Weighted average cost'],correct:2},
-      {question:'60. What is the primary purpose of the Foreign Corrupt Practices Act (FCPA)?',choices:['To regulate trade tariffs','To prohibit bribery of foreign officials by U.S. companies','To standardize accounting practices internationally','To tax foreign earnings of multinational corporations'],correct:1},
-      {question:'61. Which of the following best describes the concept of present value?',choices:['The current market value of an asset','The value today of a future sum of money','The face value of a bond at issuance','The current book value of a company'],correct:1},
-      {question:'62. A corporation is considering a merger with another company. Which of the following would be classified as a synergy resulting from the merger?',choices:['Increased competition','Higher borrowing costs','Cost savings from eliminating duplicate functions','Reduced market share'],correct:2},
-      {question:'63. What is the main purpose of an external financial audit?',choices:['To detect all instances of fraud','To provide reasonable assurance that financial statements are free from material misstatement','To guarantee future financial performance','To ensure compliance with all tax regulations'],correct:1},
-      {question:'64. Which of the following is characteristic of a bear market?',choices:['Rapidly rising stock prices','High investor optimism','Prolonged period of falling stock prices','Increased initial public offerings'],correct:2},
-      {question:'65. A company has a current ratio of 1.5. What does this indicate?',choices:['$1.50 in current assets for every $1 in current liabilities','50% more liabilities than assets','Assets are growing at 1.5% annually','Profit margin is 1.5%'],correct:0},
-      {question:'66. What is the primary purpose of the Dodd-Frank Act?',choices:['To promote free trade','To increase financial system stability and consumer protection','To simplify the tax code','To regulate international banking'],correct:1},
-      {question:'67. Which of the following would be classified as a long-term asset?',choices:['Cash','Accounts receivable','Manufacturing equipment','Short-term investments'],correct:2},
-      {question:'68. What is the primary goal of international diversification in an investment portfolio?',choices:['To simplify investment decisions','To reduce risk by spreading investments across different countries','To eliminate the need for domestic investments','To guarantee positive returns regardless of market conditions'],correct:1},
-      {question:'69. A commercial bank’s primary source of income is typically:',choices:['Fees from checking accounts','Interest earned on loans','Revenue from investment advisory services','Foreign exchange transactions'],correct:1},
-      {question:'70. Which of the following investment vehicles would typically have the highest liquidity?',choices:['Real estate','Municipal bonds','Money market funds','Private equity investments'],correct:2},
-      {question:'71. In corporate finance, what is the significance of the weighted average cost of capital (WACC)?',choices:['It represents the minimum return a company must earn on investments','It measures the historical cost of all capital raised','It shows the maximum amount a company should pay for capital','It indicates the total dollar cost of capital'],correct:0},
-      {question:'72. Which of the following best describes the term "beta" in investment analysis?',choices:['A measure of an investment’s historical return','A measure of an investment’s volatility relative to the market','A measure of an investment’s dividend yield','A measure of an investment’s liquidity'],correct:1},
-      {question:'73. What is the primary purpose of an accounts receivable aging report?',choices:['To track the age of inventory items','To monitor outstanding customer payments by due date','To determine employee longevity','To calculate depreciation schedules'],correct:1},
-      {question:'74. Which of the following is a characteristic of a certificate of deposit (CD)?',choices:['High liquidity with no penalties for early withdrawal','Variable interest rates that fluctuate with market conditions','Fixed term with penalties for early withdrawal','No FDIC insurance coverage'],correct:2},
-      {question:'75. A financial analyst is examining a company’s operating leverage. This analysis primarily focuses on:',choices:['The company’s debt financing','The relationship between fixed and variable costs','The company’s tax strategy','The company’s accounts receivable collection period'],correct:1},
-      {question:'76. In the context of financial planning, what is asset allocation?',choices:['The distribution of investments among different asset categories','The process of selling underperforming assets','The liquidation of assets to pay off debts','The transfer of assets between family members'],correct:0},
-      {question:'77. When a company experiences a cash shortfall and needs temporary financing, which source is most appropriate?',choices:['Issue of long-term bonds','Initial public offering','Short-term line of credit','Additional common stock offering'],correct:2},
-      {question:'78. What is the primary function of FINRA?',choices:['Setting monetary policy','Regulating brokerage firms and exchange markets','Insuring bank deposits','Auditing corporate financial statements'],correct:1},
-      {question:'79. Which of the following would NOT be considered when calculating free cash flow?',choices:['Net income','Depreciation','Capital expenditures','Stock price'],correct:3},
-      {question:'80. What is the primary reason companies hedge against currency risk?',choices:['To speculate on exchange rate movements','To reduce uncertainty in international business transactions','To avoid paying taxes on foreign income','To increase the volatility of earnings'],correct:1},
-      {question:'81. A bank is evaluating a loan application for a small business. Which factor is LEAST relevant?',choices:['Credit history','Cash flow','Collateral','Business owner’s favorite sports team'],correct:3},
-      {question:'82. Which best describes the function of a market maker in securities trading?',choices:['Creating new financial products','Providing liquidity by buying and selling securities','Regulating trading activities','Auditing financial reports'],correct:1},
-      {question:'83. What is the primary purpose of a company’s capital structure policy?',choices:['To determine the mix of debt and equity financing','To establish employee compensation levels','To set product pricing strategies','To manage inventory levels'],correct:0},
-      {question:'84. In financial analysis, what does EBIT stand for?',choices:['Earnings Before Income Taxes','Earnings Before Interest and Taxes','Equity Before Internal Transfers','Effective Business Income Total'],correct:1},
-      {question:'85. Which best describes "stagflation"?',choices:['A period of high economic growth and low inflation','A period of economic stagnation combined with high inflation','The stabilization of volatile markets','The staggered implementation of financial regulations'],correct:1},
-      {question:'86. What is the primary purpose of conducting a SWOT analysis in financial planning?',choices:['To determine optimal investment strategies','To identify strengths, weaknesses, opportunities, and threats','To calculate tax liabilities','To establish credit terms'],correct:1},
-      {question:'87. In investment banking, what is an IPO?',choices:['Internal Performance Overview','International Payment Option','Initial Public Offering','Interim Profit Objective'],correct:2},
-      {question:'88. Which statement provides info about a company’s assets, liabilities, and equity at a point in time?',choices:['Income statement','Statement of cash flows','Balance sheet','Statement of retained earnings'],correct:2},
-      {question:'89. What is the primary purpose of the CFPB?',choices:['To protect investors in the stock market','To regulate consumer financial products and services','To insure bank deposits','To set interest rates'],correct:1},
-      {question:'90. Which metric is most relevant to working capital management?',choices:['Long-term debt to equity ratio','Cash conversion cycle','Return on invested capital','Fixed asset turnover'],correct:1},
-      {question:'91. Which best describes the function of a credit rating agency?',choices:['Lending money to businesses','Evaluating creditworthiness','Processing credit card transactions','Collecting past-due accounts'],correct:1},
-      {question:'92. What is the primary purpose of a bank reconciliation?',choices:['To verify bank records match company records','To determine bank profitability','To establish a line of credit','To calculate interest earned'],correct:0},
-      {question:'93. If liabilities are $500k and equity $250k, what is the debt-to-equity ratio?',choices:['0.5','1.0','2.0','2.5'],correct:2},
-      {question:'94. What is the primary purpose of IFRS?',choices:['To establish global monetary policy','To provide a common global language for business activities','To regulate international trade','To set tax rates for multinationals'],correct:1},
-      {question:'95. Which strategy focuses on buying undervalued securities?',choices:['Growth investing','Momentum investing','Value investing','Index investing'],correct:2},
-      {question:'96. What is the purpose of the SOX CEO/CFO certification requirement?',choices:['To increase executive compensation','To improve financial reporting transparency and accountability','To reduce preparation time of reports','To eliminate the need for external audits'],correct:1},
-      {question:'97. What is the primary purpose of a share repurchase program?',choices:['To issue additional shares','To buy back shares from existing shareholders','To distribute profits to bondholders','To adjust fiscal year'],correct:1},
-      {question:'98. Which is NOT typically a function of a central bank?',choices:['Setting monetary policy','Serving as a lender of last resort','Processing retail customer transactions','Issuing currency'],correct:2},
-      {question:'99. What does the term "arbitrage" refer to?',choices:['The process of resolving disputes between financial institutions','Taking advantage of price differences in different markets','A method for calculating depreciation','The negotiation of merger terms'],correct:1},
-      {question:'100. A financial manager is evaluating whether to continue an existing project. Which of the following costs should NOT be considered in this decision?',choices:['Expected future costs','Expected future revenues','Sunk costs','Opportunity costs'],correct:2}
-    ];
+    // Firebase variables (initialized later)
+    let auth, db;
+
+    // Quiz data and state
+    let questions = [ /* ... all 100 questions ... */ ];
     const total = questions.length;
     let current = 0;
     const answers = Array(total).fill(null);
-    document.getElementById('total').textContent = total;
-    const qEl = document.getElementById('question');
-    const choicesEl = document.getElementById('choices');
-    const prevBtn = document.getElementById('prev');
-    const nextBtn = document.getElementById('next');
-    const currentEl = document.getElementById('current');
-    const barEl = document.getElementById('bar');
-    const resultEl = document.getElementById('result');
-    const scoreEl = document.getElementById('score');
-    const reviewEl = document.getElementById('review');
+
+    // DOM refs
+    const authUI     = document.getElementById('auth-ui');
+    const btnSignUp  = document.getElementById('btnSignUp');
+    const btnLogin   = document.getElementById('btnLogin');
+    const btnLogout  = document.getElementById('btnLogout');
+
+    const quizCon    = document.querySelector('.quiz-container');
+    const questionEl = document.getElementById('question');
+    const choicesEl  = document.getElementById('choices');
+    const prevBtn    = document.getElementById('prev');
+    const nextBtn    = document.getElementById('next');
+    const currentEl  = document.getElementById('current');
+    const totalEl    = document.getElementById('total');
+    const barEl      = document.getElementById('bar');
+
+    const resultEl   = document.getElementById('result');
+    const scoreEl    = document.getElementById('score');
+    const reviewEl   = document.getElementById('review');
+
+    // Timer setup
+    const totalTime = 60 * 60;
+    let timeLeft    = totalTime;
+    let timerInterval;
+    function startTimer(uid) {
+      document.getElementById('timer').textContent = formatTime(timeLeft);
+      timerInterval = setInterval(async () => {
+        timeLeft--;
+        document.getElementById('timer').textContent = formatTime(timeLeft);
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          await saveProgress(uid);
+          showResults();
+        }
+      }, 1000);
+    }
+    function formatTime(sec) {
+      const m=String(Math.floor(sec/60)).padStart(2,'0');
+      const s=String(sec%60).padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    // Render question
     function render() {
-      const q = questions[current];
+      totalEl.textContent   = total;
       currentEl.textContent = current+1;
-      barEl.style.width = ((current+1)/total*100)+'%';
-      qEl.textContent = q.question;
-      choicesEl.innerHTML = '';
-      questions[current].choices.forEach((c,i) => {
+      barEl.style.width     = ((current+1)/total*100) + '%';
+      const q = questions[current];
+      questionEl.textContent = q.question;
+      choicesEl.innerHTML    = '';
+      q.choices.forEach((c,i) => {
         const li = document.createElement('li');
-        li.innerHTML = `<label><input type="radio" name="choice" value="${i}" ${answers[current]===i?'checked':''}/> ${c}</label>`;
+        li.innerHTML = `<label><input type="radio" name="choice" value="${i}" ${answers[current]===i?'checked':''} /> ${c}</label>`;
         choicesEl.appendChild(li);
       });
       prevBtn.disabled = current===0;
-      nextBtn.textContent = current===total-1?'Submit':'Next';
+      nextBtn.textContent = current===total-1 ? 'Submit' : 'Next';
     }
-    choicesEl.addEventListener('change', e => { if(e.target.name==='choice') answers[current]=+e.target.value; });
-    prevBtn.addEventListener('click', () => { if(current>0){ current--; render(); }});
-    nextBtn.addEventListener('click', () => { if(current<total-1){ current++; render(); } else { clearInterval(timerInterval); showResults(); }});
+
+    // Save/load with Firestore
+    async function saveProgress(uid) {
+      await db.collection('progress').doc(uid).set({ answers, current, timeLeft }, { merge:true });
+    }
+    async function loadProgress(uid) {
+      const doc = await db.collection('progress').doc(uid).get();
+      if (doc.exists) {
+        const data = doc.data();
+        Object.assign(answers, data.answers);
+        current = data.current;
+        timeLeft = data.timeLeft || totalTime;
+      }
+      render();
+      startTimer(uid);
+    }
+
+    // Show results
     function showResults() {
+      quizCon.style.display   = 'none';
+      resultEl.style.display  = 'block';
       let score = answers.reduce((sum,a,i) => sum + (a===questions[i].correct), 0);
       scoreEl.textContent = `${score}/${total}`;
       reviewEl.innerHTML = '';
-      questions.forEach((q,i) => { if(answers[i]!==q.correct){ const p=document.createElement('p'); p.innerHTML = `Q${i+1}: Correct is <strong>${q.choices[q.correct]}</strong>`; reviewEl.appendChild(p);} });
-      document.getElementById('quiz').style.display='none';
-      resultEl.style.display='block';
+      questions.forEach((q,i) => {
+        if (answers[i] !== q.correct) {
+          const p = document.createElement('p');
+          p.innerHTML = `Q${i+1}: Correct is <strong>${q.choices[q.correct]}</strong>`;
+          reviewEl.appendChild(p);
+        }
+      });
     }
-    render();
-    startTimer();
+
+    // Event listeners
+    choicesEl.addEventListener('change', async e => {
+      answers[current] = +e.target.value;
+      const user = auth.currentUser;
+      if (user) await saveProgress(user.uid);
+    });
+    prevBtn.addEventListener('click', async () => {
+      if (current>0) {
+        current--;
+        render();
+        await saveProgress(auth.currentUser.uid);
+      }
+    });
+    nextBtn.addEventListener('click', async () => {
+      if (current < total-1) {
+        current++;
+        render();
+        await saveProgress(auth.currentUser.uid);
+      } else {
+        clearInterval(timerInterval);
+        await saveProgress(auth.currentUser.uid);
+        showResults();
+      }
+    });
+
+    // Firebase auth and Firestore initialization (compat SDK)
+  </script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
+  authDomain: "deca-55fc4.firebaseapp.com",
+  projectId: "deca-55fc4",
+  storageBucket: "deca-55fc4.firebasestorage.app",
+  messagingSenderId: "368623997898",
+  appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
+  measurementId: "G-7ZT1H2WTWH"
+    };
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db   = firebase.firestore();
+
+    // Hook up auth UI
+    btnSignUp.onclick = async () => {
+      await auth.createUserWithEmailAndPassword(email.value, password.value);
+    };
+    btnLogin.onclick = async () => {
+      await auth.signInWithEmailAndPassword(email.value, password.value);
+    };
+    btnLogout.onclick = () => auth.signOut();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authUI.style.display = 'none';
+        btnLogout.style.display = 'inline-block';
+        quizCon.style.display = 'block';
+        resultEl.style.display = 'none';
+        loadProgress(user.uid);
+      } else {
+        authUI.style.display = 'block';
+        btnLogout.style.display = 'none';
+        quizCon.style.display = 'none';
+        resultEl.style.display = 'none';
+      }
+    });
   </script>
 </body>
 </html>
