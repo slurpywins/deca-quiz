@@ -3,8 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Auth Demo</title>
+    <title>DECA Finance Test Platform</title>
     <style>
+        :root {
+            --primary-color: #4285F4;
+            --primary-dark: #3367D6;
+            --danger-color: #F44336;
+            --danger-dark: #D32F2F;
+            --success-color: #4CAF50;
+            --success-dark: #388E3C;
+            --warning-color: #FFA000;
+            --warning-dark: #FF8F00;
+            --light-bg: #f5f5f5;
+            --border-color: #ddd;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -13,49 +32,56 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f5f5f5;
+            background-color: var(--light-bg);
         }
+        
         .container {
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--box-shadow);
             padding: 30px;
             width: 90%;
             max-width: 800px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
+        
         .auth-page {
             display: block;
             max-width: 350px;
             margin: 0 auto;
         }
-        .home-page {
+        
+        .page {
             display: none;
         }
+        
         h1, h2 {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
         }
+        
         .form-group {
             margin-bottom: 20px;
         }
+        
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
             color: #555;
         }
+        
         input {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 16px;
-            box-sizing: border-box;
         }
+        
         button {
-            background-color: #4285F4;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 4px;
@@ -63,134 +89,184 @@
             width: 100%;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: var(--transition);
             margin-bottom: 10px;
         }
+        
         button:hover {
-            background-color: #3367D6;
+            background-color: var(--primary-dark);
         }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
         .toggle-form {
             text-align: center;
             margin-top: 20px;
         }
+        
         .toggle-form a {
-            color: #4285F4;
+            color: var(--primary-color);
             text-decoration: none;
             cursor: pointer;
         }
+        
         .toggle-form a:hover {
             text-decoration: underline;
         }
+        
         .message {
             padding: 10px;
             border-radius: 4px;
             margin-bottom: 20px;
             text-align: center;
         }
+        
         .error {
             background-color: #FFEBEE;
-            color: #D32F2F;
+            color: var(--danger-dark);
         }
+        
         .success {
             background-color: #E8F5E9;
-            color: #388E3C;
+            color: var(--success-dark);
         }
+        
         .message-container {
             min-height: 60px;
         }
+        
         .welcome-message {
             text-align: center;
             font-size: 18px;
             margin-bottom: 20px;
         }
+        
         .logout-btn {
-            background-color: #F44336;
+            background-color: var(--danger-color);
             margin-top: 20px;
         }
+        
         .logout-btn:hover {
-            background-color: #D32F2F;
+            background-color: var(--danger-dark);
         }
+        
         .test-options {
             margin: 30px 0;
             padding: 20px;
-            border: 1px solid #eee;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             background-color: #f9f9f9;
         }
+        
         .action-btn {
             margin: 5px 0;
             font-weight: bold;
         }
+        
         .test-header {
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
+        
         .test-info {
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
             font-weight: bold;
         }
+        
         .question-container {
             padding: 20px;
-            border: 1px solid #eee;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             margin-bottom: 20px;
             min-height: 200px;
         }
+        
         .options-container {
             margin-top: 20px;
         }
+        
         .option-item {
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             margin-bottom: 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: var(--transition);
         }
+        
         .option-item:hover {
             background-color: #f0f7ff;
         }
+        
         .option-selected {
             background-color: #e3f2fd;
             border-color: #2196F3;
         }
+        
         .test-navigation {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
         }
+        
         .nav-btn, .exit-btn, .submit-btn {
             width: 48%;
             margin: 5px 0;
         }
+        
         .exit-btn {
-            background-color: #FFA000;
+            background-color: var(--warning-color);
         }
+        
         .exit-btn:hover {
-            background-color: #FF8F00;
+            background-color: var(--warning-dark);
         }
+        
         .submit-btn {
-            background-color: #4CAF50;
+            background-color: var(--success-color);
         }
+        
         .submit-btn:hover {
-            background-color: #388E3C;
+            background-color: var(--success-dark);
         }
+        
         .results-summary {
             background-color: #f0f7ff;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        
         .results-actions {
             display: flex;
             justify-content: space-between;
         }
+        
         .results-actions button {
             width: 48%;
         }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
         @media (max-width: 600px) {
             .container {
                 width: 95%;
@@ -209,12 +285,44 @@
                 width: 100%;
             }
         }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
     <div class="container">
         <!-- Authentication Page -->
-        <div id="authPage" class="auth-page">
+        <div id="authPage" class="page auth-page">
             <h1 id="authTitle">Sign In</h1>
             
             <div id="messageContainer" class="message-container"></div>
@@ -246,11 +354,15 @@
         </div>
         
         <!-- Home Page -->
-        <div id="homePage" class="home-page">
-            <h1>Welcome</h1>
+        <div id="homePage" class="page">
+            <h1>Welcome to DECA Finance Test</h1>
             <div id="welcomeMessage" class="welcome-message"></div>
             <div class="test-options">
                 <h2>Test Options</h2>
+                <p>Practice your finance knowledge with our comprehensive question bank.</p>
+                <div class="progress-container">
+                    <div id="testProgress" class="progress-bar" style="width: 0%"></div>
+                </div>
                 <button id="startTestButton" class="action-btn">Start New Test</button>
                 <button id="resumeTestButton" class="action-btn" style="display: none;">Resume Test</button>
             </div>
@@ -258,15 +370,18 @@
         </div>
         
         <!-- Test Page -->
-        <div id="testPage" style="display: none;">
+        <div id="testPage" class="page">
             <div class="test-header">
-                <h1>DECA Finance Cluster Practice Test 2025</h1>
+                <h1>DECA Finance Cluster Practice Test</h1>
                 <div class="test-info">
-                    <span id="questionCounter">Question 1 of 100</span>
+                    <span id="questionCounter">Question 1 of 20</span>
                     <span id="timerDisplay">Time Remaining: 60:00</span>
                 </div>
             </div>
             <div class="test-content">
+                <div class="progress-container">
+                    <div id="questionProgress" class="progress-bar" style="width: 5%"></div>
+                </div>
                 <div id="questionContainer" class="question-container">
                     <h3 id="questionText"></h3>
                     <div id="optionsContainer" class="options-container">
@@ -283,11 +398,11 @@
         </div>
         
         <!-- Results Page -->
-        <div id="resultsPage" style="display: none;">
+        <div id="resultsPage" class="page">
             <h1>Test Results</h1>
             <div class="results-summary">
                 <h2>Summary</h2>
-                <p>Score: <span id="scoreDisplay">0/100</span></p>
+                <p>Score: <span id="scoreDisplay">0/20</span></p>
                 <p>Percentage: <span id="percentageDisplay">0%</span></p>
                 <p>Time Taken: <span id="timeTakenDisplay">00:00</span></p>
             </div>
@@ -295,6 +410,15 @@
                 <button id="reviewTestButton" class="action-btn">Review Answers</button>
                 <button id="returnHomeButton" class="action-btn">Return to Home</button>
             </div>
+        </div>
+
+        <!-- Review Page -->
+        <div id="reviewPage" class="page">
+            <h1>Review Your Answers</h1>
+            <div id="reviewContainer">
+                <!-- Review content will be added dynamically -->
+            </div>
+            <button id="backToResultsButton" class="action-btn">Back to Results</button>
         </div>
     </div>
 
@@ -306,98 +430,142 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
-  authDomain: "deca-55fc4.firebaseapp.com",
-  databaseURL: "https://deca-55fc4-default-rtdb.firebaseio.com",
-  projectId: "deca-55fc4",
-  storageBucket: "deca-55fc4.firebasestorage.app",
-  messagingSenderId: "368623997898",
-  appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
-  measurementId: "G-7ZT1H2WTWH"
+            apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
+            authDomain: "deca-55fc4.firebaseapp.com",
+            databaseURL: "https://deca-55fc4-default-rtdb.firebaseio.com",
+            projectId: "deca-55fc4",
+            storageBucket: "deca-55fc4.firebasestorage.app",
+            messagingSenderId: "368623997898",
+            appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
+            measurementId: "G-7ZT1H2WTWH"
         };
+
+        // Application Constants
+        const TEST_SIZE = 20; // Number of questions per test
+        const TEST_TIME = 60 * 60; // 60 minutes in seconds
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
 
-        // DOM Elements - Auth & Home
-        const authPage = document.getElementById('authPage');
-        const homePage = document.getElementById('homePage');
-        const testPage = document.getElementById('testPage');
-        const resultsPage = document.getElementById('resultsPage');
-        const authTitle = document.getElementById('authTitle');
-        const authButton = document.getElementById('authButton');
-        const toggleText = document.getElementById('toggleText');
-        const toggleLink = document.getElementById('toggleLink');
-        const nameGroup = document.getElementById('nameGroup');
-        const messageContainer = document.getElementById('messageContainer');
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        const logoutButton = document.getElementById('logoutButton');
-        const startTestButton = document.getElementById('startTestButton');
-        const resumeTestButton = document.getElementById('resumeTestButton');
-        
+        // DOM Elements - Pages
+        const pages = {
+            auth: document.getElementById('authPage'),
+            home: document.getElementById('homePage'),
+            test: document.getElementById('testPage'),
+            results: document.getElementById('resultsPage'),
+            review: document.getElementById('reviewPage')
+        };
+
+        // DOM Elements - Auth
+        const authElements = {
+            title: document.getElementById('authTitle'),
+            button: document.getElementById('authButton'),
+            toggleText: document.getElementById('toggleText'),
+            toggleLink: document.getElementById('toggleLink'),
+            nameGroup: document.getElementById('nameGroup'),
+            messageContainer: document.getElementById('messageContainer')
+        };
+
+        // DOM Elements - Home
+        const homeElements = {
+            welcomeMessage: document.getElementById('welcomeMessage'),
+            logoutButton: document.getElementById('logoutButton'),
+            startTestButton: document.getElementById('startTestButton'),
+            resumeTestButton: document.getElementById('resumeTestButton'),
+            testProgress: document.getElementById('testProgress')
+        };
+
         // DOM Elements - Test
-        const questionCounter = document.getElementById('questionCounter');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const questionText = document.getElementById('questionText');
-        const optionsContainer = document.getElementById('optionsContainer');
-        const prevButton = document.getElementById('prevButton');
-        const nextButton = document.getElementById('nextButton');
-        const saveAndExitButton = document.getElementById('saveAndExitButton');
-        const submitTestButton = document.getElementById('submitTestButton');
-        
+        const testElements = {
+            questionCounter: document.getElementById('questionCounter'),
+            timerDisplay: document.getElementById('timerDisplay'),
+            questionText: document.getElementById('questionText'),
+            optionsContainer: document.getElementById('optionsContainer'),
+            prevButton: document.getElementById('prevButton'),
+            nextButton: document.getElementById('nextButton'),
+            saveAndExitButton: document.getElementById('saveAndExitButton'),
+            submitTestButton: document.getElementById('submitTestButton'),
+            questionProgress: document.getElementById('questionProgress')
+        };
+
         // DOM Elements - Results
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const percentageDisplay = document.getElementById('percentageDisplay');
-        const timeTakenDisplay = document.getElementById('timeTakenDisplay');
-        const reviewTestButton = document.getElementById('reviewTestButton');
-        const returnHomeButton = document.getElementById('returnHomeButton');
-        
+        const resultsElements = {
+            scoreDisplay: document.getElementById('scoreDisplay'),
+            percentageDisplay: document.getElementById('percentageDisplay'),
+            timeTakenDisplay: document.getElementById('timeTakenDisplay'),
+            reviewTestButton: document.getElementById('reviewTestButton'),
+            returnHomeButton: document.getElementById('returnHomeButton')
+        };
+
+        // DOM Elements - Review
+        const reviewElements = {
+            container: document.getElementById('reviewContainer'),
+            backButton: document.getElementById('backToResultsButton')
+        };
+
         // Form inputs
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const nameInput = document.getElementById('name');
-        
-        // Auth state
-        let isLoginMode = true;
-        let currentUser = null;
-        
-        // Test state
-        let currentTestData = null;
-        let currentQuestionIndex = 0;
-        let userAnswers = [];
-        let timerInterval = null;
-        let timeRemaining = 60 * 60; // 60 minutes in seconds
-        
-        // Test questions array (placeholder - will be loaded from database)
-        let testQuestions = [];
-        
-        // Toggle between Login and Signup
-        toggleLink.addEventListener('click', () => {
-            isLoginMode = !isLoginMode;
+        const formInputs = {
+            email: document.getElementById('email'),
+            password: document.getElementById('password'),
+            name: document.getElementById('name')
+        };
+
+        // Loading overlay
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // App State
+        const appState = {
+            isLoginMode: true,
+            currentUser: null,
+            testQuestions: [],
+            currentQuestionIndex: 0,
+            userAnswers: [],
+            testData: null,
+            timerInterval: null,
+            timeRemaining: TEST_TIME
+        };
+
+        // Show/hide loading spinner
+        function toggleLoading(show) {
+            loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+
+        // Helper function to display messages
+        function showMessage(message, type) {
+            authElements.messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+
+        function clearMessage() {
+            authElements.messageContainer.innerHTML = '';
+        }
+
+        // Toggle between login and signup
+        authElements.toggleLink.addEventListener('click', () => {
+            appState.isLoginMode = !appState.isLoginMode;
             
-            if (isLoginMode) {
-                authTitle.textContent = 'Sign In';
-                authButton.textContent = 'Sign In';
-                toggleText.textContent = "Don't have an account?";
-                toggleLink.textContent = 'Sign Up';
-                nameGroup.style.display = 'none';
+            if (appState.isLoginMode) {
+                authElements.title.textContent = 'Sign In';
+                authElements.button.textContent = 'Sign In';
+                authElements.toggleText.textContent = "Don't have an account?";
+                authElements.toggleLink.textContent = 'Sign Up';
+                authElements.nameGroup.style.display = 'none';
             } else {
-                authTitle.textContent = 'Sign Up';
-                authButton.textContent = 'Sign Up';
-                toggleText.textContent = 'Already have an account?';
-                toggleLink.textContent = 'Sign In';
-                nameGroup.style.display = 'block';
+                authElements.title.textContent = 'Sign Up';
+                authElements.button.textContent = 'Sign Up';
+                authElements.toggleText.textContent = 'Already have an account?';
+                authElements.toggleLink.textContent = 'Sign In';
+                authElements.nameGroup.style.display = 'block';
             }
             
             clearMessage();
         });
-        
-        // Handle auth actions (login/signup)
-        authButton.addEventListener('click', () => {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+
+        // Handle authentication (login/signup)
+        authElements.button.addEventListener('click', async () => {
+            const email = formInputs.email.value.trim();
+            const password = formInputs.password.value.trim();
             
             // Basic validation
             if (!email || !password) {
@@ -405,638 +573,635 @@
                 return;
             }
             
-            if (!isLoginMode) {
-                // Sign up mode
-                const name = nameInput.value.trim();
-                if (!name) {
-                    showMessage('Please enter your name.', 'error');
-                    return;
+            toggleLoading(true);
+            
+            try {
+                if (!appState.isLoginMode) {
+                    // Sign up mode
+                    const name = formInputs.name.value.trim();
+                    if (!name) {
+                        showMessage('Please enter your name.', 'error');
+                        toggleLoading(false);
+                        return;
+                    }
+                    
+                    // Create user with email and password
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+                    
+                    // Save user data to database
+                    const userData = {
+                        email: email,
+                        name: name,
+                        lastLogin: new Date().toString(),
+                        tests: {} // Initialize empty tests object
+                    };
+                    
+                    await database.ref('users/' + user.uid).set(userData);
+                    
+                    showMessage('Account created successfully!', 'success');
+                    
+                    // Store current user data
+                    appState.currentUser = {
+                        uid: user.uid,
+                        name: name,
+                        email: email
+                    };
+                    
+                    // After a brief delay, show the home page
+                    setTimeout(() => {
+                        showHomePage(name);
+                        toggleLoading(false);
+                    }, 1500);
+                    
+                } else {
+                    // Login mode
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    
+                    showMessage('Login successful!', 'success');
+                    
+                    // Get user data from the database
+                    const user = userCredential.user;
+                    const snapshot = await database.ref('users/' + user.uid).once('value');
+                    const userData = snapshot.val();
+                    
+                    // Update last login time
+                    await database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
+                    
+                    // Store current user data
+                    appState.currentUser = {
+                        uid: user.uid,
+                        name: userData.name,
+                        email: userData.email
+                    };
+                    
+                    // Check if user has an in-progress test
+                    const hasInProgressTest = userData.tests && userData.tests.inProgress;
+                    homeElements.resumeTestButton.style.display = hasInProgressTest ? 'block' : 'none';
+                    
+                    // Update progress bar if test in progress
+                    if (hasInProgressTest && userData.tests.inProgress.lastQuestionIndex) {
+                        const progress = (userData.tests.inProgress.lastQuestionIndex / TEST_SIZE) * 100;
+                        homeElements.testProgress.style.width = `${progress}%`;
+                    } else {
+                        homeElements.testProgress.style.width = '0%';
+                    }
+                    
+                    // After a brief delay, show the home page
+                    setTimeout(() => {
+                        showHomePage(userData.name);
+                        toggleLoading(false);
+                    }, 1500);
                 }
-                
-                // Create user with email and password
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        // Save user data to database
-                        const user = userCredential.user;
-                        const userData = {
-                            email: email,
-                            name: name,
-                            lastLogin: new Date().toString(),
-                            tests: {} // Initialize empty tests object
-                        };
-                        
-                        database.ref('users/' + user.uid).set(userData)
-                            .then(() => {
-                                showMessage('Account created successfully!', 'success');
-                                // After a brief delay, show the home page
-                                setTimeout(() => {
-                                    currentUser = {
-                                        uid: user.uid,
-                                        name: name,
-                                        email: email
-                                    };
-                                    showHomePage(name);
-                                }, 1500);
-                            })
-                            .catch((error) => {
-                                showMessage('Error saving user data: ' + error.message, 'error');
-                            });
-                    })
-                    .catch((error) => {
-                        showMessage(error.message, 'error');
-                    });
-            } else {
-                // Login mode
-                auth.signInWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        showMessage('Login successful!', 'success');
-                        
-                        // Get user data from the database
-                        const user = userCredential.user;
-                        database.ref('users/' + user.uid).once('value')
-                            .then((snapshot) => {
-                                const userData = snapshot.val();
-                                
-                                // Update last login time
-                                database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
-                                
-                                // Store current user data
-                                currentUser = {
-                                    uid: user.uid,
-                                    name: userData.name,
-                                    email: userData.email
-                                };
-                                
-                                // Check if user has an in-progress test
-                                if (userData.tests && userData.tests.inProgress) {
-                                    resumeTestButton.style.display = 'block';
-                                } else {
-                                    resumeTestButton.style.display = 'none';
-                                }
-                                
-                                // After a brief delay, show the home page
-                                setTimeout(() => {
-                                    showHomePage(userData.name);
-                                }, 1500);
-                            })
-                            .catch((error) => {
-                                showMessage('Error fetching user data: ' + error.message, 'error');
-                            });
-                    })
-                    .catch((error) => {
-                        showMessage('Login failed: ' + error.message, 'error');
-                    });
+            } catch (error) {
+                showMessage(error.message, 'error');
+                toggleLoading(false);
             }
         });
-        
+
         // Start Test Button
-        startTestButton.addEventListener('click', () => {
-            // Show loading state
-            startTestButton.textContent = "Loading questions...";
-            startTestButton.disabled = true;
+        homeElements.startTestButton.addEventListener('click', async () => {
+            toggleLoading(true);
+            homeElements.startTestButton.disabled = true;
             
-            // Fetch questions from Firebase
-            const questionsRef = firebase.database().ref('questions/finance-test');
-            
-            questionsRef.once('value')
-                .then((snapshot) => {
-                    // Convert Firebase snapshot to array of questions
-                    const questionsData = snapshot.val();
-                    
-                    if (!questionsData) {
-                        // If no questions in database, use setupQuestionsInDatabase function to populate it
-                        setupQuestionsInDatabase().then(() => {
-                            // After populating, try fetching again
-                            return firebase.database().ref('questions/finance-test').once('value');
-                        }).then((newSnapshot) => {
-                            const newQuestionsData = newSnapshot.val();
-                            if (!newQuestionsData) {
-                                throw new Error("Failed to set up questions in the database");
-                            }
-                            
-                            // Clear existing test questions array
-                            testQuestions.length = 0;
-                            
-                            // Add each question from database to testQuestions array
-                            Object.values(newQuestionsData).forEach(question => {
-                                testQuestions.push(question);
-                            });
-                            
-                            initializeTest();
-                        });
-                    } else {
-                        // Clear existing test questions array
-                        testQuestions.length = 0;
-                        
-                        // Add each question from database to testQuestions array
-                        Object.values(questionsData).forEach(question => {
-                            testQuestions.push(question);
-                        });
-                        
-                        initializeTest();
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error loading questions:", error);
-                    startTestButton.textContent = "Start New Test";
-                    startTestButton.disabled = false;
-                    alert("Error loading questions: " + error.message);
-                });
-        });
-        
-        // Function to initialize test after questions are loaded
-        function initializeTest() {
-            console.log(`Loaded ${testQuestions.length} questions from database`);
+            try {
+                // Fetch questions from Firebase
+                const questions = await getRandomQuestions(TEST_SIZE);
                 
-            // Initialize a new test
-            currentTestData = {
-                startTime: new Date().toString(),
-                answers: Array(testQuestions.length).fill(null),
-                completed: false
-            };
-            
-            userAnswers = Array(testQuestions.length).fill(null);
-            currentQuestionIndex = 0;
-            timeRemaining = 60 * 60; // Reset timer to 60 minutes
-            
-            // Save initial test state to database
-            saveTestProgress();
-            
-            // Reset button state
-            startTestButton.textContent = "Start New Test";
-            startTestButton.disabled = false;
-            
-            // Show the test page with the first question
-            showTestPage();
-        }
-        
+                if (!questions || questions.length === 0) {
+                    throw new Error("No questions found in the database");
+                }
+                
+                appState.testQuestions = questions;
+                appState.userAnswers = Array(questions.length).fill(null);
+                appState.currentQuestionIndex = 0;
+                appState.timeRemaining = TEST_TIME;
+                
+                // Initialize test data
+                appState.testData = {
+                    startTime: new Date().toString(),
+                    answers: Array(questions.length).fill(null),
+                    completed: false,
+                    questions: questions.map(q => q.id)  // Store question IDs for reference
+                };
+                
+                // Save initial test state to database
+                await saveTestProgress();
+                
+                // Show the test page with the first question
+                showTestPage();
+            } catch (error) {
+                console.error("Error loading questions:", error);
+                showMessage('Error loading questions: ' + error.message, 'error');
+                homeElements.startTestButton.disabled = false;
+            } finally {
+                toggleLoading(false);
+            }
+        });
+
         // Resume Test Button
-        resumeTestButton.addEventListener('click', () => {
-            // Show loading state
-            resumeTestButton.textContent = "Loading...";
-            resumeTestButton.disabled = true;
+        homeElements.resumeTestButton.addEventListener('click', async () => {
+            toggleLoading(true);
+            homeElements.resumeTestButton.disabled = true;
             
-            // First, fetch questions from Firebase
-            const questionsRef = firebase.database().ref('questions/finance-test');
-            
-            questionsRef.once('value')
-                .then((snapshot) => {
-                    // Convert Firebase snapshot to array of questions
-                    const questionsData = snapshot.val();
-                    
-                    if (!questionsData) {
-                        throw new Error("No questions found in the database");
-                    }
-                    
-                    // Clear existing test questions array
-                    testQuestions.length = 0;
-                    
-                    // Add each question from database to testQuestions array
-                    Object.values(questionsData).forEach(question => {
-                        testQuestions.push(question);
-                    });
-                    
-                    console.log(`Loaded ${testQuestions.length} questions from database`);
-                    
-                    // Now load the in-progress test
-                    return database.ref('users/' + currentUser.uid + '/tests/inProgress').once('value');
-                })
-                .then((snapshot) => {
-                    const savedTest = snapshot.val();
-                    if (savedTest) {
-                        currentTestData = savedTest;
-                        userAnswers = savedTest.answers || Array(testQuestions.length).fill(null);
-                        currentQuestionIndex = savedTest.lastQuestionIndex || 0;
-                        
-                        // Calculate remaining time
-                        if (savedTest.startTime) {
-                            const startTime = new Date(savedTest.startTime);
-                            const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
-                            timeRemaining = Math.max(0, 60 * 60 - elapsedSeconds);
-                        } else {
-                            timeRemaining = 60 * 60; // Default to 60 minutes
-                        }
-                        
-                        // Reset button state
-                        resumeTestButton.textContent = "Resume Test";
-                        resumeTestButton.disabled = false;
-                        
-                        // Show the test page
-                        showTestPage();
-                    } else {
-                        showMessage('No in-progress test found. Starting a new test...', 'error');
-                        startTestButton.click();
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error:", error);
-                    resumeTestButton.textContent = "Resume Test";
-                    resumeTestButton.disabled = false;
-                    alert("Error: " + error.message);
-                });
+            try {
+                // Load the in-progress test from the database
+                const snapshot = await database.ref('users/' + appState.currentUser.uid + '/tests/inProgress').once('value');
+                const savedTest = snapshot.val();
+                
+                if (!savedTest || !savedTest.questions || savedTest.questions.length === 0) {
+                    throw new Error("No valid in-progress test found");
+                }
+                
+                // Fetch the questions by IDs
+                const questionPromises = savedTest.questions.map(id => 
+                    database.ref('questions/finance-test/' + id).once('value').then(snap => snap.val())
+                );
+                
+                const questions = await Promise.all(questionPromises);
+                
+                // Filter out any null values (in case questions were deleted)
+                const validQuestions = questions.filter(q => q !== null);
+                
+                if (validQuestions.length === 0) {
+                    throw new Error("No valid questions found in saved test");
+                }
+                
+                appState.testQuestions = validQuestions;
+                appState.userAnswers = savedTest.answers || Array(validQuestions.length).fill(null);
+                appState.currentQuestionIndex = savedTest.lastQuestionIndex || 0;
+                appState.testData = savedTest;
+                
+                // Calculate remaining time
+                if (savedTest.startTime) {
+                    const startTime = new Date(savedTest.startTime);
+                    const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+                    appState.timeRemaining = Math.max(0, TEST_TIME - elapsedSeconds);
+                } else {
+                    appState.timeRemaining = TEST_TIME;
+                }
+                
+                // Show the test page
+                showTestPage();
+            } catch (error) {
+                console.error("Error resuming test:", error);
+                showMessage('Error resuming test. Starting a new test...', 'error');
+                homeElements.startTestButton.click();
+            } finally {
+                toggleLoading(false);
+                homeElements.resumeTestButton.disabled = false;
+            }
         });
-        
+
+        // Helper function to get random questions from Firebase
+        async function getRandomQuestions(count) {
+            try {
+                // Fetch all questions from Firebase
+                const snapshot = await database.ref('questions/finance-test').once('value');
+                const questionsData = snapshot.val();
+                
+                if (!questionsData) {
+                    throw new Error("No questions found in the database");
+                }
+                
+                // Convert object to array and add the ID to each question
+                const allQuestions = Object.entries(questionsData).map(([id, data]) => ({
+                    ...data,
+                    id
+                }));
+                
+                // Randomly select 'count' questions
+                const shuffledQuestions = shuffleArray(allQuestions);
+                return shuffledQuestions.slice(0, count);
+            } catch (error) {
+                console.error("Error fetching questions:", error);
+                throw error;
+            }
+        }
+
+        // Fisher-Yates shuffle algorithm for random question selection
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
         // Previous Question Button
-        prevButton.addEventListener('click', () => {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
+        testElements.prevButton.addEventListener('click', () => {
+            if (appState.currentQuestionIndex > 0) {
+                appState.currentQuestionIndex--;
                 displayQuestion();
                 saveTestProgress();
             }
         });
-        
+
         // Next Question Button
-        nextButton.addEventListener('click', () => {
-            if (currentQuestionIndex < testQuestions.length - 1) {
-                currentQuestionIndex++;
+        testElements.nextButton.addEventListener('click', () => {
+            if (appState.currentQuestionIndex < appState.testQuestions.length - 1) {
+                appState.currentQuestionIndex++;
                 displayQuestion();
                 saveTestProgress();
             }
         });
-        
+
         // Save and Exit Button
-        saveAndExitButton.addEventListener('click', () => {
-            saveTestProgress();
-            stopTimer();
-            showHomePage(currentUser.name);
+        testElements.saveAndExitButton.addEventListener('click', async () => {
+            toggleLoading(true);
+            try {
+                await saveTestProgress();
+                stopTimer();
+                showHomePage(appState.currentUser.name);
+            } catch (error) {
+                console.error("Error saving test:", error);
+                showMessage('Error saving test: ' + error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
         });
-        
+
         // Submit Test Button
-        submitTestButton.addEventListener('click', () => {
+        testElements.submitTestButton.addEventListener('click', async () => {
             if (confirm('Are you sure you want to submit your test? You will not be able to change your answers after submission.')) {
+                toggleLoading(true);
                 stopTimer();
                 
-                // Calculate score
-                let correctAnswers = 0;
-                for (let i = 0; i < testQuestions.length; i++) {
-                    if (userAnswers[i] === testQuestions[i].correctAnswer) {
-                        correctAnswers++;
+                try {
+                    // Calculate score
+                    let correctAnswers = 0;
+                    for (let i = 0; i < appState.testQuestions.length; i++) {
+                        if (appState.userAnswers[i] === appState.testQuestions[i].correctAnswer) {
+                            correctAnswers++;
+                        }
                     }
+                    
+                    const score = correctAnswers;
+                    const percentage = Math.round((correctAnswers / appState.testQuestions.length) * 100);
+                    
+                    // Calculate time taken
+                    let timeTaken = 0;
+                    if (appState.testData.startTime) {
+                        const startTime = new Date(appState.testData.startTime);
+                        const endTime = new Date();
+                        timeTaken = Math.floor((endTime - startTime) / 1000);
+                    }
+                    
+                    // Update test data
+                    appState.testData.completed = true;
+                    appState.testData.endTime = new Date().toString();
+                    appState.testData.score = score;
+                    appState.testData.percentage = percentage;
+                    appState.testData.timeTaken = timeTaken;
+                    
+                    // Save completed test to database
+                    await database.ref('users/' + appState.currentUser.uid + '/tests/completed').push(appState.testData);
+                    
+                    // Remove in-progress test
+                    await database.ref('users/' + appState.currentUser.uid + '/tests/inProgress').remove();
+                    
+                    // Update home page progress bar
+                    homeElements.testProgress.style.width = '0%';
+                    
+                    // Show results
+                    showResultsPage(score, percentage, timeTaken);
+                } catch (error) {
+                    console.error("Error submitting test:", error);
+                    showMessage('Error submitting test: ' + error.message, 'error');
+                } finally {
+                    toggleLoading(false);
                 }
-                
-                const score = correctAnswers;
-                const percentage = Math.round((correctAnswers / testQuestions.length) * 100);
-                
-                // Calculate time taken
-                let timeTaken = 0;
-                if (currentTestData.startTime) {
-                    const startTime = new Date(currentTestData.startTime);
-                    const endTime = new Date();
-                    timeTaken = Math.floor((endTime - startTime) / 1000);
-                }
-                
-                // Update test data
-                currentTestData.completed = true;
-                currentTestData.endTime = new Date().toString();
-                currentTestData.score = score;
-                currentTestData.percentage = percentage;
-                currentTestData.timeTaken = timeTaken;
-                
-                // Save completed test to database
-                database.ref('users/' + currentUser.uid + '/tests/completed').push(currentTestData)
-                    .then(() => {
-                        // Remove in-progress test
-                        database.ref('users/' + currentUser.uid + '/tests/inProgress').remove();
-                        
-                        // Show results
-                        showResultsPage(score, percentage, timeTaken);
-                    })
-                    .catch((error) => {
-                        showMessage('Error saving test results: ' + error.message, 'error');
-                    });
             }
         });
-        
+
         // Review Test Button
-        reviewTestButton.addEventListener('click', () => {
-            // Implement review functionality (would show all questions with user answers and correct answers)
-            alert('Review functionality would be implemented here.');
-            // For now, just return to home page
-            showHomePage(currentUser.name);
+        resultsElements.reviewTestButton.addEventListener('click', () => {
+            showReviewPage();
         });
-        
+
         // Return Home Button
-        returnHomeButton.addEventListener('click', () => {
-            showHomePage(currentUser.name);
+        resultsElements.returnHomeButton.addEventListener('click', () => {
+            showHomePage(appState.currentUser.name);
         });
-        
-        // Logout functionality
-        logoutButton.addEventListener('click', () => {
-            // If there's an active test, save progress first
-            if (testPage.style.display === 'block') {
-                saveTestProgress();
-                stopTimer();
-            }
+
+        // Back to Results Button
+        reviewElements.backButton.addEventListener('click', () => {
+            showPage(pages.results);
+        });
+
+        // Logout Button
+        homeElements.logoutButton.addEventListener('click', async () => {
+            toggleLoading(true);
             
-            auth.signOut()
-                .then(() => {
-                    currentUser = null;
-                    showAuthPage();
-                    showMessage('You have been logged out.', 'success');
-                })
-                .catch((error) => {
-                    console.error('Error signing out:', error);
-                });
+            try {
+                // If there's an active test, save progress first
+                if (pages.test.style.display === 'block') {
+                    await saveTestProgress();
+                    stopTimer();
+                }
+                
+                await auth.signOut();
+                appState.currentUser = null;
+                showAuthPage();
+                showMessage('You have been logged out.', 'success');
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showMessage('Error signing out: ' + error.message, 'error');
+        } finally {
+                toggleLoading(false);
+            }
         });
-        
+
         // Check auth state on page load
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
                 // User is signed in
-                database.ref('users/' + user.uid).once('value')
-                    .then((snapshot) => {
-                        const userData = snapshot.val();
-                        if (userData) {
-                            currentUser = {
-                                uid: user.uid,
-                                name: userData.name,
-                                email: userData.email
-                            };
-                            
-                            // Check if user has an in-progress test
-                            if (userData.tests && userData.tests.inProgress) {
-                                resumeTestButton.style.display = 'block';
-                            } else {
-                                resumeTestButton.style.display = 'none';
-                            }
-                            
-                            showHomePage(userData.name);
+                toggleLoading(true);
+                try {
+                    const snapshot = await database.ref('users/' + user.uid).once('value');
+                    const userData = snapshot.val();
+                    
+                    if (userData) {
+                        appState.currentUser = {
+                            uid: user.uid,
+                            name: userData.name,
+                            email: userData.email
+                        };
+                        
+                        // Check if user has an in-progress test
+                        const hasInProgressTest = userData.tests && userData.tests.inProgress;
+                        homeElements.resumeTestButton.style.display = hasInProgressTest ? 'block' : 'none';
+                        
+                        // Update progress bar if test in progress
+                        if (hasInProgressTest && userData.tests.inProgress.lastQuestionIndex) {
+                            const progress = (userData.tests.inProgress.lastQuestionIndex / TEST_SIZE) * 100;
+                            homeElements.testProgress.style.width = `${progress}%`;
+                        } else {
+                            homeElements.testProgress.style.width = '0%';
                         }
-                    });
+                        
+                        showHomePage(userData.name);
+                    }
+                } catch (error) {
+                    console.error("Error loading user data:", error);
+                } finally {
+                    toggleLoading(false);
+                }
             } else {
                 // User is signed out
                 showAuthPage();
             }
         });
-        
+
         // Function to display the current question
         function displayQuestion() {
+            if (!appState.testQuestions || appState.testQuestions.length === 0) {
+                console.error("No questions available");
+                return;
+            }
+            
             // Update question counter
-            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${testQuestions.length}`;
+            testElements.questionCounter.textContent = `Question ${appState.currentQuestionIndex + 1} of ${appState.testQuestions.length}`;
+            
+            // Update progress bar
+            const progressPercentage = ((appState.currentQuestionIndex + 1) / appState.testQuestions.length) * 100;
+            testElements.questionProgress.style.width = `${progressPercentage}%`;
             
             // Display the question
-            const question = testQuestions[currentQuestionIndex];
-            questionText.textContent = question.question;
+            const question = appState.testQuestions[appState.currentQuestionIndex];
+            testElements.questionText.textContent = question.question;
             
             // Create option elements
-            optionsContainer.innerHTML = '';
-            question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.className = 'option-item';
-                if (userAnswers[currentQuestionIndex] === index) {
-                    optionElement.classList.add('option-selected');
-                }
-                optionElement.textContent = String.fromCharCode(65 + index) + '. ' + option; // A, B, C, D...
-                
-                // Add click event
-                optionElement.addEventListener('click', () => {
-                    userAnswers[currentQuestionIndex] = index;
+            testElements.optionsContainer.innerHTML = '';
+            
+            if (question.options && question.options.length > 0) {
+                question.options.forEach((option, index) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option-item';
+                    if (appState.userAnswers[appState.currentQuestionIndex] === index) {
+                        optionElement.classList.add('option-selected');
+                    }
+                    optionElement.textContent = String.fromCharCode(65 + index) + '. ' + option; // A, B, C, D...
                     
-                    // Update UI to show selection
-                    document.querySelectorAll('.option-item').forEach(el => el.classList.remove('option-selected'));
-                    optionElement.classList.add('option-selected');
+                    // Add click event
+                    optionElement.addEventListener('click', () => {
+                        appState.userAnswers[appState.currentQuestionIndex] = index;
+                        
+                        // Update UI to show selection
+                        document.querySelectorAll('.option-item').forEach(el => el.classList.remove('option-selected'));
+                        optionElement.classList.add('option-selected');
+                        
+                        // Save the answer
+                        saveTestProgress();
+                    });
                     
-                    // Save the answer
-                    saveTestProgress();
+                    testElements.optionsContainer.appendChild(optionElement);
                 });
-                
-                optionsContainer.appendChild(optionElement);
-            });
+            } else {
+                testElements.optionsContainer.innerHTML = '<p>No options available for this question.</p>';
+            }
             
             // Update navigation buttons
-            prevButton.disabled = currentQuestionIndex === 0;
-            nextButton.disabled = currentQuestionIndex === testQuestions.length - 1;
+            testElements.prevButton.disabled = appState.currentQuestionIndex === 0;
+            testElements.nextButton.disabled = appState.currentQuestionIndex === appState.testQuestions.length - 1;
         }
-        
+
         // Function to start the timer
         function startTimer() {
             stopTimer(); // Clear any existing timer
             
-            timerInterval = setInterval(() => {
-                timeRemaining--;
+            appState.timerInterval = setInterval(() => {
+                appState.timeRemaining--;
                 
-                if (timeRemaining <= 0) {
+                if (appState.timeRemaining <= 0) {
                     // Time's up - force submission
-                    clearInterval(timerInterval);
+                    clearInterval(appState.timerInterval);
                     alert('Time\'s up! Your test will be submitted automatically.');
-                    submitTestButton.click();
+                    testElements.submitTestButton.click();
                     return;
                 }
                 
                 // Update timer display
-                const minutes = Math.floor(timeRemaining / 60);
-                const seconds = timeRemaining % 60;
-                timerDisplay.textContent = `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                const minutes = Math.floor(appState.timeRemaining / 60);
+                const seconds = appState.timeRemaining % 60;
+                testElements.timerDisplay.textContent = `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }, 1000);
         }
-        
+
         // Function to stop the timer
         function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
+            if (appState.timerInterval) {
+                clearInterval(appState.timerInterval);
+                appState.timerInterval = null;
             }
         }
-        
+
         // Function to save test progress
-        function saveTestProgress() {
-            if (!currentUser || !currentTestData) return;
+        async function saveTestProgress() {
+            if (!appState.currentUser || !appState.testData) return;
             
-            // Update test data
-            currentTestData.lastUpdated = new Date().toString();
-            currentTestData.answers = userAnswers;
-            currentTestData.lastQuestionIndex = currentQuestionIndex;
+            try {
+                // Update test data
+                appState.testData.lastUpdated = new Date().toString();
+                appState.testData.answers = appState.userAnswers;
+                appState.testData.lastQuestionIndex = appState.currentQuestionIndex;
+                
+                // Save to database
+                await database.ref('users/' + appState.currentUser.uid + '/tests/inProgress').set(appState.testData);
+                
+                // Update progress on home page
+                const progress = (appState.currentQuestionIndex / appState.testQuestions.length) * 100;
+                homeElements.testProgress.style.width = `${progress}%`;
+                
+                return true;
+            } catch (error) {
+                console.error('Error saving test progress:', error);
+                return false;
+            }
+        }
+
+        // Function to show review page
+        function showReviewPage() {
+            reviewElements.container.innerHTML = '';
             
-            // Save to database
-            database.ref('users/' + currentUser.uid + '/tests/inProgress').set(currentTestData)
-                .catch((error) => {
-                    console.error('Error saving test progress:', error);
+            if (!appState.testQuestions || appState.testQuestions.length === 0) {
+                reviewElements.container.innerHTML = '<p>No questions available to review.</p>';
+                return;
+            }
+            
+            appState.testQuestions.forEach((question, index) => {
+                const userAnswer = appState.userAnswers[index];
+                const correctAnswer = question.correctAnswer;
+                const isCorrect = userAnswer === correctAnswer;
+                
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'question-container';
+                reviewItem.style.borderColor = isCorrect ? 'green' : 'red';
+                
+                // Question number and text
+                const questionTitle = document.createElement('h3');
+                questionTitle.textContent = `Question ${index + 1}`;
+                reviewItem.appendChild(questionTitle);
+                
+                const questionText = document.createElement('p');
+                questionText.textContent = question.question;
+                reviewItem.appendChild(questionText);
+                
+                // Options list
+                const optionsList = document.createElement('div');
+                optionsList.className = 'options-container';
+                
+                question.options.forEach((option, optIndex) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option-item';
+                    
+                    if (optIndex === correctAnswer) {
+                        optionElement.style.borderColor = 'green';
+                        optionElement.style.backgroundColor = '#E8F5E9';
+                    } else if (optIndex === userAnswer && userAnswer !== correctAnswer) {
+                        optionElement.style.borderColor = 'red';
+                        optionElement.style.backgroundColor = '#FFEBEE';
+                    }
+                    
+                    optionElement.textContent = String.fromCharCode(65 + optIndex) + '. ' + option;
+                    optionsList.appendChild(optionElement);
                 });
-        }
-        
-        // Helper functions
-        function showMessage(message, type) {
-            messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
-        }
-        
-        function clearMessage() {
-            messageContainer.innerHTML = '';
-        }
-        
-        function showHomePage(name) {
-            authPage.style.display = 'none';
-            testPage.style.display = 'none';
-            resultsPage.style.display = 'none';
-            homePage.style.display = 'block';
+                
+                reviewItem.appendChild(optionsList);
+                
+                // Result message
+                const resultMessage = document.createElement('p');
+                resultMessage.style.fontWeight = 'bold';
+                resultMessage.style.marginTop = '15px';
+                resultMessage.style.color = isCorrect ? 'green' : 'red';
+                
+                if (isCorrect) {
+                    resultMessage.textContent = 'Correct!';
+                } else {
+                    resultMessage.textContent = `Incorrect. The correct answer is: ${String.fromCharCode(65 + correctAnswer)}`;
+                }
+                
+                reviewItem.appendChild(resultMessage);
+                reviewElements.container.appendChild(reviewItem);
+            });
             
-            welcomeMessage.textContent = `Hello, ${name}! You are now logged in.`;
+            showPage(pages.review);
+        }
+
+        // Page display functions
+        function showPage(page) {
+            // Hide all pages
+            Object.values(pages).forEach(p => p.style.display = 'none');
+            
+            // Show the requested page
+            page.style.display = 'block';
+            
+            // Adjust container width
+            const container = document.querySelector('.container');
+            if (page === pages.auth) {
+                container.style.maxWidth = '350px';
+            } else {
+                container.style.maxWidth = '800px';
+            }
+        }
+
+        function showHomePage(name) {
+            showPage(pages.home);
+            homeElements.welcomeMessage.textContent = `Hello, ${name}! You are now logged in.`;
             
             // Check if user has an in-progress test
-            if (currentUser) {
-                database.ref('users/' + currentUser.uid + '/tests/inProgress').once('value')
+            if (appState.currentUser) {
+                database.ref('users/' + appState.currentUser.uid + '/tests/inProgress').once('value')
                     .then((snapshot) => {
-                        if (snapshot.exists()) {
-                            resumeTestButton.style
-.then((snapshot) => {
-                        if (snapshot.exists()) {
-                            resumeTestButton.style.display = 'block';
-                        } else {
-                            resumeTestButton.style.display = 'none';
-                        }
-                    });
+                        homeElements.resumeTestButton.style.display = snapshot.exists() ? 'block' : 'none';
+                    })
+                    .catch(error => console.error("Error checking for in-progress test:", error));
             }
             
             // Clear form fields
-            emailInput.value = '';
-            passwordInput.value = '';
-            nameInput.value = '';
-            
-            // Adjust container width for home page
-            document.querySelector('.container').style.maxWidth = '800px';
+            formInputs.email.value = '';
+            formInputs.password.value = '';
+            formInputs.name.value = '';
         }
-        
+
         function showTestPage() {
-            authPage.style.display = 'none';
-            homePage.style.display = 'none';
-            resultsPage.style.display = 'none';
-            testPage.style.display = 'block';
-            
-            // Display the first/current question
+            showPage(pages.test);
             displayQuestion();
-            
-            // Start the timer
             startTimer();
-            
-            // Adjust container width for test page
-            document.querySelector('.container').style.maxWidth = '800px';
         }
-        
+
         function showResultsPage(score, percentage, timeTaken) {
-            authPage.style.display = 'none';
-            homePage.style.display = 'none';
-            testPage.style.display = 'none';
-            resultsPage.style.display = 'block';
+            showPage(pages.results);
             
             // Display results
-            scoreDisplay.textContent = `${score}/${testQuestions.length}`;
-            percentageDisplay.textContent = `${percentage}%`;
+            resultsElements.scoreDisplay.textContent = `${score}/${appState.testQuestions.length}`;
+            resultsElements.percentageDisplay.textContent = `${percentage}%`;
             
             // Format time taken
             const minutes = Math.floor(timeTaken / 60);
             const seconds = timeTaken % 60;
-            timeTakenDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            // Adjust container width for results page
-            document.querySelector('.container').style.maxWidth = '800px';
-        }
-        
-        function showAuthPage() {
-            homePage.style.display = 'none';
-            testPage.style.display = 'none';
-            resultsPage.style.display = 'none';
-            authPage.style.display = 'block';
-            
-            // Reset to login mode
-            isLoginMode = true;
-            authTitle.textContent = 'Sign In';
-            authButton.textContent = 'Sign In';
-            toggleText.textContent = "Don't have an account?";
-            toggleLink.textContent = 'Sign Up';
-            nameGroup.style.display = 'none';
-            
-            // Adjust container width for auth page
-            document.querySelector('.container').style.maxWidth = '350px';
+            resultsElements.timeTakenDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // Function to set up questions in the database
-        async function setupQuestionsInDatabase() {
-            console.log("Setting up questions in the database...");
+        function showAuthPage() {
+            showPage(pages.auth);
             
-            // Reference to the questions collection in your Firebase database
-            const questionsRef = firebase.database().ref('questions/finance-test');
-            
-            // Sample questions to add to the database
-            const questionsToAdd = [
-                {
-                    id: "q1",
-                    question: "A corporation is considering issuing a new series of bonds to finance expansion. The CFO needs to determine how quickly the company can expect to recoup the initial investment in the project. Which of the following capital investment analysis methods would be most appropriate?",
-                    options: [
-                        "Internal rate of return",
-                        "Payback period",
-                        "Discounted break-even",
-                        "Net present value"
-                    ],
-                    correctAnswer: 1 // Index of correct answer (B. Payback period)
-                },
-                {
-                    id: "q2",
-                    question: "Which of the following best describes an important aspect of diversification strategies in investment planning?",
-                    options: [
-                        "Investing all available capital in one industry that is performing well",
-                        "Spreading investments across different asset classes to reduce risk",
-                        "Frequently trading securities to maximize short-term gains",
-                        "Focusing primarily on blue-chip stocks for guaranteed returns"
-                    ],
-                    correctAnswer: 1 // Index of correct answer (B. Spreading investments...)
-                },
-                {
-                    id: "q3",
-                    question: "A financial analyst is studying patterns in stock price movements using charts and statistical indicators to predict future price movement. This approach is known as:",
-                    options: [
-                        "Fundamental analysis",
-                        "Qualitative analysis", 
-                        "Technical analysis",
-                        "Actuarial analysis"
-                    ],
-                    correctAnswer: 2 // Index of correct answer (C. Technical analysis)
-                },
-                {
-                    id: "q4",
-                    question: "Which of the following describes the process by which a corporation distributes a portion of its earnings to shareholders?",
-                    options: [
-                        "Capital gain",
-                        "Dividend",
-                        "Interest payment",
-                        "Expense allocation"
-                    ],
-                    correctAnswer: 1 // Index of correct answer (B. Dividend)
-                },
-                {
-                    id: "q5",
-                    question: "Securities and investment firms are required to adhere to regulations established by:",
-                    options: [
-                        "Federal Communications Commission (FCC)",
-                        "Securities and Exchange Commission (SEC)",
-                        "Federal Deposit Insurance Corporation (FDIC)",
-                        "National Labor Relations Board (NLRB)"
-                    ],
-                    correctAnswer: 1 // Index of correct answer (B. SEC)
-                }
-            ];
-            
-            // Add each question to the database
-            const promises = [];
-            questionsToAdd.forEach(question => {
-                promises.push(
-                    questionsRef.child(question.id).set(question)
-                        .then(() => console.log(`Question ${question.id} added successfully`))
-                        .catch(error => console.error(`Error adding question ${question.id}:`, error))
-                );
-            });
-            
-            // Wait for all questions to be added
-            await Promise.all(promises);
-            console.log("All questions have been added to the database");
-            return true;
+            // Reset to login mode
+            appState.isLoginMode = true;
+            authElements.title.textContent = 'Sign In';
+            authElements.button.textContent = 'Sign In';
+            authElements.toggleText.textContent = "Don't have an account?";
+            authElements.toggleLink.textContent = 'Sign Up';
+            authElements.nameGroup.style.display = 'none';
         }
 
         // Check if questions exist in the database on page load
         document.addEventListener('DOMContentLoaded', () => {
-            firebase.database().ref('questions/finance-test').once('value')
+            database.ref('questions/finance-test').once('value')
                 .then((snapshot) => {
                     if (!snapshot.exists()) {
-                        console.log("No questions found in the database. Setting up sample questions...");
-                        setupQuestionsInDatabase();
+                        console.warn("No questions found in the database.");
                     } else {
                         console.log("Questions already exist in the database");
                     }
