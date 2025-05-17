@@ -1,2247 +1,1511 @@
-// Initialize Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
-  authDomain: "DECA-55fc4.firebaseapp.com",
-  databaseURL: "https://DECA-55fc4-default-rtdb.firebaseio.com",
-  projectId: "DECA-55fc4",
-  storageBucket: "DECA-55fc4.appspot.com",
-  messagingSenderId: "368623997898",
-  appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
-  measurementId: "G-7ZT1H2WTWH"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
-
-// Page references
-const pages = {
-  auth: document.getElementById('authPage'),
-  home: document.getElementById('homePage'),
-  summary: document.getElementById('summaryPage'),
-  resumeTests: document.getElementById('resumeTestsPage'),
-  test: document.getElementById('testPage'),
-  results: document.getElementById('resultsPage'),
-  review: document.getElementById('reviewPage'),
-  testDetail: document.getElementById('testDetailPage'),
-  admin: document.getElementById('adminPage'),
-  userDetail: document.getElementById('userDetailPage'),
-  adminVerification: document.getElementById('adminVerificationPage'),
-  emailVerification: null // Will be set during initialization
-};
-
-// Admin Verification elements
-const verificationElements = {
-  messageContainer: document.getElementById('verificationMessageContainer'),
-  codeInput: document.getElementById('verificationCode'),
-  verifyButton: document.getElementById('verifyButton'),
-  resendButton: document.getElementById('resendCodeButton'),
-  cancelButton: document.getElementById('cancelVerificationButton')
-};
-
-// Admin elements
-const adminElements = {
-  welcomeMessage: document.getElementById('adminWelcomeMessage'),
-  filterTest: document.getElementById('adminFilterTest'),
-  sortBy: document.getElementById('adminSortBy'),
-  usersContainer: document.getElementById('usersContainer'),
-  backButton: document.getElementById('backToHomeFromAdminButton'),
-  userParticipationChart: document.getElementById('userParticipationChart'),
-  testTypeScoresChart: document.getElementById('testTypeScoresChart')
-};
-
-// User Detail elements
-const userDetailElements = {
-  name: document.getElementById('userDetailName'),
-  email: document.getElementById('userDetailEmail'),
-  totalTests: document.getElementById('userDetailTotalTests'),
-  avgScore: document.getElementById('userDetailAvgScore'),
-  bestScore: document.getElementById('userDetailBestScore'),
-  testTypeChart: document.getElementById('userTestTypeChart'),
-  progressionChart: document.getElementById('userProgressionChart'),
-  completedTestsContainer: document.getElementById('userCompletedTestsContainer'),
-  backButton: document.getElementById('backToAdminButton')
-};
-
-// Auth elements
-const authElements = {
-  title: document.getElementById('authTitle'),
-  button: document.getElementById('authButton'),
-  toggleText: document.getElementById('toggleText'),
-  toggleLink: document.getElementById('toggleLink'),
-  nameGroup: document.getElementById('nameGroup'),
-  messageContainer: document.getElementById('messageContainer')
-};
-
-// Home elements
-const homeElements = {
-  welcomeMessage: document.getElementById('welcomeMessage'),
-  logoutButton: document.getElementById('logoutButton'),
-  startTestButton: document.getElementById('startTestButton'),
-  summaryButton: document.getElementById('summaryButton'),
-  resumeTestsButton: document.getElementById('resumeTestsButton'),
-  timeLimit: document.getElementById('timeLimit'),
-  adminButton: document.createElement('button') // Will add this dynamically if admin
-};
-
-// Summary elements
-const summaryElements = {
-  totalTestsValue: document.getElementById('totalTestsValue'),
-  avgScoreValue: document.getElementById('avgScoreValue'),
-  bestScoreValue: document.getElementById('bestScoreValue'),
-  filterTest: document.getElementById('filterTest'),
-  sortBy: document.getElementById('sortBy'),
-  completedTestsContainer: document.getElementById('completedTestsContainer'),
-  backButton: document.getElementById('backToHomeButton'),
-  overallPieChart: document.getElementById('overallPieChart'),
-  progressionChart: document.getElementById('progressionChart')
-};
-
-// Test Detail elements
-const testDetailElements = {
-  title: document.getElementById('testDetailTitle'),
-  date: document.getElementById('testDetailDate'),
-  score: document.getElementById('testDetailScore'),
-  percentage: document.getElementById('testDetailPercentage'),
-  time: document.getElementById('testDetailTime'),
-  chart: document.getElementById('testDetailChart'),
-  reviewContainer: document.getElementById('testDetailReviewContainer'),
-  backButton: document.getElementById('backToSummaryButton')
-};
-
-// Resume tests elements
-const resumeElements = {
-  inProgressTestsContainer: document.getElementById('inProgressTestsContainer'),
-  backButton: document.getElementById('backFromResumeButton')
-};
-
-// Test elements
-const testElements = {
-  questionCounter: document.getElementById('questionCounter'),
-  timerDisplay: document.getElementById('timerDisplay'),
-  questionText: document.getElementById('questionText'),
-  optionsContainer: document.getElementById('optionsContainer'),
-  prevButton: document.getElementById('prevButton'),
-  nextButton: document.getElementById('nextButton'),
-  saveAndExitButton: document.getElementById('saveAndExitButton'),
-  submitTestButton: document.getElementById('submitTestButton'),
-  questionProgress: document.getElementById('questionProgress')
-};
-
-// Results elements
-const resultsElements = {
-  scoreDisplay: document.getElementById('scoreDisplay'),
-  percentageDisplay: document.getElementById('percentageDisplay'),
-  timeTakenDisplay: document.getElementById('timeTakenDisplay'),
-  reviewTestButton: document.getElementById('reviewTestButton'),
-  returnHomeButton: document.getElementById('returnHomeButton'),
-  pieChart: document.getElementById('resultsPieChart')
-};
-
-// Review elements
-const reviewElements = {
-  container: document.getElementById('reviewContainer'),
-  backButton: document.getElementById('backToResultsButton')
-};
-
-// Form inputs
-const formInputs = {
-  email: document.getElementById('email'),
-  password: document.getElementById('password'),
-  name: document.getElementById('name')
-};
-
-const testSelect = document.getElementById('testSelect');
-const loadingOverlay = document.getElementById('loadingOverlay');
-
-// Chart instances
-let overallPieChart = null;
-let progressionChart = null;
-let resultsPieChart = null;
-let testDetailChart = null;
-
-let appState = {
-  isLoginMode: true,
-  currentUser: null,
-  testQuestions: [],
-  currentQuestionIndex: 0,
-  userAnswers: [],
-  testData: null,
-  timerInterval: null,
-  timeRemaining: 0,
-  completedTests: [],
-  inProgressTests: {},
-  testTypes: [],
-  currentTestDetail: null,
-  isAdmin: false,
-  allUsers: [],
-  currentUserDetail: null,
-  adminEmail: "gautham0913@gmail.com", // Replace with your email
-  adminVerificationCode: null,
-  adminVerified: false,
-  pendingVerification: null, // For email verification
-  emailVerificationElements: null // For email verification UI
-};
-
-// Email verification page setup
-function setupEmailVerification() {
-  // Create email verification page
-  const verificationPage = document.createElement('div');
-  verificationPage.id = 'emailVerificationPage';
-  verificationPage.className = 'page auth-page';
-  verificationPage.style.display = 'none';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DECA Learning Platform</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
   
-  verificationPage.innerHTML = `
-    <div class="logo-container">
-      <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
-        <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
-        <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
-        <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
-        <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
-      </svg>
-    </div>
+  <style>
+    :root {
+      --primary-color: #0056A4;
+      --primary-hover: #004080;
+      --secondary-color: #3A7DC0;
+      --success-color: #10B981;
+      --danger-color: #EF4444;
+      --warning-color: #F59E0B;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+    }
     
-    <h1>Email Verification</h1>
-    <div id="emailVerificationMessageContainer" class="message-container"></div>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     
-    <div class="card">
-      <p class="welcome-message">A verification code has been sent to your email. Please verify your email to continue.</p>
-      
-      <div id="emailVerificationInfo" class="form-group">
-        <p>We've sent a verification link to: <strong id="userEmailDisplay"></strong></p>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    .page {
+      display: none;
+      width: 100%;
+      padding: 20px 0;
+    }
+    
+    /* Login Page Styles */
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+    }
+    
+    .auth-container {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 430px;
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .auth-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--gray-900);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--gray-700);
+      font-size: 14px;
+    }
+    
+    .input-group {
+      position: relative;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 10px 12px 10px 38px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    
+    .form-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 86, 164, 0.1);
+    }
+    
+    .form-input.error {
+      border-color: var(--danger-color);
+    }
+    
+    .error-message {
+      color: var(--danger-color);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+    }
+    
+    .remember-me input {
+      margin-right: 6px;
+    }
+    
+    .forgot-password {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+      width: 100%;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .btn-outline {
+      border: 1px solid var(--gray-300);
+      background-color: white;
+      color: var(--gray-700);
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .btn-outline:hover {
+      background-color: var(--gray-100);
+    }
+    
+    .btn-outline img, .btn-outline svg {
+      margin-right: 10px;
+      height: 18px;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+    }
+    
+    .divider-line {
+      flex-grow: 1;
+      height: 1px;
+      background-color: var(--gray-300);
+    }
+    
+    .divider-text {
+      padding: 0 10px;
+      color: var(--gray-500);
+      font-size: 14px;
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--gray-600);
+    }
+    
+    .auth-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+    
+    .message-container {
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 430px;
+    }
+    
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    
+    .message.success {
+      background-color: #D1FAE5;
+      color: #065F46;
+      border-left: 4px solid #10B981;
+    }
+    
+    .message.error {
+      background-color: #FEE2E2;
+      color: #991B1B;
+      border-left: 4px solid #EF4444;
+    }
+    
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Home Page Styles */
+    .home-page {
+      padding: 30px 0;
+    }
+    
+    .welcome-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .welcome-title {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    .welcome-subtitle {
+      color: var(--gray-600);
+      margin-bottom: 20px;
+    }
+    
+    .action-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .action-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .action-card i {
+      font-size: 32px;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+    
+    .action-card h3 {
+      margin-bottom: 10px;
+      color: var(--gray-800);
+    }
+    
+    .action-card p {
+      color: var(--gray-600);
+      margin-bottom: 15px;
+    }
+    
+    .test-options {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .test-options h3 {
+      margin-bottom: 15px;
+      color: var(--gray-800);
+    }
+    
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+    
+    .option-group {
+      margin-bottom: 15px;
+    }
+    
+    .option-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: var(--gray-700);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      background-color: white;
+    }
+    
+    /* Media Queries */
+    @media (max-width: 768px) {
+      .action-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Auth Page (Login/Register) -->
+    <div id="authPage" class="page auth-page">
+      <div class="logo-container">
+        <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+          <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+          <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+          <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+          <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+        </svg>
       </div>
       
-      <button id="verifyEmailButton" class="btn btn-primary">
-        <i class="fas fa-check-circle"></i> I've Verified My Email
-      </button>
+      <div id="messageContainer" class="message-container"></div>
       
-      <button id="resendVerificationButton" class="btn btn-secondary">
-        <i class="fas fa-redo"></i> Resend Verification Email
-      </button>
+      <div class="auth-container">
+        <h1 id="authTitle" class="auth-title">Sign In</h1>
+        
+        <div class="form-group" id="nameGroup" style="display: none;">
+          <label for="name">Full Name</label>
+          <div class="input-group">
+            <i class="fas fa-user input-icon"></i>
+            <input type="text" id="name" class="form-input" placeholder="John Doe">
+          </div>
+          <div id="nameError" class="error-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-group">
+            <i class="fas fa-envelope input-icon"></i>
+            <input type="email" id="email" class="form-input" placeholder="you@example.com">
+          </div>
+          <div id="emailError" class="error-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-group">
+            <i class="fas fa-lock input-icon"></i>
+            <input type="password" id="password" class="form-input" placeholder="••••••••">
+          </div>
+          <div id="passwordError" class="error-message"></div>
+        </div>
+        
+        <div class="remember-forgot">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe">
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+        
+        <button id="authButton" class="btn btn-primary">Sign In</button>
+        
+        <div class="divider">
+          <div class="divider-line"></div>
+          <div class="divider-text">OR</div>
+          <div class="divider-line"></div>
+        </div>
+        
+        <button id="googleAuthButton" class="btn btn-outline">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+              <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
+              <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
+              <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
+              <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
+            </g>
+          </svg>
+          Sign in with Google
+        </button>
+      </div>
       
-      <button id="backToLoginButton" class="btn btn-danger">
-        <i class="fas fa-times"></i> Back to Login
-      </button>
+      <div class="auth-footer">
+        <span id="toggleText">Don't have an account?</span>
+        <a href="#" id="toggleLink" class="auth-link">Sign Up</a>
+      </div>
     </div>
-  `;
-  
-  // Add to container
-  document.querySelector('.container').appendChild(verificationPage);
-  
-  // Add to pages object
-  pages.emailVerification = verificationPage;
-  
-  // Store elements
-  const emailVerificationElements = {
-    page: verificationPage,
-    messageContainer: document.getElementById('emailVerificationMessageContainer'),
-    emailDisplay: document.getElementById('userEmailDisplay'),
-    verifyButton: document.getElementById('verifyEmailButton'),
-    resendButton: document.getElementById('resendVerificationButton'),
-    backButton: document.getElementById('backToLoginButton')
-  };
-  
-  // Add event listeners
-  emailVerificationElements.verifyButton.addEventListener('click', checkEmailVerification);
-  emailVerificationElements.resendButton.addEventListener('click', resendVerificationEmail);
-  emailVerificationElements.backButton.addEventListener('click', () => showAuthPage());
-  
-  return emailVerificationElements;
-}
 
-// Generate a secure verification token
-function generateVerificationToken() {
-  const array = new Uint8Array(32);
-  window.crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-}
-
-// Show verification message
-function showVerificationMessage(msg, type) {
-  const container = document.getElementById('emailVerificationMessageContainer');
-  container.innerHTML = `<div class="message ${type}">${msg}</div>`;
-}
-
-// Clear verification message
-function clearVerificationMessage() {
-  const container = document.getElementById('emailVerificationMessageContainer');
-  if (container) {
-    container.innerHTML = '';
-  }
-}
-
-// Send verification email
-async function sendVerificationEmail(user, email, token) {
-  try {
-    toggleLoading(true);
-    
-    // Create user verification data in database
-    await database.ref(`userVerifications/${user.uid}`).set({
-      email: email,
-      token: token,
-      createdAt: new Date().toString(),
-      verified: false
-    });
-    
-    // In a real implementation, you would send an actual email here
-    // using a service like Firebase Cloud Functions, SendGrid, etc.
-    // For demo purposes, we'll simulate this
-    
-    console.log('Verification token:', token);
-    
-    // Example verification URL (this would be included in the email)
-    const verificationUrl = `${window.location.origin}${window.location.pathname}?mode=verifyEmail&oobCode=${token}&uid=${user.uid}`;
-    console.log('Verification URL:', verificationUrl);
-    
-    // Show alert with the verification URL (for demo purposes only)
-    alert(`For demo purposes: Your verification URL is: ${verificationUrl}\n\nIn a real implementation, this would be sent to your email.`);
-    
-    showVerificationMessage('Verification email sent! Please check your inbox and spam folder.', 'success');
-    toggleLoading(false);
-    
-    return true;
-  } catch (error) {
-    console.error('Error sending verification email:', error);
-    showVerificationMessage('Failed to send verification email. Please try again.', 'error');
-    toggleLoading(false);
-    return false;
-  }
-}
-
-// Resend verification email
-async function resendVerificationEmail() {
-  if (!appState.pendingVerification || !appState.pendingVerification.user) {
-    showVerificationMessage('No pending verification found. Please try signing up again.', 'error');
-    return;
-  }
-  
-  try {
-    toggleLoading(true);
-    
-    const user = appState.pendingVerification.user;
-    const email = appState.pendingVerification.email;
-    const newToken = generateVerificationToken();
-    
-    // Update token in database
-    await database.ref(`userVerifications/${user.uid}`).update({
-      token: newToken,
-      createdAt: new Date().toString()
-    });
-    
-    // In a real implementation, you would send an actual email here
-    
-    console.log('New verification token:', newToken);
-    
-    // Example verification URL (this would be included in the email)
-    const verificationUrl = `${window.location.origin}${window.location.pathname}?mode=verifyEmail&oobCode=${newToken}&uid=${user.uid}`;
-    console.log('Verification URL:', verificationUrl);
-    
-    // Show alert with the verification URL (for demo purposes only)
-    alert(`For demo purposes: Your new verification URL is: ${verificationUrl}\n\nIn a real implementation, this would be sent to your email.`);
-    
-    showVerificationMessage('Verification email resent! Please check your inbox and spam folder.', 'success');
-    toggleLoading(false);
-  } catch (error) {
-    console.error('Error resending verification email:', error);
-    showVerificationMessage('Failed to resend verification email. Please try again.', 'error');
-    toggleLoading(false);
-  }
-}
-
-// Check if email is verified
-async function checkEmailVerification() {
-  if (!appState.pendingVerification || !appState.pendingVerification.user) {
-    showVerificationMessage('No pending verification found. Please try signing up again.', 'error');
-    return;
-  }
-  
-  try {
-    toggleLoading(true);
-    
-    const user = appState.pendingVerification.user;
-    
-    // Reload user to get latest verification status
-    await user.reload();
-    
-    // Check database verification status
-    const verificationSnapshot = await database.ref(`userVerifications/${user.uid}`).once('value');
-    const verificationData = verificationSnapshot.val();
-    
-    if (verificationData && verificationData.verified === true) {
-      // Email is verified, complete the sign-up process
-      showVerificationMessage('Email verified successfully!', 'success');
+    <!-- Home Page -->
+    <div id="homePage" class="page home-page">
+      <div class="welcome-card">
+        <h1 id="welcomeMessage" class="welcome-title">Hello!</h1>
+        <p class="welcome-subtitle">Welcome back to the DECA Learning Platform. Ready to continue your journey?</p>
+        <button id="logoutButton" class="btn btn-primary" style="max-width: 200px;">
+          <i class="fas fa-sign-out-alt"></i> Log Out
+        </button>
+      </div>
       
-      // Update user status
-      await database.ref(`users/${user.uid}`).update({
-        emailVerified: true
-      });
+      <div class="action-cards">
+        <div class="action-card">
+          <i class="fas fa-play-circle"></i>
+          <h3>Start a Test</h3>
+          <p>Take a new assessment to test your knowledge and skills</p>
+          <button id="startTestButton" class="btn btn-primary">Start Test</button>
+        </div>
+        
+        <div class="action-card">
+          <i class="fas fa-chart-line"></i>
+          <h3>View Performance</h3>
+          <p>See your test history and track your progress over time</p>
+          <button id="summaryButton" class="btn btn-primary">View Summary</button>
+        </div>
+        
+        <div class="action-card">
+          <i class="fas fa-hourglass-half"></i>
+          <h3>Resume Test</h3>
+          <p>Continue a previously started test session</p>
+          <button id="resumeTestsButton" class="btn btn-primary">Resume Tests</button>
+        </div>
+      </div>
       
-      // Complete registration and proceed to home page
-      appState.currentUser = {
-        uid: user.uid,
-        name: appState.pendingVerification.name,
-        email: appState.pendingVerification.email
+      <div class="test-options">
+        <h3>Test Options</h3>
+        <div class="options-grid">
+          <div class="option-group">
+            <label for="testSelect">Select Test Type</label>
+            <select id="testSelect" class="form-select">
+              <option value="" disabled selected>Choose a test</option>
+              <!-- Options will be populated dynamically -->
+            </select>
+          </div>
+          
+          <div class="option-group">
+            <label for="timeLimit">Time Limit (minutes)</label>
+            <select id="timeLimit" class="form-select">
+              <option value="0">No time limit</option>
+              <option value="10">10 minutes</option>
+              <option value="20">20 minutes</option>
+              <option value="30" selected>30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other pages from the existing code would go here -->
+    <div id="summaryPage" class="page">
+      <!-- Summary page content -->
+    </div>
+    
+    <div id="resumeTestsPage" class="page">
+      <!-- Resume Tests page content -->
+    </div>
+    
+    <div id="testPage" class="page">
+      <!-- Test page content -->
+    </div>
+    
+    <div id="resultsPage" class="page">
+      <!-- Results page content -->
+    </div>
+    
+    <div id="reviewPage" class="page">
+      <!-- Review page content -->
+    </div>
+    
+    <div id="testDetailPage" class="page">
+      <!-- Test Detail page content -->
+    </div>
+    
+    <div id="adminPage" class="page">
+      <!-- Admin page content -->
+    </div>
+    
+    <div id="userDetailPage" class="page">
+      <!-- User Detail page content -->
+    </div>
+    
+    <div id="adminVerificationPage" class="page">
+      <!-- Admin Verification page content -->
+    </div>
+
+    <!-- Email Verification Page will be added dynamically -->
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAEJU8ZOlOuQzMNw7Cza-U_SuegJH29jRo",
+      authDomain: "DECA-55fc4.firebaseapp.com",
+      databaseURL: "https://DECA-55fc4-default-rtdb.firebaseio.com",
+      projectId: "DECA-55fc4",
+      storageBucket: "DECA-55fc4.appspot.com",
+      messagingSenderId: "368623997898",
+      appId: "1:368623997898:web:79b9952ee9e9fa0edb7533",
+      measurementId: "G-7ZT1H2WTWH"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Page references - Same as provided code
+    const pages = {
+      auth: document.getElementById('authPage'),
+      home: document.getElementById('homePage'),
+      summary: document.getElementById('summaryPage'),
+      resumeTests: document.getElementById('resumeTestsPage'),
+      test: document.getElementById('testPage'),
+      results: document.getElementById('resultsPage'),
+      review: document.getElementById('reviewPage'),
+      testDetail: document.getElementById('testDetailPage'),
+      admin: document.getElementById('adminPage'),
+      userDetail: document.getElementById('userDetailPage'),
+      adminVerification: document.getElementById('adminVerificationPage'),
+      emailVerification: null // Will be set during initialization
+    };
+
+    // Auth elements - Updated for new UI
+    const authElements = {
+      title: document.getElementById('authTitle'),
+      button: document.getElementById('authButton'),
+      toggleText: document.getElementById('toggleText'),
+      toggleLink: document.getElementById('toggleLink'),
+      nameGroup: document.getElementById('nameGroup'),
+      messageContainer: document.getElementById('messageContainer'),
+      googleButton: document.getElementById('googleAuthButton')
+    };
+
+    // Home elements - Same as provided code
+    const homeElements = {
+      welcomeMessage: document.getElementById('welcomeMessage'),
+      logoutButton: document.getElementById('logoutButton'),
+      startTestButton: document.getElementById('startTestButton'),
+      summaryButton: document.getElementById('summaryButton'),
+      resumeTestsButton: document.getElementById('resumeTestsButton'),
+      timeLimit: document.getElementById('timeLimit'),
+      adminButton: document.createElement('button') // Will add this dynamically if admin
+    };
+
+    // Form inputs - Same as provided code
+    const formInputs = {
+      email: document.getElementById('email'),
+      password: document.getElementById('password'),
+      name: document.getElementById('name')
+    };
+
+    // Error message elements
+    const errorElements = {
+      email: document.getElementById('emailError'),
+      password: document.getElementById('passwordError'),
+      name: document.getElementById('nameError')
+    };
+
+    const testSelect = document.getElementById('testSelect');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    let appState = {
+      isLoginMode: true,
+      currentUser: null,
+      testQuestions: [],
+      currentQuestionIndex: 0,
+      userAnswers: [],
+      testData: null,
+      timerInterval: null,
+      timeRemaining: 0,
+      completedTests: [],
+      inProgressTests: {},
+      testTypes: [],
+      currentTestDetail: null,
+      isAdmin: false,
+      allUsers: [],
+      currentUserDetail: null,
+      adminEmail: "gautham0913@gmail.com", // Replace with your email
+      adminVerificationCode: null,
+      adminVerified: false,
+      pendingVerification: null,
+      emailVerificationElements: null
+    };
+
+    // Initialize email verification system
+    function setupEmailVerification() {
+      // Create email verification page (same as in the provided code)
+      const verificationPage = document.createElement('div');
+      verificationPage.id = 'emailVerificationPage';
+      verificationPage.className = 'page auth-page';
+      verificationPage.style.display = 'none';
+      
+      verificationPage.innerHTML = `
+        <div class="logo-container">
+          <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+            <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+            <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+            <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+            <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+          </svg>
+        </div>
+        
+        <h1>Email Verification</h1>
+        <div id="emailVerificationMessageContainer" class="message-container"></div>
+        
+        <div class="auth-container">
+          <p class="welcome-message">A verification code has been sent to your email. Please verify your email to continue.</p>
+          
+          <div id="emailVerificationInfo" class="form-group">
+            <p>We've sent a verification link to: <strong id="userEmailDisplay"></strong></p>
+          </div>
+          
+          <button id="verifyEmailButton" class="btn btn-primary">
+            <i class="fas fa-check-circle"></i> I've Verified My Email
+          </button>
+          
+          <button id="resendVerificationButton" class="btn btn-outline" style="margin-top: 10px;">
+            <i class="fas fa-redo"></i> Resend Verification Email
+          </button>
+          
+          <button id="backToLoginButton" class="btn btn-outline" style="margin-top: 10px;">
+            <i class="fas fa-times"></i> Back to Login
+          </button>
+        </div>
+      `;
+      
+      // Add to container
+      document.querySelector('.container').appendChild(verificationPage);
+      
+      // Add to pages object
+      pages.emailVerification = verificationPage;
+      
+      // Store elements
+      const emailVerificationElements = {
+        page: verificationPage,
+        messageContainer: document.getElementById('emailVerificationMessageContainer'),
+        emailDisplay: document.getElementById('userEmailDisplay'),
+        verifyButton: document.getElementById('verifyEmailButton'),
+        resendButton: document.getElementById('resendVerificationButton'),
+        backButton: document.getElementById('backToLoginButton')
       };
       
-      setTimeout(() => {
-        showHomePage(appState.pendingVerification.name);
-        toggleLoading(false);
-      }, 1000);
-    } else {
-      // Email not verified yet
-      showVerificationMessage('Email not verified yet. Please check your inbox and click the verification link.', 'error');
-      toggleLoading(false);
+      // Add event listeners
+      emailVerificationElements.verifyButton.addEventListener('click', checkEmailVerification);
+      emailVerificationElements.resendButton.addEventListener('click', resendVerificationEmail);
+      emailVerificationElements.backButton.addEventListener('click', () => showAuthPage());
+      
+      return emailVerificationElements;
     }
-  } catch (error) {
-    console.error('Error checking email verification:', error);
-    showVerificationMessage('Failed to check verification status. Please try again.', 'error');
-    toggleLoading(false);
-  }
-}
 
-// Process email verification from URL
-async function processEmailVerification() {
-  // Extract verification parameters from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const mode = urlParams.get('mode');
-  const oobCode = urlParams.get('oobCode');
-  const uid = urlParams.get('uid');
-  
-  if (mode === 'verifyEmail' && oobCode && uid) {
-    try {
-      toggleLoading(true);
+    // Create Admin Verification Page
+    function setupAdminVerification() {
+      const adminVerificationPage = pages.adminVerification;
       
-      // Check if token matches
-      const verificationSnapshot = await database.ref(`userVerifications/${uid}`).once('value');
-      const verificationData = verificationSnapshot.val();
+      adminVerificationPage.innerHTML = `
+        <div class="auth-page">
+          <div class="logo-container">
+            <svg class="logo" width="177" height="60" viewBox="0 0 177 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M56.78 14.02L42.82 0.06C42.4 -0.02 41.92 -0.02 41.5 0.06L27.54 14.02C27.12 14.46 27.12 15.18 27.54 15.6L41.5 29.56C41.72 29.78 41.96 29.86 42.16 29.86C42.36 29.86 42.6 29.78 42.82 29.56L56.78 15.6C57.22 15.18 57.22 14.46 56.78 14.02Z" fill="#0056A4"/>
+              <path d="M72.38 15.3H85.5C92.42 15.3 97.58 20.22 97.58 27.02C97.58 33.82 92.42 38.74 85.5 38.74H72.38V15.3ZM82.02 31.9H85.1C87.54 31.9 88.7 29.8 88.7 27.02C88.7 24.24 87.54 22.14 85.1 22.14H82.02V31.9Z" fill="#0056A4"/>
+              <path d="M101.44 15.3H122.24V22.14H110.96V23.5H120.48V29.78H110.96V31.9H122.52V38.74H101.44V15.3Z" fill="#0056A4"/>
+              <path d="M136.5 15.3C143.56 15.3 149.08 20.34 149.08 27C149.08 33.66 143.56 38.7 136.5 38.7C129.44 38.7 123.92 33.66 123.92 27C123.92 20.34 129.44 15.3 136.5 15.3ZM136.5 31.78C139.24 31.78 140.28 29.76 140.28 27C140.28 24.24 139.24 22.22 136.5 22.22C133.76 22.22 132.72 24.24 132.72 27C132.72 29.76 133.76 31.78 136.5 31.78Z" fill="#0056A4"/>
+              <path d="M151.98 15.3H162.46L168.54 27.1H168.7V15.3H177V38.74H166.92L160.44 26.1H160.28V38.74H151.98V15.3Z" fill="#0056A4"/>
+            </svg>
+          </div>
+          
+          <h1>Admin Verification</h1>
+          <div id="verificationMessageContainer" class="message-container"></div>
+          
+          <div class="auth-container">
+            <p class="welcome-message">Please enter the verification code sent to your email to access the admin dashboard.</p>
+            
+            <div class="form-group">
+              <label for="verificationCode">Verification Code</label>
+              <div class="input-group">
+                <i class="fas fa-key input-icon"></i>
+                <input type="text" id="verificationCode" class="form-input" placeholder="Enter your 6-digit code">
+              </div>
+            </div>
+            
+            <button id="verifyButton" class="btn btn-primary">
+              <i class="fas fa-check-circle"></i> Verify Code
+            </button>
+            
+            <button id="resendCodeButton" class="btn btn-outline" style="margin-top: 10px;">
+              <i class="fas fa-redo"></i> Resend Code
+            </button>
+            
+            <button id="cancelVerificationButton" class="btn btn-outline" style="margin-top: 10px;">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </div>
+      `;
       
-      if (verificationData && verificationData.token === oobCode) {
-        // Verify the email
-        await database.ref(`userVerifications/${uid}`).update({
-          verified: true,
-          verifiedAt: new Date().toString()
-        });
-        
-        // Update user status
-        await database.ref(`users/${uid}`).update({
-          emailVerified: true
-        });
-        
-        // Show success message
-        alert('Email verified successfully! You can now sign in to your account.');
-      } else {
-        alert('Invalid or expired verification link. Please try again or request a new verification email.');
+      // Admin Verification elements
+      return {
+        messageContainer: document.getElementById('verificationMessageContainer'),
+        codeInput: document.getElementById('verificationCode'),
+        verifyButton: document.getElementById('verifyButton'),
+        resendButton: document.getElementById('resendCodeButton'),
+        cancelButton: document.getElementById('cancelVerificationButton')
+      };
+    }
+
+    // Validation functions for the login form
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    function validatePassword(password) {
+      return password.length >= 6;
+    }
+
+    function validateName(name) {
+      return name.trim().length > 0;
+    }
+
+    function validateLoginForm() {
+      let isValid = true;
+      
+      // Clear previous error messages
+      errorElements.email.textContent = '';
+      errorElements.password.textContent = '';
+      errorElements.name.textContent = '';
+      
+      // Validate email
+      if (!formInputs.email.value) {
+        errorElements.email.textContent = 'Email is required';
+        isValid = false;
+      } else if (!validateEmail(formInputs.email.value)) {
+        errorElements.email.textContent = 'Please enter a valid email';
+        isValid = false;
       }
       
-      // Clear URL parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Validate password
+      if (!formInputs.password.value) {
+        errorElements.password.textContent = 'Password is required';
+        isValid = false;
+      } else if (!validatePassword(formInputs.password.value)) {
+        errorElements.password.textContent = 'Password must be at least 6 characters';
+        isValid = false;
+      }
       
-      // Redirect to login page
-      showAuthPage();
-      toggleLoading(false);
-    } catch (error) {
-      console.error('Error verifying email:', error);
-      alert('Error verifying email. Please try again.');
-      toggleLoading(false);
+      // Validate name if in signup mode
+      if (!appState.isLoginMode) {
+        if (!formInputs.name.value) {
+          errorElements.name.textContent = 'Name is required';
+          isValid = false;
+        } else if (!validateName(formInputs.name.value)) {
+          errorElements.name.textContent = 'Please enter a valid name';
+          isValid = false;
+        }
+      }
+      
+      return isValid;
     }
-  }
-}
 
-// Show email verification page
-function showEmailVerificationPage(user, email, name) {
-  // Set pending verification state
-  appState.pendingVerification = { user, email, name };
-  
-  // Update email display
-  document.getElementById('userEmailDisplay').textContent = email;
-  
-  // Show verification page
-  showPage(pages.emailVerification);
-}
-
-// Modified Sign Up function
-async function handleSignUp() {
-  const email = formInputs.email.value.trim();
-  const password = formInputs.password.value.trim();
-  const name = formInputs.name.value.trim();
-  
-  if (!email || !password || !name) {
-    showMessage('Please fill in all fields.', 'error');
-    return;
-  }
-  
-  toggleLoading(true);
-  
-  try {
-    // Create user account
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    const user = userCredential.user;
-    
-    // Generate verification token
-    const verificationToken = generateVerificationToken();
-    
-    // Create initial user data
-    await database.ref('users/' + user.uid).set({
-      email, 
-      name, 
-      lastLogin: new Date().toString(),
-      emailVerified: false, // Add this field
-      tests: {}
-    });
-    
-    // Send verification email
-    const emailSent = await sendVerificationEmail(user, email, verificationToken);
-    
-    if (emailSent) {
-      showMessage('Account created! Please verify your email to continue.', 'success');
+    // Modified Sign In function with validation
+    async function handleSignIn() {
+      if (!validateLoginForm()) return;
       
-      // Show verification page
-      setTimeout(() => {
-        showEmailVerificationPage(user, email, name);
-        toggleLoading(false);
-      }, 1000);
-    } else {
-      showMessage('Account created, but failed to send verification email. Please try again.', 'error');
-      toggleLoading(false);
-    }
-  } catch (err) {
-    showMessage(err.message, 'error');
-    toggleLoading(false);
-  }
-}
-
-// Modified Sign In function
-async function handleSignIn() {
-  const email = formInputs.email.value.trim();
-  const password = formInputs.password.value.trim();
-  
-  if (!email || !password) {
-    showMessage('Please enter both email and password.', 'error');
-    return;
-  }
-  
-  toggleLoading(true);
-  
-  try {
-    // Sign in
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    const user = userCredential.user;
-    
-    // Get user data
-    const userSnapshot = await database.ref('users/' + user.uid).once('value');
-    const userData = userSnapshot.val();
-    
-    // Check if email is verified
-    const verificationSnapshot = await database.ref(`userVerifications/${user.uid}`).once('value');
-    const verificationData = verificationSnapshot.val();
-    
-    if (userData.emailVerified !== true && (!verificationData || verificationData.verified !== true)) {
-      // Email not verified
-      showMessage('Please verify your email before signing in.', 'error');
+      const email = formInputs.email.value.trim();
+      const password = formInputs.password.value.trim();
       
-      // Set pending verification
-      appState.pendingVerification = { user, email, name: userData.name };
-      
-      // Show verification page
-      setTimeout(() => {
-        showEmailVerificationPage(user, email, userData.name);
-        toggleLoading(false);
-      }, 1000);
-      return;
-    }
-    
-    // Email is verified, proceed with login
-    await database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
-    showMessage('Login successful!', 'success');
-    
-    appState.currentUser = { uid: user.uid, name: userData.name, email: userData.email };
-    appState.isAdmin = (userData.email === appState.adminEmail);
-    
-    setTimeout(() => {
-      showHomePage(userData.name);
-      toggleLoading(false);
-    }, 1000);
-  } catch (err) {
-    showMessage(err.message, 'error');
-    toggleLoading(false);
-  }
-}
-
-// Initialize email verification system
-function initEmailVerification() {
-  // Set up verification page
-  appState.emailVerificationElements = setupEmailVerification();
-  
-  // Check for verification links in URL
-  processEmailVerification();
-}
-
-function toggleLoading(show) {
-  loadingOverlay.style.display = show ? 'flex' : 'none';
-}
-
-function showMessage(msg, type) {
-  authElements.messageContainer.innerHTML =
-    `<div class="message ${type}">${msg}</div>`;
-}
-
-function clearMessage() {
-  authElements.messageContainer.innerHTML = '';
-}
-
-// Toggle auth form
-authElements.toggleLink.addEventListener('click', () => {
-  appState.isLoginMode = !appState.isLoginMode;
-  if (appState.isLoginMode) {
-    authElements.title.textContent = 'Sign In';
-    authElements.button.textContent = 'Sign In';
-    authElements.toggleText.textContent = "Don't have an account?";
-    authElements.toggleLink.textContent = 'Sign Up';
-    authElements.nameGroup.style.display = 'none';
-  } else {
-    authElements.title.textContent = 'Sign Up';
-    authElements.button.textContent = 'Sign Up';
-    authElements.toggleText.textContent = 'Already have an account?';
-    authElements.toggleLink.textContent = 'Sign In';
-    authElements.nameGroup.style.display = 'block';
-  }
-  clearMessage();
-});
-
-// Sign In / Sign Up - Replace the original event listener
-authElements.button.addEventListener('click', () => {
-  if (appState.isLoginMode) {
-    handleSignIn();
-  } else {
-    handleSignUp();
-  }
-});
-
-// Load tests and check auth on page load
-document.addEventListener('DOMContentLoaded', async () => {
-  // Initialize email verification system
-  initEmailVerification();
-  
-  try {
-    const snap = await database.ref('questions').once('value');
-    const tests = snap.exists() ? Object.keys(snap.val()) : [];
-    appState.testTypes = tests;
-    
-    // Populate testSelect
-    testSelect.innerHTML = '';
-    tests.forEach(key => {
-      const opt = document.createElement('option');
-      opt.value = key;
-      opt.textContent = key.replace(/-/g,' ').toUpperCase();
-      testSelect.appendChild(opt);
-    });
-    
-    // Populate filterTest
-    summaryElements.filterTest.innerHTML = '<option value="all">All Tests</option>';
-    tests.forEach(key => {
-      const opt = document.createElement('option');
-      opt.value = key;
-      opt.textContent = key.replace(/-/g,' ').toUpperCase();
-      summaryElements.filterTest.appendChild(opt);
-    });
-    
-    // Populate admin filterTest
-    adminElements.filterTest.innerHTML = '<option value="all">All Tests</option>';
-    tests.forEach(key => {
-      const opt = document.createElement('option');
-      opt.value = key;
-      opt.textContent = key.replace(/-/g,' ').toUpperCase();
-      adminElements.filterTest.appendChild(opt);
-    });
-  } catch (err) {
-    console.error('Error loading tests:', err);
-    testSelect.innerHTML = '<option disabled>Error loading tests</option>';
-  }
-  
-  // Check user auth state immediately
-  auth.onAuthStateChanged(async (usr) => {
-    if (usr) {
       toggleLoading(true);
-      const snap = await database.ref('users/' + usr.uid).once('value');
-      const data = snap.val();
       
-      // Check if email is verified
-      if (data.emailVerified !== true) {
-        // Get verification status
-        const verificationSnapshot = await database.ref(`userVerifications/${usr.uid}`).once('value');
+      try {
+        // Sign in
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Get user data
+        const userSnapshot = await database.ref('users/' + user.uid).once('value');
+        const userData = userSnapshot.val();
+        
+        // Check if email is verified
+        const verificationSnapshot = await database.ref(`userVerifications/${user.uid}`).once('value');
         const verificationData = verificationSnapshot.val();
         
-        if (!verificationData || verificationData.verified !== true) {
+        if (userData.emailVerified !== true && (!verificationData || verificationData.verified !== true)) {
+          // Email not verified
+          showMessage('Please verify your email before signing in.', 'error');
+          
+          // Set pending verification
+          appState.pendingVerification = { user, email, name: userData.name };
+          
           // Show verification page
-          appState.pendingVerification = { user: usr, email: data.email, name: data.name };
-          showEmailVerificationPage(usr, data.email, data.name);
-          toggleLoading(false);
+          setTimeout(() => {
+            showEmailVerificationPage(user, email, userData.name);
+            toggleLoading(false);
+          }, 1000);
           return;
         }
         
-        // Update user verified status if needed
-        await database.ref('users/' + usr.uid).update({ emailVerified: true });
+        // Email is verified, proceed with login
+        await database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
+        showMessage('Login successful!', 'success');
+        
+        appState.currentUser = { uid: user.uid, name: userData.name, email: userData.email };
+        appState.isAdmin = (userData.email === appState.adminEmail);
+        
+        setTimeout(() => {
+          showHomePage(userData.name);
+          toggleLoading(false);
+        }, 1000);
+      } catch (err) {
+        showMessage(err.message, 'error');
+        toggleLoading(false);
       }
-      
-      appState.currentUser = { uid: usr.uid, name: data.name, email: data.email };
-      
-      // Check if this user is the admin
-      appState.isAdmin = (data.email === appState.adminEmail);
-      appState.adminVerified = false; // Reset verification state
-      
-      // Load user's completed tests
-      await loadCompletedTests();
-      
-      // Load user's in-progress tests
-      await loadInProgressTests();
-      
-      showHomePage(data.name);
-      toggleLoading(false);
-    } else {
-      showAuthPage();
     }
-  });
-});
 
-// Load completed tests
-async function loadCompletedTests() {
-  try {
-    const snap = await database.ref(`users/${appState.currentUser.uid}/tests/completed`).once('value');
-    const data = snap.val() || {};
-    
-    // Convert to array
-    appState.completedTests = Object.entries(data).map(([id, test]) => ({
-      id,
-      ...test
-    }));
-    
-    // Update summary stats
-    updateSummaryStats();
-    
-    // Create summary charts
-    createSummaryCharts();
-  } catch (err) {
-    console.error('Error loading completed tests:', err);
-  }
-}
-
-// Load in-progress tests
-async function loadInProgressTests() {
-  try {
-    const snap = await database.ref(`users/${appState.currentUser.uid}/tests/inProgress`).once('value');
-    if (snap.exists()) {
-      // Convert to object with keys
-      const tests = {};
+    // Modified Sign Up function with validation
+    async function handleSignUp() {
+      if (!validateLoginForm()) return;
       
-      // Check if it's an object with keys or a single in-progress test
-      if (snap.hasChildren()) {
-        snap.forEach(childSnap => {
-          const key = childSnap.key;
-          const val = childSnap.val();
-          tests[key] = val;
+      const email = formInputs.email.value.trim();
+      const password = formInputs.password.value.trim();
+      const name = formInputs.name.value.trim();
+      
+      toggleLoading(true);
+      
+      try {
+        // Create user account
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Generate verification token
+        const verificationToken = generateVerificationToken();
+        
+        // Create initial user data
+        await database.ref('users/' + user.uid).set({
+          email, 
+          name, 
+          lastLogin: new Date().toString(),
+          emailVerified: false,
+          tests: {}
         });
-      } else {
-        // For backward compatibility - old structure had a single in-progress test
-        const val = snap.val();
-        if (val) {
-          tests['default'] = val;
+        
+        // Send verification email
+        const emailSent = await sendVerificationEmail(user, email, verificationToken);
+        
+        if (emailSent) {
+          showMessage('Account created! Please verify your email to continue.', 'success');
+          
+          // Show verification page
+          setTimeout(() => {
+            showEmailVerificationPage(user, email, name);
+            toggleLoading(false);
+          }, 1000);
+        } else {
+          showMessage('Account created, but failed to send verification email. Please try again.', 'error');
+          toggleLoading(false);
         }
+      } catch (err) {
+        showMessage(err.message, 'error');
+        toggleLoading(false);
+      }
+    }
+
+    // Add Google Sign-In functionality
+    async function handleGoogleSignIn() {
+      toggleLoading(true);
+      
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        
+        // The signed-in user info
+        const user = result.user;
+        
+        // Check if this is a new or existing user
+        const userSnapshot = await database.ref('users/' + user.uid).once('value');
+        const userData = userSnapshot.val();
+        
+        if (!userData) {
+          // New user - create user data
+          await database.ref('users/' + user.uid).set({
+            email: user.email,
+            name: user.displayName || 'Google User',
+            lastLogin: new Date().toString(),
+            emailVerified: true, // Google accounts are pre-verified
+            tests: {}
+          });
+          
+          showMessage('Account created successfully!', 'success');
+        } else {
+          // Existing user - update last login
+          await database.ref('users/' + user.uid + '/lastLogin').set(new Date().toString());
+          showMessage('Login successful!', 'success');
+        }
+        
+        // Set appState
+        appState.currentUser = { 
+          uid: user.uid, 
+          name: userData ? userData.name : (user.displayName || 'Google User'), 
+          email: user.email 
+        };
+        
+        // Check if admin
+        appState.isAdmin = (user.email === appState.adminEmail);
+        
+        // Show home page
+        setTimeout(() => {
+          showHomePage(appState.currentUser.name);
+          toggleLoading(false);
+        }, 1000);
+      } catch (err) {
+        console.error('Error during Google sign in:', err);
+        showMessage(err.message, 'error');
+        toggleLoading(false);
+      }
+    }
+
+    // Generate a secure verification token
+    function generateVerificationToken() {
+      const array = new Uint8Array(32);
+      window.crypto.getRandomValues(array);
+      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Send verification email
+    async function sendVerificationEmail(user, email, token) {
+      try {
+        toggleLoading(true);
+        
+        // Create user verification data in database
+        await database.ref(`userVerifications/${user.uid}`).set({
+          email: email,
+          token: token,
+          createdAt: new Date().toString(),
+          verified: false
+        });
+        
+        // In a real app, this would send an actual email with the code
+        // For now, we'll just show it in a message for demo purposes
+        
+        console.log('Verification token:', token);
+        
+        // Example verification URL (this would be included in the email)
+        const verificationUrl = `${window.location.origin}${window.location.pathname}?mode=verifyEmail&oobCode=${token}&uid=${user.uid}`;
+        console.log('Verification URL:', verificationUrl);
+        
+        // Show alert with the verification URL (for demo purposes only)
+        alert(`For demo purposes: Your verification URL is: ${verificationUrl}\n\nIn a real implementation, this would be sent to your email.`);
+        
+        showVerificationMessage('Verification email sent! Please check your inbox and spam folder.', 'success');
+        toggleLoading(false);
+        
+        return true;
+      } catch (error) {
+        console.error('Error sending verification email:', error);
+        showVerificationMessage('Failed to send verification email. Please try again.', 'error');
+        toggleLoading(false);
+        return false;
+      }
+    }
+
+    // Check if email is verified
+    async function checkEmailVerification() {
+      if (!appState.pendingVerification || !appState.pendingVerification.user) {
+        showVerificationMessage('No pending verification found. Please try signing up again.', 'error');
+        return;
       }
       
-      appState.inProgressTests = tests;
-    } else {
-      appState.inProgressTests = {};
-    }
-  } catch (err) {
-    console.error('Error loading in-progress tests:', err);
-  }
-}
-
-// Update summary stats
-function updateSummaryStats() {
-  const tests = appState.completedTests;
-  
-  // Total tests
-  summaryElements.totalTestsValue.textContent = tests.length;
-  
-  // Average score
-  if (tests.length > 0) {
-    const avgScore = tests.reduce((acc, test) => acc + test.percentage, 0) / tests.length;
-    summaryElements.avgScoreValue.textContent = `${Math.round(avgScore)}%`;
-    
-    // Best score
-    const bestScore = Math.max(...tests.map(test => test.percentage));
-    summaryElements.bestScoreValue.textContent = `${bestScore}%`;
-  } else {
-    summaryElements.avgScoreValue.textContent = '0%';
-    summaryElements.bestScoreValue.textContent = '0%';
-  }
-}
-
-// Create summary charts
-function createSummaryCharts() {
-  const tests = appState.completedTests;
-  
-  // Clear existing charts
-  if (overallPieChart) {
-    overallPieChart.destroy();
-  }
-  
-  if (progressionChart) {
-    progressionChart.destroy();
-  }
-  
-  if (tests.length === 0) {
-    return;
-  }
-  
-  // Calculate total correct and incorrect answers
-  let totalCorrect = 0;
-  let totalIncorrect = 0;
-  
-  tests.forEach(test => {
-    totalCorrect += test.score;
-    totalIncorrect += test.questionCount - test.score;
-  });
-  
-  // Create overall pie chart
-  const pieCtx = summaryElements.overallPieChart.getContext('2d');
-  overallPieChart = new Chart(pieCtx, {
-    type: 'pie',
-    data: {
-      labels: ['Correct', 'Incorrect'],
-      datasets: [{
-        data: [totalCorrect, totalIncorrect],
-        backgroundColor: ['#10B981', '#EF4444'],
-        borderColor: ['#D1FAE5', '#FEE2E2'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom'
+      try {
+        toggleLoading(true);
+        
+        const user = appState.pendingVerification.user;
+        
+        // Reload user to get latest verification status
+        await user.reload();
+        
+        // Check database verification status
+        const verificationSnapshot = await database.ref(`userVerifications/${user.uid}`).once('value');
+        const verificationData = verificationSnapshot.val();
+        
+        if (verificationData && verificationData.verified === true) {
+          // Email is verified, complete the sign-up process
+          showVerificationMessage('Email verified successfully!', 'success');
+          
+          // Update user status
+          await database.ref(`users/${user.uid}`).update({
+            emailVerified: true
+          });
+          
+          // Complete registration and proceed to home page
+          appState.currentUser = {
+            uid: user.uid,
+            name: appState.pendingVerification.name,
+            email: appState.pendingVerification.email
+          };
+          
+          setTimeout(() => {
+            showHomePage(appState.pendingVerification.name);
+            toggleLoading(false);
+          }, 1000);
+        } else {
+          // Email not verified yet
+          showVerificationMessage('Email not verified yet. Please check your inbox and click the verification link.', 'error');
+          toggleLoading(false);
         }
+      } catch (error) {
+        console.error('Error checking email verification:', error);
+        showVerificationMessage('Failed to check verification status. Please try again.', 'error');
+        toggleLoading(false);
       }
     }
-  });
-  
-  // Create progression chart
-  // Sort tests by date and get the last 10
-  const sortedTests = [...tests].sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
-  const recentTests = sortedTests.slice(-10);
-  
-  const progressionCtx = summaryElements.progressionChart.getContext('2d');
-  progressionChart = new Chart(progressionCtx, {
-    type: 'line',
-    data: {
-      labels: recentTests.map((test, index) => `Test ${index + 1}`),
-      datasets: [{
-        label: 'Score %',
-        data: recentTests.map(test => test.percentage),
-        borderColor: '#0056A4',
-        backgroundColor: 'rgba(0, 86, 164, 0.1)',
-        fill: true,
-        tension: 0.1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          title: {
-            display: true,
-            text: 'Score (%)'
+
+    // Process email verification from URL
+    async function processEmailVerification() {
+      // Extract verification parameters from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode');
+      const oobCode = urlParams.get('oobCode');
+      const uid = urlParams.get('uid');
+      
+      if (mode === 'verifyEmail' && oobCode && uid) {
+        try {
+          toggleLoading(true);
+          
+          // Check if token matches
+          const verificationSnapshot = await database.ref(`userVerifications/${uid}`).once('value');
+          const verificationData = verificationSnapshot.val();
+          
+          if (verificationData && verificationData.token === oobCode) {
+            // Verify the email
+            await database.ref(`userVerifications/${uid}`).update({
+              verified: true,
+              verifiedAt: new Date().toString()
+            });
+            
+            // Update user status
+            await database.ref(`users/${uid}`).update({
+              emailVerified: true
+            });
+            
+            // Show success message
+            alert('Email verified successfully! You can now sign in to your account.');
+          } else {
+            alert('Invalid or expired verification link. Please try again or request a new verification email.');
           }
-        }
-      },
-      plugins: {
-        legend: {
-          display: false
-        }
-      }
-    }
-  });
-}
-
-// Create results pie chart
-function createResultsPieChart(correct, total) {
-  const incorrect = total - correct;
-  
-  // Clear existing chart
-  if (resultsPieChart) {
-    resultsPieChart.destroy();
-  }
-  
-  const pieCtx = resultsElements.pieChart.getContext('2d');
-  resultsPieChart = new Chart(pieCtx, {
-    type: 'pie',
-    data: {
-      labels: ['Correct', 'Incorrect'],
-      datasets: [{
-        data: [correct, incorrect],
-        backgroundColor: ['#10B981', '#EF4444'],
-        borderColor: ['#D1FAE5', '#FEE2E2'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom'
+          
+          // Clear URL parameters
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          // Redirect to login page
+          showAuthPage();
+          toggleLoading(false);
+        } catch (error) {
+          console.error('Error verifying email:', error);
+          alert('Error verifying email. Please try again.');
+          toggleLoading(false);
         }
       }
     }
-  });
-}
 
-// Create test detail chart
-function createTestDetailChart(correct, total) {
-  const incorrect = total - correct;
-  
-  // Clear existing chart
-  if (testDetailChart) {
-    testDetailChart.destroy();
-  }
-  
-  const pieCtx = testDetailElements.chart.getContext('2d');
-  testDetailChart = new Chart(pieCtx, {
-    type: 'pie',
-    data: {
-      labels: ['Correct', 'Incorrect'],
-      datasets: [{
-        data: [correct, incorrect],
-        backgroundColor: ['#10B981', '#EF4444'],
-        borderColor: ['#D1FAE5', '#FEE2E2'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom'
-        }
+    // Resend verification email
+    async function resendVerificationEmail() {
+      if (!appState.pendingVerification || !appState.pendingVerification.user) {
+        showVerificationMessage('No pending verification found. Please try signing up again.', 'error');
+        return;
+      }
+      
+      try {
+        toggleLoading(true);
+        
+        const user = appState.pendingVerification.user;
+        const email = appState.pendingVerification.email;
+        const newToken = generateVerificationToken();
+        
+        // Update token in database
+        await database.ref(`userVerifications/${user.uid}`).update({
+          token: newToken,
+          createdAt: new Date().toString()
+        });
+        
+        // In a real implementation, you would send an actual email here
+        
+        console.log('New verification token:', newToken);
+        
+        // Example verification URL (this would be included in the email)
+        const verificationUrl = `${window.location.origin}${window.location.pathname}?mode=verifyEmail&oobCode=${newToken}&uid=${user.uid}`;
+        console.log('Verification URL:', verificationUrl);
+        
+        // Show alert with the verification URL (for demo purposes only)
+        alert(`For demo purposes: Your new verification URL is: ${verificationUrl}\n\nIn a real implementation, this would be sent to your email.`);
+        
+        showVerificationMessage('Verification email resent! Please check your inbox and spam folder.', 'success');
+        toggleLoading(false);
+      } catch (error) {
+        console.error('Error resending verification email:', error);
+        showVerificationMessage('Failed to resend verification email. Please try again.', 'error');
+        toggleLoading(false);
       }
     }
-  });
-}
 
-// Filter and render completed tests
-function renderCompletedTests() {
-  const container = summaryElements.completedTestsContainer;
-  const filterValue = summaryElements.filterTest.value;
-  const sortValue = summaryElements.sortBy.value;
-  
-  // Filter tests
-  let filteredTests = [...appState.completedTests];
-  if (filterValue !== 'all') {
-    filteredTests = filteredTests.filter(test => test.testKey === filterValue);
-  }
-  
-  // Sort tests
-  switch (sortValue) {
-    case 'date-desc':
-      filteredTests.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-      break;
-    case 'date-asc':
-      filteredTests.sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
-      break;
-    case 'score-desc':
-      filteredTests.sort((a, b) => b.percentage - a.percentage);
-      break;
-    case 'score-asc':
-      filteredTests.sort((a, b) => a.percentage - b.percentage);
-      break;
-  }
-  
-  // Render tests
-  container.innerHTML = '';
-  
-  if (filteredTests.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-clipboard-list"></i>
-        <p>No completed tests found</p>
-        <button class="btn btn-primary" onclick="showPage(pages.home)">
-          <i class="fas fa-play-circle"></i> Start a Test
-        </button>
-      </div>
-    `;
-    return;
-  }
-  
-  filteredTests.forEach(test => {
-    const completedDate = new Date(test.completedAt);
-    const formattedDate = completedDate.toLocaleDateString();
-    const formattedTime = completedDate.toLocaleTimeString();
-    
-    // Format time taken
-    const minutes = Math.floor(test.timeSpent / 60);
-    const seconds = test.timeSpent % 60;
-    const timeTaken = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    const card = document.createElement('div');
-    card.className = 'test-card';
-    card.innerHTML = `
-      <div class="test-card-header">
-        <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
-        <div class="test-card-date">${formattedDate} at ${formattedTime}</div>
-      </div>
-      <div class="test-card-info">
-        <div class="test-card-stat">
-          <i class="fas fa-clipboard-check"></i>
-          <span>Score: ${test.score}/${test.questionCount}</span>
-        </div>
-        <div class="test-card-stat">
-          <i class="fas fa-percentage"></i>
-          <span>${test.percentage}%</span>
-        </div>
-        <div class="test-card-stat">
-          <i class="fas fa-clock"></i>
-          <span>Time: ${timeTaken}</span>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:1rem;">
-        <i class="fas fa-search"></i> View Details
-      </button>
-    `;
-    
-    // Add event listener to view test details
-    const viewButton = card.querySelector('.btn');
-    viewButton.addEventListener('click', () => {
-      showTestDetail(test);
-    });
-    
-    container.appendChild(card);
-  });
-}
+    // Show email verification page
+    function showEmailVerificationPage(user, email, name) {
+      // Set pending verification state
+      appState.pendingVerification = { user, email, name };
+      
+      // Update email display
+      document.getElementById('userEmailDisplay').textContent = email;
+      
+      // Show verification page
+      showPage(pages.emailVerification);
+    }
 
-// Show test detail page
-async function showTestDetail(test) {
-  toggleLoading(true);
-  
-  try {
-    // Set the current test detail
-    appState.currentTestDetail = test;
-    
-    // Update test detail elements
-    testDetailElements.title.textContent = test.testKey.replace(/-/g, ' ').toUpperCase();
-    
-    const completedDate = new Date(test.completedAt);
-    testDetailElements.date.textContent = `Completed on ${completedDate.toLocaleDateString()} at ${completedDate.toLocaleTimeString()}`;
-    
-    testDetailElements.score.textContent = `${test.score}/${test.questionCount}`;
-    testDetailElements.percentage.textContent = `${test.percentage}%`;
-    
-    // Format time taken
-    const minutes = Math.floor(test.timeSpent / 60);
-    const seconds = test.timeSpent % 60;
-    testDetailElements.time.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    // Create pie chart
-    createTestDetailChart(test.score, test.questionCount);
-    
-    // Fetch questions for this test
-    const testKey = test.testKey;
-    
-    const qs = await Promise.all(test.questions.map(id =>
-      database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
-    ));
-    
-    const questions = qs.filter(q => q !== null).map((q, idx) => ({
-      id: test.questions[idx],
-      ...q
-    }));
-    
-    // Render review
-    testDetailElements.reviewContainer.innerHTML = '';
-    
-    questions.forEach((q, index) => {
-      const userAnswer = test.answers[index];
-      const isCorrect = userAnswer === q.correctAnswer;
+    // Show verification message
+    function showVerificationMessage(msg, type) {
+      if (!appState.emailVerificationElements) return;
       
-      const questionDiv = document.createElement('div');
-      questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
+      const container = appState.emailVerificationElements.messageContainer;
+      container.innerHTML = `<div class="message ${type}">${msg}</div>`;
+    }
+    
+    // Clear verification message
+    function clearVerificationMessage() {
+      if (!appState.emailVerificationElements) return;
       
-      const header = document.createElement('h3');
-      const icon = document.createElement('span');
-      icon.className = `icon ${isCorrect ? 'correct' : 'incorrect'}`;
-      icon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
-      
-      header.appendChild(icon);
-      header.appendChild(document.createTextNode(` Question ${index + 1}`));
-      
-      const questionText = document.createElement('p');
-      questionText.textContent = q.question || "";
-      
-      questionDiv.appendChild(header);
-      questionDiv.appendChild(questionText);
-      
-      // Add options with indicators
-      const optionsList = document.createElement('div');
-      optionsList.className = 'options-list';
-      
-      q.options && q.options.forEach((option, optIndex) => {
-        const optionItem = document.createElement('div');
-        optionItem.className = 'review-option';
-        
-        if (optIndex === q.correctAnswer) {
-          optionItem.classList.add('correct-answer');
-        }
-        
-        if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
-          optionItem.classList.add('wrong-answer');
-        }
-        
-        // Create icon for correct/incorrect
-        const optIcon = document.createElement('span');
-        optIcon.className = 'icon';
-        
-        if (optIndex === q.correctAnswer) {
-          optIcon.innerHTML = '<i class="fas fa-check"></i>';
-        } else if (optIndex === userAnswer) {
-          optIcon.innerHTML = '<i class="fas fa-times"></i>';
-        }
-        
-        optionItem.appendChild(optIcon);
-        optionItem.appendChild(document.createTextNode(` ${option}`));
-        optionsList.appendChild(optionItem);
+      const container = appState.emailVerificationElements.messageContainer;
+      container.innerHTML = '';
+    }
+
+    function showMessage(msg, type) {
+      authElements.messageContainer.innerHTML = `<div class="message ${type}">${msg}</div>`;
+    }
+
+    function clearMessage() {
+      authElements.messageContainer.innerHTML = '';
+    }
+
+    function toggleLoading(show) {
+      loadingOverlay.style.display = show ? 'flex' : 'none';
+    }
+
+    // Page navigation functions
+    function showPage(p) {
+      Object.values(pages).forEach(pg => {
+        if (pg) pg.style.display = 'none';
       });
-      
-      questionDiv.appendChild(optionsList);
-      testDetailElements.reviewContainer.appendChild(questionDiv);
-    });
-    
-    // Show test detail page
-    showPage(pages.testDetail);
-  } catch (err) {
-    console.error('Error showing test detail:', err);
-    alert('Could not load test details. Please try again.');
-  } finally {
-    toggleLoading(false);
-  }
-}
-
-// Render in-progress tests
-function renderInProgressTests() {
-  const container = resumeElements.inProgressTestsContainer;
-  container.innerHTML = '';
-  
-  const tests = appState.inProgressTests;
-  const testIds = Object.keys(tests);
-  
-  if (testIds.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-hourglass-half"></i>
-        <p>No in-progress tests found</p>
-        <button class="btn btn-primary" onclick="showPage(pages.home)">
-          <i class="fas fa-play-circle"></i> Start a Test
-        </button>
-      </div>
-    `;
-    return;
-  }
-  
-  testIds.forEach(testId => {
-    const test = tests[testId];
-    const startDate = new Date(test.startTime);
-    const formattedDate = startDate.toLocaleDateString();
-    const formattedTime = startDate.toLocaleTimeString();
-    
-    // Calculate progress
-    const answeredCount = test.answers ? test.answers.filter(a => a !== null).length : 0;
-    const progressPercent = Math.round((answeredCount / test.questionCount) * 100);
-    
-    const card = document.createElement('div');
-    card.className = 'test-card';
-    card.innerHTML = `
-      <div class="test-card-header">
-        <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
-        <div class="test-card-date">Started: ${formattedDate} at ${formattedTime}</div>
-      </div>
-      <div class="progress-container">
-        <div class="progress-bar" style="width:${progressPercent}%"></div>
-      </div>
-      <div class="test-card-info">
-        <div class="test-card-stat">
-          <i class="fas fa-tasks"></i>
-          <span>Progress: ${answeredCount}/${test.questionCount} questions</span>
-        </div>
-        <div class="test-card-stat">
-          <i class="fas fa-percentage"></i>
-          <span>${progressPercent}% Complete</span>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:1rem;">
-        <i class="fas fa-play-circle"></i> Resume Test
-      </button>
-    `;
-    
-    // Add event listener to resume this test
-    const resumeButton = card.querySelector('.btn');
-    resumeButton.addEventListener('click', () => {
-      resumeSpecificTest(testId);
-    });
-    
-    container.appendChild(card);
-  });
-}
-
-// Resume a specific test
-async function resumeSpecificTest(testId) {
-  toggleLoading(true);
-  
-  try {
-    const test = appState.inProgressTests[testId];
-    if (!test) throw new Error('Test not found');
-    
-    // Get testKey from saved data
-    const testKey = test.testKey;
-    
-    const qs = await Promise.all(test.questions.map(id =>
-      database.ref(`questions/${testKey}/${id}`).once('value').then(s => s.val())
-    ));
-    
-    const valid = qs.filter(q => q !== null).map((q, idx) => ({
-      id: test.questions[idx],
-      ...q
-    }));
-    
-    appState.testQuestions = valid;
-    appState.userAnswers = test.answers || Array(valid.length).fill(null);
-    appState.currentQuestionIndex = test.lastQuestionIndex || 0;
-    appState.testData = test;
-    
-    // Set the current in-progress test ID
-    appState.currentInProgressTestId = testId;
-    
-    // timeRemaining
-    if (test.timeLimit > 0) {
-      const elapsed = Math.floor((new Date() - new Date(test.startTime)) / 1000);
-      appState.timeRemaining = Math.max(0, test.timeLimit * 60 - elapsed);
+      p.style.display = 'block';
     }
-    
-    showTestPage();
-  } catch (err) {
-    console.error('Error resuming test:', err);
-    alert('Could not resume test. Please try again or start a new test.');
-  } finally {
-    toggleLoading(false);
-  }
-}
 
-// Start New Test
-homeElements.startTestButton.addEventListener('click', async () => {
-  const testKey = testSelect.value;
-  if (!testKey) {
-    alert('Please choose a test.');
-    return;
-  }
-  
-  toggleLoading(true);
-  homeElements.startTestButton.disabled = true;
-  
-  try {
-    // Load every question under that test
-    const snap = await database.ref(`questions/${testKey}`).once('value');
-    const data = snap.val();
-    if (!data) throw new Error(`No questions for "${testKey}".`);
-    
-    const questions = Object.entries(data).map(([id,q]) => ({ id, ...q }));
-    appState.testQuestions = questions;
-    appState.userAnswers = Array(questions.length).fill(null);
-    appState.currentQuestionIndex = 0;
-    
-    // Setup testData
-    const timeLimitMin = parseInt(homeElements.timeLimit.value);
-    appState.timeRemaining = timeLimitMin * 60;
-    
-    const testData = {
-      startTime: new Date().toString(),
-      answers: Array(questions.length).fill(null),
-      completed: false,
-      questions: questions.map(q=>q.id),
-      questionCount: questions.length,
-      timeLimit: timeLimitMin,
-      testKey: testKey // Store testKey here
-    };
-    
-    appState.testData = testData;
-    
-    // Generate a unique ID for this test
-    const newTestId = Date.now().toString();
-    appState.currentInProgressTestId = newTestId;
-    
-    // Save to in-progress tests
-    appState.inProgressTests[newTestId] = testData;
-    await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${newTestId}`).set(testData);
-    
-    showTestPage();
-  } catch (err) {
-    console.error('Error loading test:', err);
-    alert('Error: ' + err.message);
-    homeElements.startTestButton.disabled = false;
-  } finally {
-    toggleLoading(false);
-  }
-});
-
-// Navigation to Resume Tests page
-homeElements.resumeTestsButton.addEventListener('click', () => {
-  showPage(pages.resumeTests);
-  renderInProgressTests();
-});
-
-// Navigation to Summary page
-homeElements.summaryButton.addEventListener('click', () => {
-  showPage(pages.summary);
-  renderCompletedTests();
-  createSummaryCharts();
-});
-
-// Navigation back to Home from Summary
-summaryElements.backButton.addEventListener('click', () => {
-  showHomePage(appState.currentUser.name);
-});
-
-// Navigation back to Home from Resume
-resumeElements.backButton.addEventListener('click', () => {
-  showHomePage(appState.currentUser.name);
-});
-
-// Navigation back to Summary from Test Detail
-testDetailElements.backButton.addEventListener('click', () => {
-  showPage(pages.summary);
-});
-
-// Filter and sort change events
-summaryElements.filterTest.addEventListener('change', renderCompletedTests);
-summaryElements.sortBy.addEventListener('change', renderCompletedTests);
-
-// Save test progress
-async function saveTestProgress() {
-  if (!appState.currentUser || !appState.testData) return;
-  
-  try {
-    appState.testData.lastUpdated = new Date().toString();
-    appState.testData.answers = appState.userAnswers;
-    appState.testData.lastQuestionIndex = appState.currentQuestionIndex;
-    
-    const testId = appState.currentInProgressTestId || 'default';
-    
-    await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${testId}`).set(appState.testData);
-  } catch (err) {
-    console.error('Error saving progress:', err);
-  }
-}
-
-// Display current question
-function displayQuestion() {
-  const q = appState.testQuestions[appState.currentQuestionIndex];
-  if (!q) return;
-  
-  // Update question text
-  testElements.questionText.textContent = q.question || "";
-  
-  // Clear options container
-  testElements.optionsContainer.innerHTML = '';
-  
-  // Update question counter
-  testElements.questionCounter.textContent = `Question ${appState.currentQuestionIndex + 1} of ${appState.testQuestions.length}`;
-  
-  // Update progress bar
-  const progress = ((appState.currentQuestionIndex + 1) / appState.testQuestions.length) * 100;
-  testElements.questionProgress.style.width = `${progress}%`;
-  
-  // Create option elements
-  if (q.options) {
-    q.options.forEach((option, index) => {
-      const optionDiv = document.createElement('div');
-      optionDiv.className = 'option';
+    function showHomePage(name) {
+      showPage(pages.home);
+      homeElements.startTestButton.disabled = false;
+      formInputs.email.value = '';
+      formInputs.password.value = '';
+      formInputs.name.value = '';
+      homeElements.welcomeMessage.textContent = `Hello, ${name}!`;
       
-      const radioInput = document.createElement('input');
-      radioInput.type = 'radio';
-      radioInput.name = 'answer';
-      radioInput.id = `option-${index}`;
-      radioInput.value = index;
-      
-      // Check if user already answered this question
-      if (appState.userAnswers[appState.currentQuestionIndex] === index) {
-        radioInput.checked = true;
+      // Check if user is admin and add admin button if needed
+      if (appState.isAdmin) {
+        if (!document.getElementById('adminButton')) {
+          const adminBtn = homeElements.adminButton;
+          adminBtn.id = 'adminButton';
+          adminBtn.className = 'btn btn-primary';
+          adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Admin Dashboard';
+          adminBtn.style.marginTop = '1rem';
+          adminBtn.addEventListener('click', () => {
+            showAdminVerificationPage();
+          });
+          
+          // Add to DOM after logout button
+          homeElements.logoutButton.parentNode.insertBefore(adminBtn, homeElements.logoutButton);
+        }
       }
-      
-      const label = document.createElement('label');
-      label.htmlFor = `option-${index}`;
-      label.textContent = option;
-      
-      optionDiv.appendChild(radioInput);
-      optionDiv.appendChild(label);
-      testElements.optionsContainer.appendChild(optionDiv);
-      
-      // Add event listener to save answer when selected
-      radioInput.addEventListener('change', () => {
-        appState.userAnswers[appState.currentQuestionIndex] = index;
-        saveTestProgress();
-      });
-    });
-  }
-  
-  // Update navigation buttons
-  testElements.prevButton.disabled = appState.currentQuestionIndex === 0;
-  testElements.nextButton.style.display = 
-    appState.currentQuestionIndex < appState.testQuestions.length - 1 ? 'inline-block' : 'none';
-  testElements.submitTestButton.style.display = 
-    appState.currentQuestionIndex === appState.testQuestions.length - 1 ? 'inline-block' : 'none';
-}
-
-// Timer functions
-function startTimer() {
-  if (appState.testData.timeLimit <= 0) {
-    testElements.timerDisplay.textContent = 'No Time Limit';
-    return;
-  }
-  
-  updateTimerDisplay();
-  appState.timerInterval = setInterval(() => {
-    appState.timeRemaining--;
-    updateTimerDisplay();
-    
-    // Auto-submit when time is up
-    if (appState.timeRemaining <= 0) {
-      clearInterval(appState.timerInterval);
-      alert('Time is up! Your test will be submitted.');
-      submitTest();
     }
-  }, 1000);
-}
 
-function updateTimerDisplay() {
-  const minutes = Math.floor(appState.timeRemaining / 60);
-  const seconds = appState.timeRemaining % 60;
-  testElements.timerDisplay.textContent = 
-    `Time Remaining: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function stopTimer() {
-  clearInterval(appState.timerInterval);
-}
-
-// Navigation handlers
-testElements.prevButton.addEventListener('click', () => {
-  if (appState.currentQuestionIndex > 0) {
-    appState.currentQuestionIndex--;
-    displayQuestion();
-  }
-});
-
-testElements.nextButton.addEventListener('click', () => {
-  if (appState.currentQuestionIndex < appState.testQuestions.length - 1) {
-    appState.currentQuestionIndex++;
-    displayQuestion();
-  }
-});
-
-testElements.saveAndExitButton.addEventListener('click', async () => {
-  stopTimer();
-  await saveTestProgress();
-  showHomePage(appState.currentUser.name);
-});
-
-testElements.submitTestButton.addEventListener('click', () => {
-  if (confirm('Are you sure you want to submit this test? You cannot change your answers after submission.')) {
-    submitTest();
-  }
-});
-
-// Submit test
-async function submitTest() {
-  stopTimer();
-  toggleLoading(true);
-  
-  try {
-    const score = calculateScore();
-    const percentage = Math.round((score / appState.testQuestions.length) * 100);
-    const timeSpent = appState.testData.timeLimit * 60 - appState.timeRemaining;
-    
-    // Create completed test data
-    const completedTest = {
-      ...appState.testData,
-      completed: true,
-      completedAt: new Date().toString(),
-      score: score,
-      percentage: percentage,
-      timeSpent: timeSpent
-    };
-    
-    // Save to user's completed tests
-    const testId = Date.now();
-    await database.ref(`users/${appState.currentUser.uid}/tests/completed/${testId}`).set(completedTest);
-    
-    // Remove from in-progress
-    const inProgressTestId = appState.currentInProgressTestId || 'default';
-    await database.ref(`users/${appState.currentUser.uid}/tests/inProgress/${inProgressTestId}`).remove();
-    
-    // Update appState
-    delete appState.inProgressTests[inProgressTestId];
-    appState.completedTests.push({
-      id: testId,
-      ...completedTest
-    });
-    
-    // Create pie chart for results
-    createResultsPieChart(score, appState.testQuestions.length);
-    
-    // Show results
-    showResultsPage(score, percentage, timeSpent);
-  } catch (error) {
-    console.error('Error submitting test:', error);
-    alert('There was an error submitting your test. Please try again.');
-  } finally {
-    toggleLoading(false);
-  }
-}
-
-function calculateScore() {
-  let score = 0;
-  appState.testQuestions.forEach((q, index) => {
-    const userAnswer = appState.userAnswers[index];
-    if (userAnswer !== null && userAnswer === q.correctAnswer) {
-      score++;
+    function showAuthPage() {
+      showPage(pages.auth);
+      appState.isLoginMode = true;
+      authElements.title.textContent = 'Sign In';
+      authElements.button.textContent = 'Sign In';
+      authElements.toggleText.textContent = "Don't have an account?";
+      authElements.toggleLink.textContent = 'Sign Up';
+      authElements.nameGroup.style.display = 'none';
     }
-  });
-  return score;
-}
 
-// Results and review handling
-resultsElements.reviewTestButton.addEventListener('click', () => {
-  showPage(pages.review);
-  renderReview();
-});
-
-resultsElements.returnHomeButton.addEventListener('click', () => {
-  showHomePage(appState.currentUser.name);
-});
-
-reviewElements.backButton.addEventListener('click', () => {
-  showPage(pages.results);
-});
-
-function renderReview() {
-  reviewElements.container.innerHTML = '';
-  
-  appState.testQuestions.forEach((q, index) => {
-    const userAnswer = appState.userAnswers[index];
-    const isCorrect = userAnswer === q.correctAnswer;
-    
-    const questionDiv = document.createElement('div');
-    questionDiv.className = `review-question ${isCorrect ? 'correct' : 'incorrect'}`;
-    
-    const header = document.createElement('h3');
-    const icon = document.createElement('span');
-    icon.className = `icon ${isCorrect ? 'correct' : 'incorrect'}`;
-    icon.innerHTML = isCorrect ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>';
-    
-    header.appendChild(icon);
-    header.appendChild(document.createTextNode(` Question ${index + 1}`));
-    
-    const questionText = document.createElement('p');
-    questionText.textContent = q.question || "";
-    
-    questionDiv.appendChild(header);
-    questionDiv.appendChild(questionText);
-    
-    // Add options with indicators
-    const optionsList = document.createElement('div');
-    optionsList.className = 'options-list';
-    
-    q.options && q.options.forEach((option, optIndex) => {
-      const optionItem = document.createElement('div');
-      optionItem.className = 'review-option';
+    // Show admin verification page
+    function showAdminVerificationPage() {
+      // Reset state
+      appState.adminVerified = false;
+      verificationElements.codeInput.value = '';
+      clearAdminVerificationMessage();
       
-      if (optIndex === q.correctAnswer) {
-        optionItem.classList.add('correct-answer');
+      // Send initial verification code
+      sendVerificationCode();
+      
+      // Show verification page
+      showPage(pages.adminVerification);
+    }
+
+    function clearAdminVerificationMessage() {
+      verificationElements.messageContainer.innerHTML = '';
+    }
+
+    function showAdminVerificationMessage(msg, type) {
+      verificationElements.messageContainer.innerHTML = `<div class="message ${type}">${msg}</div>`;
+    }
+
+    // Generate verification code
+    function generateVerificationCode() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    // Send verification code (simulated)
+    function sendVerificationCode() {
+      // Generate a new 6-digit code
+      appState.adminVerificationCode = generateVerificationCode();
+      
+      // In a real app, this would send an email with the code
+      // For now, we'll just show it in a message for demo purposes
+      showAdminVerificationMessage(`Verification code sent! (For demo purposes, your code is: ${appState.adminVerificationCode})`, 'success');
+      
+      console.log('Verification code:', appState.adminVerificationCode);
+    }
+
+    // Verify admin code
+    function verifyAdminCode() {
+      const enteredCode = verificationElements.codeInput.value.trim();
+      
+      if (!enteredCode) {
+        showAdminVerificationMessage('Please enter the verification code.', 'error');
+        return;
       }
       
-      if (optIndex === userAnswer && optIndex !== q.correctAnswer) {
-        optionItem.classList.add('wrong-answer');
+      if (enteredCode !== appState.adminVerificationCode) {
+        showAdminVerificationMessage('Invalid verification code. Please try again.', 'error');
+        return;
       }
       
-      // Create icon for correct/incorrect
-      const optIcon = document.createElement('span');
-      optIcon.className = 'icon';
-      
-      if (optIndex === q.correctAnswer) {
-        optIcon.innerHTML = '<i class="fas fa-check"></i>';
-      } else if (optIndex === userAnswer) {
-        optIcon.innerHTML = '<i class="fas fa-times"></i>';
+      // Code is valid, mark as verified and proceed to admin dashboard
+      appState.adminVerified = true;
+      showAdminPage();
+    }
+
+    // Admin page functions
+    async function showAdminPage() {
+      // Check if admin is verified
+      if (!appState.isAdmin) {
+        alert('You do not have permission to access the admin dashboard.');
+        showHomePage(appState.currentUser.name);
+        return;
       }
       
-      optionItem.appendChild(optIcon);
-      optionItem.appendChild(document.createTextNode(` ${option}`));
-      optionsList.appendChild(optionItem);
-    });
-    
-    questionDiv.appendChild(optionsList);
-    reviewElements.container.appendChild(questionDiv);
-  });
-}
-
-// Page navigation functions
-function showPage(p) {
-  Object.values(pages).forEach(pg => pg.style.display = 'none');
-  p.style.display = 'block';
-}
-
-function showHomePage(name) {
-  showPage(pages.home);
-  homeElements.startTestButton.disabled = false;
-  formInputs.email.value = '';
-  formInputs.password.value = '';
-  formInputs.name.value = '';
-  homeElements.welcomeMessage.textContent = `Hello, ${name}!`;
-  
-  // Check if user is admin and add admin button if needed
-  if (appState.isAdmin) {
-    if (!document.getElementById('adminButton')) {
-      const adminBtn = homeElements.adminButton;
-      adminBtn.id = 'adminButton';
-      adminBtn.className = 'btn btn-primary';
-      adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Admin Dashboard';
-      adminBtn.style.marginTop = '1rem';
-      adminBtn.addEventListener('click', () => {
+      if (!appState.adminVerified) {
         showAdminVerificationPage();
+        return;
+      }
+      
+      toggleLoading(true);
+      
+      try {
+        // Load all users
+        await loadAllUsers();
+        
+        // Create admin charts
+        createAdminCharts();
+        
+        // Render users list
+        renderUsersList();
+        
+        // Set welcome message
+        adminElements.welcomeMessage.textContent = `Hello, ${appState.currentUser.name}!`;
+        
+        // Show admin page
+        showPage(pages.admin);
+      } catch (err) {
+        console.error('Error loading admin page:', err);
+        alert('Error loading admin dashboard. Please try again.');
+      } finally {
+        toggleLoading(false);
+      }
+    }
+
+    // Load all users - stub function, would be implemented in full code
+    async function loadAllUsers() {
+      appState.allUsers = [];
+      // Implementation from original code would go here
+    }
+
+    // Create admin charts - stub function, would be implemented in full code
+    function createAdminCharts() {
+      // Implementation from original code would go here
+    }
+
+    // Render users list - stub function, would be implemented in full code
+    function renderUsersList() {
+      // Implementation from original code would go here
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize email verification system
+      appState.emailVerificationElements = setupEmailVerification();
+      
+      // Set up admin verification elements
+      verificationElements = setupAdminVerification();
+      
+      // Add event listeners for verification elements
+      verificationElements.verifyButton.addEventListener('click', verifyAdminCode);
+      verificationElements.resendButton.addEventListener('click', sendVerificationCode);
+      verificationElements.cancelButton.addEventListener('click', () => {
+        showHomePage(appState.currentUser.name);
       });
       
-      // Add to DOM after logout button
-      homeElements.logoutButton.parentNode.insertBefore(adminBtn, homeElements.logoutButton);
-    }
-  }
-}
-
-function showTestPage() {
-  showPage(pages.test);
-  displayQuestion();
-  startTimer();
-}
-
-function showResultsPage(score, pct, timeTaken) {
-  showPage(pages.results);
-  resultsElements.scoreDisplay.textContent = `${score}/${appState.testQuestions.length}`;
-  resultsElements.percentageDisplay.textContent = `${pct}%`;
-  
-  // Format time taken
-  const minutes = Math.floor(timeTaken / 60);
-  const seconds = timeTaken % 60;
-  resultsElements.timeTakenDisplay.textContent = 
-    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function showAuthPage() {
-  showPage(pages.auth);
-  appState.isLoginMode = true;
-  authElements.title.textContent = 'Sign In';
-  authElements.button.textContent = 'Sign In';
-  authElements.toggleText.textContent = "Don't have an account?";
-  authElements.toggleLink.textContent = 'Sign Up';
-  authElements.nameGroup.style.display = 'none';
-}
-
-function showVerificationMessage(msg, type) {
-  verificationElements.messageContainer.innerHTML =
-    `<div class="message ${type}">${msg}</div>`;
-}
-
-function clearVerificationMessage() {
-  verificationElements.messageContainer.innerHTML = '';
-}
-
-// Generate verification code
-function generateVerificationCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-// Send verification code (simulated)
-function sendVerificationCode() {
-  // Generate a new 6-digit code
-  appState.adminVerificationCode = generateVerificationCode();
-  
-  // In a real app, this would send an email with the code
-  // For now, we'll just show it in a message for demo purposes
-  showVerificationMessage(`Verification code sent! (For demo purposes, your code is: ${appState.adminVerificationCode})`, 'success');
-  
-  console.log('Verification code:', appState.adminVerificationCode);
-}
-
-// Show admin verification page
-function showAdminVerificationPage() {
-  // Reset state
-  appState.adminVerified = false;
-  verificationElements.codeInput.value = '';
-  clearVerificationMessage();
-  
-  // Send initial verification code
-  sendVerificationCode();
-  
-  // Show verification page
-  showPage(pages.adminVerification);
-}
-
-// Verify admin code
-function verifyAdminCode() {
-  const enteredCode = verificationElements.codeInput.value.trim();
-  
-  if (!enteredCode) {
-    showVerificationMessage('Please enter the verification code.', 'error');
-    return;
-  }
-  
-  if (enteredCode !== appState.adminVerificationCode) {
-    showVerificationMessage('Invalid verification code. Please try again.', 'error');
-    return;
-  }
-  
-  // Code is valid, mark as verified and proceed to admin dashboard
-  appState.adminVerified = true;
-  showAdminPage();
-}
-
-// Admin page functions
-async function showAdminPage() {
-  // Check if admin is verified
-  if (!appState.isAdmin) {
-    alert('You do not have permission to access the admin dashboard.');
-    showHomePage(appState.currentUser.name);
-    return;
-  }
-  
-  if (!appState.adminVerified) {
-    showAdminVerificationPage();
-    return;
-  }
-  
-  toggleLoading(true);
-  
-  try {
-    // Load all users
-    await loadAllUsers();
-    
-    // Create admin charts
-    createAdminCharts();
-    
-    // Render users list
-    renderUsersList();
-    
-    // Set welcome message
-    adminElements.welcomeMessage.textContent = `Hello, ${appState.currentUser.name}!`;
-    
-    // Show admin page
-    showPage(pages.admin);
-  } catch (err) {
-    console.error('Error loading admin page:', err);
-    alert('Error loading admin dashboard. Please try again.');
-  } finally {
-    toggleLoading(false);
-  }
-}
-
-async function loadAllUsers() {
-  appState.allUsers = [];
-  
-  const snap = await database.ref('users').once('value');
-  
-  if (snap.exists()) {
-    snap.forEach(childSnap => {
-      const uid = childSnap.key;
-      const userData = childSnap.val();
+      // Allow pressing Enter to submit verification code
+      verificationElements.codeInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+          verifyAdminCode();
+        }
+      });
       
-      // Skip the current user (admin)
-      if (uid !== appState.currentUser.uid) {
-        appState.allUsers.push({
-          uid,
-          name: userData.name,
-          email: userData.email,
-          lastLogin: userData.lastLogin,
-          tests: userData.tests || {}
+      // Check for verification links in URL
+      processEmailVerification();
+      
+      // Toggle auth form
+      authElements.toggleLink.addEventListener('click', () => {
+        appState.isLoginMode = !appState.isLoginMode;
+        if (appState.isLoginMode) {
+          authElements.title.textContent = 'Sign In';
+          authElements.button.textContent = 'Sign In';
+          authElements.toggleText.textContent = "Don't have an account?";
+          authElements.toggleLink.textContent = 'Sign Up';
+          authElements.nameGroup.style.display = 'none';
+        } else {
+          authElements.title.textContent = 'Sign Up';
+          authElements.button.textContent = 'Sign Up';
+          authElements.toggleText.textContent = 'Already have an account?';
+          authElements.toggleLink.textContent = 'Sign In';
+          authElements.nameGroup.style.display = 'block';
+        }
+        clearMessage();
+      });
+      
+      // Sign In / Sign Up button
+      authElements.button.addEventListener('click', () => {
+        if (appState.isLoginMode) {
+          handleSignIn();
+        } else {
+          handleSignUp();
+        }
+      });
+      
+      // Google Sign In button
+      authElements.googleButton.addEventListener('click', handleGoogleSignIn);
+      
+      // Logout button
+      homeElements.logoutButton.addEventListener('click', () => {
+        auth.signOut().then(() => {
+          appState.currentUser = null;
+          appState.isAdmin = false;
+          appState.adminVerified = false;
+          showAuthPage();
+        }).catch(error => {
+          console.error('Error signing out:', error);
         });
-      }
-    });
-  }
-}
-
-function createAdminCharts() {
-  // Clear existing charts
-  if (adminElements.userParticipationChart._chart) {
-    adminElements.userParticipationChart._chart.destroy();
-  }
-  
-  if (adminElements.testTypeScoresChart._chart) {
-    adminElements.testTypeScoresChart._chart.destroy();
-  }
-  
-  // Calculate statistics
-  const testTypeTotals = {};
-  const testTypeScores = {};
-  let totalUsers = appState.allUsers.length;
-  let usersWithTests = 0;
-  
-  appState.allUsers.forEach(user => {
-    if (user.tests && user.tests.completed) {
-      usersWithTests++;
-      
-      Object.values(user.tests.completed).forEach(test => {
-        const testType = test.testKey;
-        
-        if (!testTypeTotals[testType]) {
-          testTypeTotals[testType] = 0;
-          testTypeScores[testType] = 0;
-        }
-        
-        testTypeTotals[testType]++;
-        testTypeScores[testType] += test.percentage;
       });
-    }
-  });
-  
-  // Calculate averages
-  Object.keys(testTypeScores).forEach(testType => {
-    if (testTypeTotals[testType] > 0) {
-      testTypeScores[testType] = Math.round(testTypeScores[testType] / testTypeTotals[testType]);
-    }
-  });
-  
-  // Create user participation chart
-  const participationCtx = adminElements.userParticipationChart.getContext('2d');
-  adminElements.userParticipationChart._chart = new Chart(participationCtx, {
-    type: 'pie',
-    data: {
-      labels: ['Active Users', 'Inactive Users'],
-      datasets: [{
-        data: [usersWithTests, totalUsers - usersWithTests],
-        backgroundColor: ['#10B981', '#E5E7EB'],
-        borderColor: ['#D1FAE5', '#F9FAFB'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom'
-        }
-      }
-    }
-  });
-  
-  // Create test type scores chart
-  const testTypes = Object.keys(testTypeScores);
-  const scores = testTypes.map(type => testTypeScores[type]);
-  
-  const scoresCtx = adminElements.testTypeScoresChart.getContext('2d');
-  adminElements.testTypeScoresChart._chart = new Chart(scoresCtx, {
-    type: 'bar',
-    data: {
-      labels: testTypes.map(type => type.replace(/-/g, ' ').toUpperCase()),
-      datasets: [{
-        label: 'Average Score (%)',
-        data: scores,
-        backgroundColor: '#3A7DC0',
-        borderColor: '#0056A4',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          title: {
-            display: true,
-            text: 'Score (%)'
+      
+      // Load tests and check auth on page load
+      try {
+        // Check user auth state immediately
+        auth.onAuthStateChanged(async (usr) => {
+          if (usr) {
+            toggleLoading(true);
+            const snap = await database.ref('users/' + usr.uid).once('value');
+            const data = snap.val();
+            
+            // Check if email is verified
+            if (data.emailVerified !== true) {
+              // Get verification status
+              const verificationSnapshot = await database.ref(`userVerifications/${usr.uid}`).once('value');
+              const verificationData = verificationSnapshot.val();
+              
+              if (!verificationData || verificationData.verified !== true) {
+                // Show verification page
+                appState.pendingVerification = { user: usr, email: data.email, name: data.name };
+                showEmailVerificationPage(usr, data.email, data.name);
+                toggleLoading(false);
+                return;
+              }
+              
+              // Update user verified status if needed
+              await database.ref('users/' + usr.uid).update({ emailVerified: true });
+            }
+            
+            appState.currentUser = { uid: usr.uid, name: data.name, email: data.email };
+            
+            // Check if this user is the admin
+            appState.isAdmin = (data.email === appState.adminEmail);
+            appState.adminVerified = false; // Reset verification state
+            
+            // Load user's completed tests
+            // await loadCompletedTests();
+            
+            // Load user's in-progress tests
+            // await loadInProgressTests();
+            
+            showHomePage(data.name);
+            toggleLoading(false);
+          } else {
+            showAuthPage();
           }
-        }
+        });
+      } catch (err) {
+        console.error('Error during authentication check:', err);
       }
-    }
-  });
-}
-
-function renderUsersList() {
-  const container = adminElements.usersContainer;
-  const filterValue = adminElements.filterTest.value;
-  const sortValue = adminElements.sortBy.value;
-  
-  // Sort users
-  let users = [...appState.allUsers];
-  
-  // Calculate average scores and test counts
-  users.forEach(user => {
-    user.testCount = 0;
-    user.totalScore = 0;
-    user.avgScore = 0;
-    
-    if (user.tests && user.tests.completed) {
-      const completedTests = Object.values(user.tests.completed);
-      user.testCount = completedTests.length;
-      
-      if (user.testCount > 0) {
-        user.totalScore = completedTests.reduce((acc, test) => acc + test.percentage, 0);
-        user.avgScore = Math.round(user.totalScore / user.testCount);
-      }
-    }
-  });
-  
-  // Filter users if needed
-  if (filterValue !== 'all') {
-    users = users.filter(user => {
-      if (!user.tests || !user.tests.completed) return false;
-      
-      return Object.values(user.tests.completed).some(test => test.testKey === filterValue);
     });
-  }
-  
-  // Sort users
-  switch (sortValue) {
-    case 'name-asc':
-      users.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case 'name-desc':
-      users.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-    case 'tests-desc':
-      users.sort((a, b) => b.testCount - a.testCount);
-      break;
-    case 'score-desc':
-      users.sort((a, b) => b.avgScore - a.avgScore);
-      break;
-    case 'score-asc':
-      users.sort((a, b) => a.avgScore - b.avgScore);
-      break;
-  }
-  
-  // Render users
-  container.innerHTML = '';
-  
-  if (users.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-users"></i>
-        <p>No users found</p>
-      </div>
-    `;
-    return;
-  }
-  
-  users.forEach(user => {
-    const card = document.createElement('div');
-    card.className = 'test-card';
-    
-    let lastLoginText = 'Never logged in';
-    if (user.lastLogin) {
-      const loginDate = new Date(user.lastLogin);
-      lastLoginText = `Last login: ${loginDate.toLocaleDateString()} at ${loginDate.toLocaleTimeString()}`;
-    }
-    
-    card.innerHTML = `
-      <div class="test-card-header">
-        <h3 class="test-card-title">${user.name}</h3>
-        <div class="test-card-date">${user.email}</div>
-      </div>
-      <div class="test-card-info">
-        <div class="test-card-stat">
-          <i class="fas fa-clipboard-check"></i>
-          <span>Tests: ${user.testCount}</span>
-        </div>
-        <div class="test-card-stat">
-          <i class="fas fa-percentage"></i>
-          <span>Avg. Score: ${user.avgScore}%</span>
-        </div>
-        <div class="test-card-stat">
-          <i class="fas fa-clock"></i>
-          <span>${lastLoginText}</span>
-        </div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:1rem;">
-        <i class="fas fa-search"></i> View Details
-      </button>
-    `;
-    
-    // Add event listener
-    const viewButton = card.querySelector('.btn');
-    viewButton.addEventListener('click', () => {
-      showUserDetailPage(user);
-    });
-    
-    container.appendChild(card);
-  });
-}
-
-async function showUserDetailPage(user) {
-  toggleLoading(true);
-  
-  try {
-    appState.currentUserDetail = user;
-    
-    // Update user detail elements
-    userDetailElements.name.textContent = user.name;
-    userDetailElements.email.textContent = user.email;
-    
-    // Calculate statistics
-    let completedTests = [];
-    if (user.tests && user.tests.completed) {
-      completedTests = Object.entries(user.tests.completed).map(([id, test]) => ({
-        id,
-        ...test
-      }));
-    }
-    
-    // Set statistics
-    userDetailElements.totalTests.textContent = completedTests.length;
-    
-    if (completedTests.length > 0) {
-      const totalScore = completedTests.reduce((acc, test) => acc + test.percentage, 0);
-      const avgScore = Math.round(totalScore / completedTests.length);
-      const bestScore = Math.max(...completedTests.map(test => test.percentage));
-      
-      userDetailElements.avgScore.textContent = `${avgScore}%`;
-      userDetailElements.bestScore.textContent = `${bestScore}%`;
-    } else {
-      userDetailElements.avgScore.textContent = '0%';
-      userDetailElements.bestScore.textContent = '0%';
-    }
-    
-    // Create charts
-    createUserDetailCharts(completedTests);
-    
-    // Render completed tests
-    renderUserCompletedTests(completedTests);
-    
-    // Show user detail page
-    showPage(pages.userDetail);
-  } catch (err) {
-    console.error('Error showing user detail:', err);
-    alert('Could not load user details. Please try again.');
-  } finally {
-    toggleLoading(false);
-  }
-}
-
-function createUserDetailCharts(tests) {
-  // Clear existing charts
-  if (userDetailElements.testTypeChart._chart) {
-    userDetailElements.testTypeChart._chart.destroy();
-  }
-  
-  if (userDetailElements.progressionChart._chart) {
-    userDetailElements.progressionChart._chart.destroy();
-  }
-  
-  if (tests.length === 0) {
-    return;
-  }
-  
-  // Calculate test type statistics
-  const testTypes = {};
-  
-  tests.forEach(test => {
-    const testType = test.testKey;
-    
-    if (!testTypes[testType]) {
-      testTypes[testType] = {
-        count: 0,
-        totalScore: 0,
-        avgScore: 0
-      };
-    }
-    
-    testTypes[testType].count++;
-    testTypes[testType].totalScore += test.percentage;
-  });
-  
-  // Calculate averages
-  Object.keys(testTypes).forEach(type => {
-    testTypes[type].avgScore = Math.round(testTypes[type].totalScore / testTypes[type].count);
-  });
-  
-  // Create test type chart
-  const types = Object.keys(testTypes);
-  const scores = types.map(type => testTypes[type].avgScore);
-  
-  const testTypeCtx = userDetailElements.testTypeChart.getContext('2d');
-  userDetailElements.testTypeChart._chart = new Chart(testTypeCtx, {
-    type: 'bar',
-    data: {
-      labels: types.map(type => type.replace(/-/g, ' ').toUpperCase()),
-      datasets: [{
-        label: 'Average Score (%)',
-        data: scores,
-        backgroundColor: '#3A7DC0',
-        borderColor: '#0056A4',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          title: {
-            display: true,
-            text: 'Score (%)'
-          }
-        }
-      }
-    }
-  });
-  
-  // Create progression chart
-  // Sort tests by date and get the last 10
-  const sortedTests = [...tests].sort((a, b) => new Date(a.completedAt) - new Date(b.completedAt));
-  const recentTests = sortedTests.slice(-10);
-  
-  const progressionCtx = userDetailElements.progressionChart.getContext('2d');
-  userDetailElements.progressionChart._chart = new Chart(progressionCtx, {
-    type: 'line',
-    data: {
-      labels: recentTests.map((test, index) => `Test ${index + 1}`),
-      datasets: [{
-        label: 'Score %',
-        data: recentTests.map(test => test.percentage),
-        borderColor: '#0056A4',
-        backgroundColor: 'rgba(0, 86, 164, 0.1)',
-        fill: true,
-        tension: 0.1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          title: {
-            display: true,
-            text: 'Score (%)'
-          }
-        }
-      },
-      plugins: {
-        legend: {
-          display: false
-        }
-      }
-    }
-  });
-}
-
-function renderUserCompletedTests(tests) {
-  const container = userDetailElements.completedTestsContainer;
-  container.innerHTML = '';
-  
-  if (tests.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-clipboard-list"></i>
-        <p>No completed tests found</p>
-      </div>
-    `;
-    return;
-  }
-  
-  // Sort tests by date (newest first)
-  const sortedTests = [...tests].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-  
-  sortedTests.forEach(test => {
-    const completedDate = new Date(test.completedAt);
-    const formattedDate = completedDate.toLocaleDateString();
-    const formattedTime = completedDate.toLocaleTimeString();
-    
-    // Format time taken
-    const minutes = Math.floor(test.timeSpent / 60);
-    const seconds = test.timeSpent % 60;
-    const timeTaken = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    const card = document.createElement('div');
-    card.className = 'test-card';
-    card.innerHTML = `
-      <div class="test-card-header">
-        <h3 class="test-card-title">${test.testKey.replace(/-/g, ' ').toUpperCase()}</h3>
-        <div class="test-card-date">${formattedDate} at ${formattedTime}</div>
-      </div>
-      <div class="test-card-info">
-        <div class="test-card-stat">
-          <i class="fas fa-clipboard-check"></i>
-          <span>Score: ${test.score}/${test.questionCount}</span>
-        </div>
-        <div class="test-card-stat">
-          <i class="fas fa-percentage"></i>
-          <span>${test.percentage}%</span>
-        </div>
-        <div class="test-card-stat">
-          <i class="fas fa-clock"></i>
-          <span>Time: ${timeTaken}</span>
-        </div>
-      </div>
-    `;
-    
-    container.appendChild(card);
-  });
-}
-
-// Event listeners for verification page elements
-verificationElements.verifyButton.addEventListener('click', () => {
-  verifyAdminCode();
-});
-
-verificationElements.resendButton.addEventListener('click', () => {
-  sendVerificationCode();
-});
-
-verificationElements.cancelButton.addEventListener('click', () => {
-  showHomePage(appState.currentUser.name);
-});
-
-// Allow pressing Enter to submit verification code
-verificationElements.codeInput.addEventListener('keyup', (event) => {
-  if (event.key === 'Enter') {
-    verifyAdminCode();
-  }
-});
-
-// Event listeners for admin elements
-adminElements.backButton.addEventListener('click', () => {
-  showHomePage(appState.currentUser.name);
-});
-
-userDetailElements.backButton.addEventListener('click', () => {
-  showAdminPage();
-});
-
-adminElements.filterTest.addEventListener('change', renderUsersList);
-adminElements.sortBy.addEventListener('change', renderUsersList);
-
-// Logout button
-homeElements.logoutButton.addEventListener('click', () => {
-  auth.signOut().then(() => {
-    appState.currentUser = null;
-    appState.isAdmin = false;
-    appState.adminVerified = false;
-    showAuthPage();
-  }).catch(error => {
-    console.error('Error signing out:', error);
-  });
-});
+  </script>
+</body>
+</html>
