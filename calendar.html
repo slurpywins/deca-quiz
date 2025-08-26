@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assignment Calendar</title>
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+  <link rel="stylesheet" href="calendar.css" />
+</head>
+<body>
+  <header>
+    <h1>Assignment Calendar</h1>
+    <button id="addAssignmentBtn">Add Assignment</button>
+  </header>
+  <main>
+    <div id='calendar'></div>
+    <aside id="sidebar">
+      <h2>Upcoming Assignments</h2>
+      <ul id="upcomingList"></ul>
+      <div class="export-import">
+        <button id="exportBtn">Export</button>
+        <label class="importLabel">Import<input type="file" id="importInput" accept="application/json" /></label>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Modal for adding/editing assignments -->
+  <div id="assignmentModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2 id="modalTitle">New Assignment</h2>
+      <form id="assignmentForm">
+        <input type="hidden" id="assignmentId" />
+        <label>
+          Title
+          <input type="text" id="title" required />
+        </label>
+        <label>
+          Subject
+          <input type="text" id="subject" />
+        </label>
+        <label>
+          Due Date & Time
+          <input type="datetime-local" id="dueDate" required />
+        </label>
+        <label>
+          Color
+          <input type="color" id="color" value="#3788d8" />
+        </label>
+        <label>
+          Description
+          <textarea id="description"></textarea>
+        </label>
+        <button type="submit" id="saveAssignment">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
+  <script src="calendar.js"></script>
+</body>
+</html>
